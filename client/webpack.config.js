@@ -56,7 +56,7 @@ module.exports = {
     new EslintWebpackPlugin({ extensions }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      favicon: "./public/favicon.ico",
+      favicon: "./public/iconPage.png",
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
