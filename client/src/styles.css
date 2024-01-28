@@ -1,0 +1,297 @@
+body{
+  background-color:#DFDFDF;
+}
+
+html {
+  font-size: 10px;
+  font-family: sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#App {
+  width: 98%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-direction: column; /* Stack the child components vertically */
+}
+
+.container {
+  width: 40%;
+  min-width: 60rem;
+  max-width: 75rem;
+  height: 100%;
+}
+
+p {
+  line-height: 2.6rem;
+  margin-top: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+p span.code {
+  font-family: monospace;
+  color: var(--gray);
+}
+
+hr {
+  margin: 4rem 0;
+}
+
+h1 {
+  font-size: 4rem;
+  color: #2E231D;
+}
+
+.content-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Set the height to 100% of the viewport height */
+  width: 100vw;  /* Set the height to 100% of the viewport width */
+}
+
+.content-wrapper{
+  position: absolute;
+  display: flex;
+  background-color: white;
+  border-radius: 20px;
+  padding: 5%; /* Add horizontal padding */
+}
+
+.shadow-overlay {
+  position: absolute;
+  left:3%;
+  width: 100%;
+  height: 100%;
+  background-color: #C3C3C3;
+  border-radius: 20px;
+  z-index: -1;
+}
+
+.app-button {
+  background-color: #FF812C;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.app-button:hover {
+  background-color: #FF6600;
+}
+
+/*----------- Login Page -----------*/
+
+.nearfile-heading{
+  color: #FF812C;
+}
+
+.login-wrapper {
+  width: 50%; 
+}
+
+.shadow-overlay-login {
+  top: 13%;
+}
+
+.login-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.content-column {
+  display: flex;
+  flex-direction: column;
+  flex: 2;  
+  color: #2E231D;
+}
+
+.app-button__login {
+  padding: 13% 25%;
+}
+
+.nearsoftLogo {
+  position: absolute;
+  top: 3%;
+  left: 2%;
+  width: 140px; 
+  height: 40px; 
+  z-index: 1; 
+}
+
+.app-button__logout {
+  position: absolute;
+  top: 3%;
+  right: 2%;
+  width: 140px; 
+  height: 40px; 
+  z-index: 1; 
+}
+
+/*----------- Home Page -----------*/
+
+.home-wrapper {
+  width: 60%;
+  height: 50%;
+  flex-direction: column; /* Stack the child components vertically */
+  align-items: center;    /* Center the child components horizontally */
+}
+
+.shadow-overlay-home {
+  top: 7%;
+}
+
+/*----------- Home Page // Files management section -----------*/
+
+.files-header {
+  padding-right: 10%;
+}
+
+.uplBackground {
+  background-color: #C0C0C0; 
+  padding: 20px; 
+  border-radius: 10px;
+}
+
+.file-actions-wrapper {
+  margin-bottom: 20px; /* Add some space between the components */
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+}
+
+.uploaded-files{
+  display: flex;
+  justify-content: space-around;
+  height: 100%;
+  width: 100%;
+}
+
+.file-actions-wrapper button {
+  background: none;
+  border: none;
+  padding: 0;
+  padding-top: 3%;
+  cursor: pointer;
+}
+
+.file-actions-wrapper button span {
+  display: none;
+}
+
+.uploaded-docs {
+  cursor: pointer;
+  color: black; 
+  text-decoration: none; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  height: 100%;
+}
+
+.uploaded-files-container {
+  max-height: 240px; /* Adjust this value as needed */
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #555555 #DFDFDF; /* Firefox */
+
+  /* WebKit (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #555555;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #DFDFDF;
+    border-radius: 6px;
+  }
+}
+
+.file-column {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/*----------- Home Page // Audit Log -----------*/
+
+.auditlog-header {
+  margin-right: auto; 
+}
+
+.auditLog-container{
+  margin-top: 10%;
+}
+
+/*----------- Home Page // POPUP Upload Document -----------*/
+.upload-file-header {
+  color: #FF812C;
+  padding-left: 10px;
+}
+
+.section-title-upload-popup {
+  display: flex;
+  flex-direction: row;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #DFDFDF;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+.display-block {
+  display: block;
+  width: 50%;
+}
+
+.display-none {
+  display: none;
+  background-color: brown;
+}
+
+.popup-section {
+  margin-bottom: 20px;
+}
+
+.drag-drop-section {
+  border: 2px dashed #000;
+  padding: 20px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+/* Add additional styles for visual feedback when dragging over the drop area */
+.drag-drop-section.drag-over {
+  border-style: solid;
+}
+
+.app-button__upload {
+  width: 100%; /* Set the width to 100% */
+  padding: 15px; /* Adjust padding as needed */
+}
+
+.app-button_back{
+  cursor: pointer; 
+}
+
+
