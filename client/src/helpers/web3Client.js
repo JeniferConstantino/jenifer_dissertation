@@ -1,5 +1,7 @@
 import Web3 from 'web3'
-import StoreFile from '../contracts/StoreFile.json'
+import StoreFile from '../contracts/contracts/StoreFile.sol/StoreFile.json'
+import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
+
 import FileApp from './FileApp'
 import FileHandler from './fileHandler'
 
@@ -40,7 +42,7 @@ const Web3Provider = ({children}) => {
         // MetaMask is installed (the provider has been injected)
 
         // Ask the user to connect is wallet to the website
-        provider.current
+        await provider.current
         .request({ method: 'eth_requestAccounts'}) // we send this request to the provider to get access to the users' account
         .then((accounts) => {
             selectedAccount.current = accounts[0];
@@ -68,11 +70,10 @@ const Web3Provider = ({children}) => {
 
 
         const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
-        const networkId = await web3.eth.net.getId(); // network Id for the current network
 
-        if (!StoreFile.networks || !StoreFile.networks[networkId] || !StoreFile.networks[networkId].address) {
+        if (StoreFile_ContractAddress.address === "") {
             isInitialized.current = false;
-            messageError = "Contract address not found for the current network";
+            messageError = "Contract address not found for the current network.";
             result = { success: isInitialized.current, messageError };
             return result;
         }
@@ -80,7 +81,7 @@ const Web3Provider = ({children}) => {
         // Once instantiated we can do multiple things with the contract StoreFile
         storeFileContract.current = new web3.eth.Contract(
             StoreFile.abi, 
-            StoreFile.networks[networkId].address
+            StoreFile_ContractAddress.address
         );
 
         if(accountSelected.current){
