@@ -3,33 +3,32 @@ import FileHandler from '../../helpers/fileHandler';
 import { IPFS_BASE_URL } from '../../../ipfs';
 import { FcDocument , FcImageFile} from "react-icons/fc";
 
-const DisplayUplDocs = ({ipfsCIDAndType, loading, maxFilesPerColumn}) => {
+const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn}) => {
 
     const renderFiles = () => {
-        const files = Array.from(ipfsCIDAndType.entries());
         const rows = [];
-
+        
         for (let i=0; i<maxFilesPerColumn; i++) {
-            const row = files.filter((file, index) => index % maxFilesPerColumn === i).map(([ipfsCidHash, type], index) => (
+            const row = uploadedFiles.filter((file, index) => index % maxFilesPerColumn === i).map((file, index) => (
                 <div key={index}>
-                    {type === FileHandler.FileType.Image ? (
+                    {file.fileType === FileHandler.FileType.Image ? (
                         <a 
-                            href={`${IPFS_BASE_URL}${ipfsCidHash}`}
-                            download={`file.${type}`}
+                            href={`${IPFS_BASE_URL}${file.ipfsCID}`}
+                            download={`file.${file.fileType}`}
                             className="uploaded-docs"
                         >
                             <FcImageFile size={50}/>
-                            <span style={{ marginTop: '5px' }}>Download Image</span>
+                            <span style={{ marginTop: '5px' }}>{file.fileName}</span>
                         </a>
-                    ) : type === FileHandler.FileType.File ? (
+                    ) : file.fileType === FileHandler.FileType.File ? (
                         <>
                             <a
-                                href={`${IPFS_BASE_URL}${ipfsCidHash}`}
-                                download={`file.${type}`}
+                                href={`${IPFS_BASE_URL}${file.ipfsCID}`}
+                                download={`file.${file.fileType}`}
                                 className="uploaded-docs"
                             >
                                 <FcDocument  size={50}/>
-                                <span style={{ marginTop: '5px' }}>Download File</span>
+                                <span style={{ marginTop: '5px' }}>{file.fileName}</span>
                             </a>
                         </>
                     ) : (
@@ -39,7 +38,6 @@ const DisplayUplDocs = ({ipfsCIDAndType, loading, maxFilesPerColumn}) => {
                 </div>
             ));
 
-            
             rows.push(<div key={i} className="file-column">{row}</div>);
         }
         return rows;
@@ -51,7 +49,7 @@ const DisplayUplDocs = ({ipfsCIDAndType, loading, maxFilesPerColumn}) => {
                 <div className="uploaded-files">
                     {loading ? (
                         <p>Loading...</p>
-                    ) : ipfsCIDAndType.size > 0 ? (
+                    ) : uploadedFiles.length > 0 ? (
                         renderFiles()
                     ) : (
                         <p>No documents uploaded</p>

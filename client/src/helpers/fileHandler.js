@@ -55,10 +55,11 @@ class FileHandler {
     }
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value
-    static checkFileAlreadyUploaded = (fileCID, ipfsCIDAndType) => {
-        let fileImgAlreadyUploaded = ipfsCIDAndType.has(fileCID);
-        if(fileImgAlreadyUploaded){
-            throw new Error('File already uploaded!');
+    static checkFileAlreadyUploaded = (fileCID, uploadedFiles) => {
+        for (var file of uploadedFiles) {
+            if (file.ipfsCID === fileCID) {
+                throw new Error('File already uploaded!');
+            }
         }
     }
 

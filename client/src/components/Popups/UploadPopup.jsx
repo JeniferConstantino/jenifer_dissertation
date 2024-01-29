@@ -5,7 +5,7 @@ import FileApp from '../../helpers/FileApp';
 import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, selectedAccount, children}) => {
+const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, selectedAccount, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -44,7 +44,7 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
                 const fileCID = await FileHandler.addFileToIPFS(encryptFile);
                 console.log('File added to IPFS', fileCID);
 
-                FileHandler.checkFileAlreadyUploaded(fileCID, ipfsCIDAndType);
+                FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
 
                 const fileName = fileUpl.name.toLowerCase();
                 var fileType = FileHandler.determineFileType(fileName);
@@ -60,11 +60,10 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
                 // Adds the CID (the IPFS Hash) to the blockchain
                 storeIpfsHashBlockchain(fileUploaded).then(transaction => {
                     // Updates the state with the result
-                    var tempUpdatedIpfsCidAndType = new Map(ipfsCIDAndType);
-                    tempUpdatedIpfsCidAndType.set(fileCID, fileType);
+                    var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');
 
-                    handleFileUploaded(e, tempUpdatedIpfsCidAndType);
+                    handleFileUploaded(e, tempUpdatedUploadedFiles);
 
                 }).catch( err => {
                     console.log(err);

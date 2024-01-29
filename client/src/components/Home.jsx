@@ -10,7 +10,7 @@ import UploadPopup from './Popups/UploadPopup';
 const Home = () => {
 
     // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
-    const [ipfsCIDAndType, setIpfsCIDAndType] = useState(new Map());
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
@@ -32,17 +32,9 @@ const Home = () => {
 
     // Get the IPFS Hash
     const fetchIPFSHashes = async () => {
-        console.log("fetching");
         getIPFSHashesBlockchain().then((files) => {
-            console.log("files length: ", files.length);
             if(files.length !== 0){
-                var tempMap = new Map();
-                files.forEach((file, index) => {
-                    console.log("file.ipfsCID: ", file.ipfsCID, "file.fileType", file.fileType);
-                    tempMap.set(file.ipfsCID, file.fileType);
-                });
-                
-                setIpfsCIDAndType(tempMap);
+                setUploadedFiles(files);
             }
         }).catch(err => {
             console.log(err);
@@ -66,8 +58,8 @@ const Home = () => {
     }
 
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
-    const handleUpload = async (e, tempUpdatedIpfsCidAndType) => {
-        setIpfsCIDAndType(tempUpdatedIpfsCidAndType);        
+    const handleUpload = async (e, tempUpdatedUploadedFiles) => {
+        setUploadedFiles(tempUpdatedUploadedFiles);        
         handleCloseUploadPopup();
     };
 
@@ -104,7 +96,7 @@ const Home = () => {
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
                     <div className='uplBackground'>
-                        <DisplayUplDocs ipfsCIDAndType={ipfsCIDAndType} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/>
+                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/>
                     </div>
                 </div>
             </div>
@@ -117,7 +109,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <UploadPopup handleFileUploaded={handleUpload} ipfsCIDAndType={ipfsCIDAndType} show={showUploadPopup} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
+            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
         </>
     );
 
