@@ -9,6 +9,7 @@ import UploadPopup from './Popups/UploadPopup';
 
 const Home = () => {
 
+    // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
     const [ipfsCIDAndType, setIpfsCIDAndType] = useState(new Map());
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
@@ -27,14 +28,17 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    });
+    }, []);
 
     // Get the IPFS Hash
     const fetchIPFSHashes = async () => {
+        console.log("fetching");
         getIPFSHashesBlockchain().then((files) => {
+            console.log("files length: ", files.length);
             if(files.length !== 0){
                 var tempMap = new Map();
                 files.forEach((file, index) => {
+                    console.log("file.ipfsCID: ", file.ipfsCID, "file.fileType", file.fileType);
                     tempMap.set(file.ipfsCID, file.fileType);
                 });
                 

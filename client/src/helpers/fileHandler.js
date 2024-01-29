@@ -51,7 +51,6 @@ class FileHandler {
     static async addFileToIPFS (fileAsBuffer) {
         const addedFile = await ipfs.add({ content: fileAsBuffer});
         const fileCID = addedFile.cid.toString();
-        console.log('File added to IPFS', fileCID);
         return fileCID;
     }
 

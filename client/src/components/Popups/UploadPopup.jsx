@@ -42,6 +42,7 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
                 console.log("File uploaded encrypted.");
 
                 const fileCID = await FileHandler.addFileToIPFS(encryptFile);
+                console.log('File added to IPFS', fileCID);
 
                 FileHandler.checkFileAlreadyUploaded(fileCID, ipfsCIDAndType);
 
@@ -52,11 +53,9 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
                 // public key, the symmetric encrypted key, and the file uploaded
 
                 // Encrypt the symmetric key
-                console.log("symmetricKey: ", symmetricKey);
                 const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey);
-                console.log("encryptedSymmetricKey: ", encryptedSymmetricKey);
 
-                let fileUploaded = new FileApp(selectedAccount.current, fileCID, fileType);
+                let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedAccount.current, fileCID, fileType);
 
                 // Adds the CID (the IPFS Hash) to the blockchain
                 storeIpfsHashBlockchain(fileUploaded).then(transaction => {
@@ -90,6 +89,7 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
         if (fileInpt.files.length !== 0) {
             const file = fileInpt.files[0] // access to the file
             setFileUpl(file);
+
             const reader = new window.FileReader()
             reader.readAsArrayBuffer(file)
             reader.onloadend = () => {

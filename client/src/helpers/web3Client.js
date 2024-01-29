@@ -131,7 +131,7 @@ const Web3Provider = ({children}) => {
         let files = [];
         if(result.length != null){
             result.forEach(file => {
-                var fileApp = new FileApp(file.owner, file.ipfsCID, file.fileType);
+                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType);
                 files.push(fileApp);
             });
         }

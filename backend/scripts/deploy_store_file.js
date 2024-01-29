@@ -19,7 +19,7 @@ async function main() {
   fs.writeFileSync(filePath, JSON.stringify(contractData, null, 2));
 
   console.log(
-    `Deployed to ${contractAddress}`
+    `StoreFile deployed to ${contractAddress}`
   );
 
 }
