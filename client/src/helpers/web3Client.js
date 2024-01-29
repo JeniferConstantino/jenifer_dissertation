@@ -115,7 +115,7 @@ const Web3Provider = ({children}) => {
             console.log("User is not logged in");
             return
         }
-        console.log("going to execute the select");
+
         return storeFileContract.current.methods.set(fileUploaded).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
     }
 

@@ -56,8 +56,7 @@ const UploadPopup = ({handleFileUploaded, ipfsCIDAndType, handleClose, show, sel
                 const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey);
                 console.log("encryptedSymmetricKey: ", encryptedSymmetricKey);
 
-                console.log("storing file in the Ethereum blockchain with the account: ", selectedAccount);
-                let fileUploaded = new FileApp(selectedAccount, fileCID, fileType);
+                let fileUploaded = new FileApp(selectedAccount.current, fileCID, fileType);
 
                 // Adds the CID (the IPFS Hash) to the blockchain
                 storeIpfsHashBlockchain(fileUploaded).then(transaction => {
