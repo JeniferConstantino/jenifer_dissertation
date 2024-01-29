@@ -29,7 +29,6 @@ class FileHandler {
         // Retrieve RSA public key from localStorage
         const rsaKeyPair = JSON.parse(localStorage.getItem('rsaKeyPair'));
         const rsaPublicKey = rsaKeyPair.publicKey;
-        console.log("publicKey to be used in encryption of the symmetric key: ", rsaPublicKey);
 
         return crypto.publicEncrypt(
             rsaPublicKey,

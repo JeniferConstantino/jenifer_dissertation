@@ -6,7 +6,7 @@
 
 ## Not using Docker
 
-1. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy.js --network localhost
+1. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_store_file.js --network localhost
 2. cd client < npm run start
 
 # Frequent Problems:
