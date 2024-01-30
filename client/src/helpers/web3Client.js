@@ -3,9 +3,10 @@ import StoreFile from '../contracts/contracts/StoreFile.sol/StoreFile.json'
 import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
 
 import FileApp from './FileApp'
-import FileHandler from './fileHandler'
+import FileHandler from './fileHandler';
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
+import EncryptionHandler from './EncryptionHandler'
 
 const Web3Context= createContext();
 
@@ -69,7 +70,7 @@ const Web3Provider = ({children}) => {
             }
 
             // Generate a Key Pair
-            const {privateKey, publicKey} = FileHandler.generateKeyPair();
+            const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
             console.log("Key Pair generated");
 
             isInitialized.current = true;
@@ -78,7 +79,6 @@ const Web3Provider = ({children}) => {
             return result;
 
         }
-
         
         isInitialized.current = false;
         messageError = "Make sure you're connected to MetaMask extention";
@@ -86,6 +86,7 @@ const Web3Provider = ({children}) => {
         return result;
     }, []);
 
+    // TODO: refactor this for an eventual Fuctory Method (??)
     const contractInitialization = () => {
         const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
         let messageError = "";
@@ -120,13 +121,29 @@ const Web3Provider = ({children}) => {
         return true
     }
 
-    const storeFileBlockchain = async (fileUploaded) => {
-        if(!isInitialized.current){
-            console.log("User is not logged in");
-            return
-        }
+    const storeFileBlockchain = (fileUpl, symmetricKey, selectedAccount, fileCID) => {
+        return new Promise((resolve, reject) => {
+            if(!isInitialized.current){
+                console.log("User is not logged in");
+                return
+            }
 
-        return storeFileContract.current.methods.set(fileUploaded).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+            // Prepares the file to be stored
+            const fileName = fileUpl.name.toLowerCase();
+            var fileType = FileHandler.determineFileType(fileName);
+            const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey); // Encrypt the symmetric key
+            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedAccount, fileCID, fileType);
+        
+            storeFileContract.current.methods.set(fileUploaded)
+                .send({ from: selectedAccount })
+                .then(transactionResult => {
+                    resolve({ transactionResult, fileUploaded })
+                })
+                .catch(error => {
+                    console.error("Error storing file on the blockchain:", error);
+                    reject("Error storing file on the blockchain");
+                });
+        });
     }
 
     const getIPFSHashesBlockchain = async () => {

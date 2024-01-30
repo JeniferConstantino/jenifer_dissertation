@@ -1,7 +1,7 @@
 import {ipfs} from '../../ipfs';
 import {Buffer} from 'buffer';
+import EncryptionHandler from './EncryptionHandler';
 const crypto = require('crypto-browserify');
-const forge = require('node-forge');
 
 class FileHandler {
 
@@ -9,19 +9,6 @@ class FileHandler {
     static FileType = {
         Image: 'image',
         File: 'file'
-    }
-
-    // Generate a random symmetric key (for each file)
-    static generateSymmetricKey() {
-        return crypto.randomBytes(32); // it uses AES-256 algorithm 
-    }
-
-    // Generate an RSA key pair (assymmetric encryption)
-    static generateKeyPair() {
-        const rsaKeyPair = forge.pki.rsa.generateKeyPair({bits: 2048});
-        const privateKey = forge.pki.privateKeyToPem(rsaKeyPair.privateKey);
-        const publicKey = forge.pki.publicKeyToPem(rsaKeyPair.publicKey);
-        return {privateKey, publicKey};
     }
 
     static encryptSymmetricKey(symmetricKey) {
@@ -48,9 +35,15 @@ class FileHandler {
 
     // Adds the file to IPFS
     static async addFileToIPFS (fileAsBuffer) {
-        const addedFile = await ipfs.add({ content: fileAsBuffer});
+
+        // Encrypts uploaded file using symmetric encryption
+        const symmetricKey = EncryptionHandler.generateSymmetricKey();
+        const encryptFile = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
+
+        const addedFile = await ipfs.add({ content: encryptFile});
         const fileCID = addedFile.cid.toString();
-        return fileCID;
+
+        return {fileCID, symmetricKey};
     }
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value

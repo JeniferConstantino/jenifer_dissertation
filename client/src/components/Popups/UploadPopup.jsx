@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import FileHandler from '../../helpers/fileHandler';
-import FileApp from '../../helpers/FileApp';
 import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
@@ -35,39 +34,23 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
 
         if(fileAsBuffer){
             try{
-                // Generates a symmetric key for the current file to be stored
-                const symmetricKey = FileHandler.generateSymmetricKey();
-                // Encrypts the current file to be stored with the generated symmetric key
-                const encryptFile = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
-                console.log("File uploaded encrypted.");
+                // Encrypts and adds file to IPFS
+                const {fileCID, symmetricKey} = await FileHandler.addFileToIPFS(fileAsBuffer);
+                console.log('File encrypted and added to IPFS', fileCID);
 
-                const fileCID = await FileHandler.addFileToIPFS(encryptFile);
-                console.log('File added to IPFS', fileCID);
-
+                // Verifies if the file exists
                 FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
 
-                const fileName = fileUpl.name.toLowerCase();
-                var fileType = FileHandler.determineFileType(fileName);
-                
-                // TODO: Now I need to store in the Ethereum blockcahin the 
-                // public key, the symmetric encrypted key, and the file uploaded
-
-                // Encrypt the symmetric key
-                const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey);
-
-                let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedAccount.current, fileCID, fileType);
-
-                // Adds the CID (the IPFS Hash) to the blockchain
-                storeFileBlockchain(fileUploaded).then(transaction => {
+                // Adds the file to the blockchain
+                storeFileBlockchain(fileUpl, symmetricKey, selectedAccount.current, fileCID).then(({transactionResult, fileUploaded}) => {
                     // Updates the state with the result
                     var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');
 
                     handleFileUploaded(e, tempUpdatedUploadedFiles);
-
-                }).catch( err => {
+                }).catch(err => {
                     console.log(err);
-                })          
+                })       
             } catch (error) {
                 console.error("Error uploading file to IPFS:", error);
             }
