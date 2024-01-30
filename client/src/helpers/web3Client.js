@@ -110,7 +110,7 @@ const Web3Provider = ({children}) => {
         return true
     }
 
-    const storeIpfsHashBlockchain = async (fileUploaded) => {
+    const storeFileBlockchain = async (fileUploaded) => {
         if(!isInitialized.current){
             console.log("User is not logged in");
             return
@@ -153,7 +153,7 @@ const Web3Provider = ({children}) => {
         storeFileContract,
         login,
         logOut,
-        storeIpfsHashBlockchain,
+        storeFileBlockchain,
         getIPFSHashesBlockchain,
     }
 

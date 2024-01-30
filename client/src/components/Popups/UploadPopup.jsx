@@ -14,7 +14,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
     const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
 
-    const {storeIpfsHashBlockchain} = useWeb3();
+    const {storeFileBlockchain} = useWeb3();
 
 
     const handleDragOver = (e) => {
@@ -58,7 +58,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
                 let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedAccount.current, fileCID, fileType);
 
                 // Adds the CID (the IPFS Hash) to the blockchain
-                storeIpfsHashBlockchain(fileUploaded).then(transaction => {
+                storeFileBlockchain(fileUploaded).then(transaction => {
                     // Updates the state with the result
                     var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');
