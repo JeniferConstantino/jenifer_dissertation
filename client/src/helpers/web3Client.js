@@ -1,8 +1,11 @@
 import Web3 from 'web3'
 import StoreFile from '../contracts/contracts/StoreFile.sol/StoreFile.json'
+import StoreUser from '../contracts/contracts/StoreUser.sol/StoreUser.json'
 import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
+import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.json'
 
 import FileApp from './FileApp'
+import UserApp from './UserApp'
 import FileHandler from './fileHandler';
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
@@ -22,90 +25,83 @@ const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();
     let storeFileContract = useRef();
+    let storeUserContract = useRef();
     let isInitialized = useRef(false);
     let accountSelected = useRef(false);
     let provider = useRef();
 
     const login = useCallback(async () => {
-        // Because Metamask injects itself into the browser, it's possible to access it through the window object
-        provider.current = window.ethereum; // Link to my Ethereum node - a "gateway" to the rest of the network 
-        let result = {};
+
         let messageError = "";
 
-        if(typeof provider.current === 'undefined'){
-            // MetaMask is not installed
-            isInitialized.current = false;
-            messageError = "MetaMask not intsalled";
-            result = { success: isInitialized.current, messageError};
-            return result;
-        }
+        try {
+            provider.current = window.ethereum; // Link to my Ethereum node - a "gateway" to the rest of the network 
 
-        // MetaMask is installed (the provider has been injected)
+            if(typeof provider.current === 'undefined'){
+                // MetaMask is not installed
+                isInitialized.current = false;
+                messageError = "MetaMask not intsalled";
+                return { success: isInitialized.current, messageError};
+            }
 
-        // Ask the user to connect is wallet to the website
-        await provider.current
-        .request({ method: 'eth_requestAccounts'}) // we send this request to the provider to get access to the users' account
-        .then((accounts) => {
+            // Ask the user to connect is wallet to the website
+            const accounts = await provider.current.request({ method: 'eth_requestAccounts' });
+
             selectedAccount.current = accounts[0];
             console.log(`Selected account is ${selectedAccount.current}`);
             accountSelected.current = true;
-        })
-        .catch((err) => {
-            console.log(err);
-            isInitialized.current = false;
-            messageError = "Make sure you're connected to MetaMask extention";
-            result = { success: isInitialized.current, messageError};
-            return result;  
-        });
 
-        // Creates the user and starts the app
-        if (accountSelected.current) {
             // Initialize contracts
             const contractInitializationResult = contractInitialization();
 
             if (contractInitializationResult.messageError !== "") {
                 isInitialized.current = false;
-                result = { success: isInitialized.current, messageError: contractInitializationResult.messageError};
-                return result;
+                return { success: isInitialized.current, messageError: contractInitializationResult.messageError};
             }
-
-            // Generate a Key Pair
-            const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
-            console.log("Key Pair generated");
-
+            
+            // Adds the user in the blockchain if he isn't already
+            const user = await storeUserBlockchain(selectedAccount.current);
             isInitialized.current = true;
-            messageError = "success. User Initialized and Application ready.";
-            result = { success: isInitialized.current, messageError};
-            return result;
+            messageError = "success. User: " + user.name + " Initialized and Application ready.";
+            return { success: isInitialized.current, messageError};
 
+        } catch (error) {
+            console.log(error);
+            isInitialized.current = false;
+            messageError = "Make sure you're connected to MetaMask extension";
+            return { success: isInitialized.current, messageError };
         }
-        
-        isInitialized.current = false;
-        messageError = "Make sure you're connected to MetaMask extention";
-        result = { success: isInitialized.current, messageError};
-        return result;
     }, []);
 
-    // TODO: refactor this for an eventual Fuctory Method (??)
+    // TODO: refactor this for an eventual Factory Method (??)
     const contractInitialization = () => {
         const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
         let messageError = "";
-        let result = {};
 
         if (StoreFile_ContractAddress.address === "") {
             isInitialized.current = false;
             messageError = "StoreFile Contract address not found for the current network.";
-            result = { success: isInitialized.current, messageError };
-            return {messageError, result};
+            return { success: isInitialized.current, messageError };
         }
 
-        // Once instantiated we can do multiple things with the contract StoreFile
+        if (StoreUser_ContractAddress.address === "") {
+            isInitialized.current = false;
+            messageError = "StoreUser Contract address not found for the current network.";
+            return { success: isInitialized.current, messageError };
+        }
+
+        // Once instantiated we can do multiple things with the contract
         storeFileContract.current = new web3.eth.Contract(
             StoreFile.abi, 
             StoreFile_ContractAddress.address
         );
 
-        return {messageError, result};
+        storeUserContract.current = new web3.eth.Contract(
+            StoreUser.abi, 
+            StoreUser_ContractAddress.address
+        );
+
+        return { success: isInitialized.current, messageError };
     }
 
     // Logs Out the user
@@ -113,6 +109,7 @@ const Web3Provider = ({children}) => {
         // Cleans variables
         provider = null;
         storeFileContract = null;
+        storeUserContract = null;
         selectedAccount = null;
         isInitialized = false;
         // Redirects the user to the login page
@@ -146,7 +143,40 @@ const Web3Provider = ({children}) => {
         });
     }
 
-    const getIPFSHashesBlockchain = async () => {
+    const storeUserBlockchain = async (selectedAccount) => {    
+        try {
+            var userLogged = null;
+            // Verifies if the user exist
+            console.log("selectedAccount: ", selectedAccount);
+            var userStored = await storeUserContract.current.methods.getUser(selectedAccount).call({from: selectedAccount.current});
+            if (userStored.name === "") {
+                console.log("user first time in the app");
+
+                // Prepares the user to be stored
+                // --- >Asks for the username
+
+                const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
+                console.log("Key Pair generated");
+                console.log("selectedAccount: ", selectedAccount);
+                userLogged = new UserApp(selectedAccount, "JoaoTeste", publicKey, privateKey);
+
+                // Adds the user to the blockchain
+                const transactionReceipt = await storeUserContract.current.methods.login(userLogged).send({ from: selectedAccount }); // from indicates the account that will be actually sending the transaction
+                console.log("Transaction Receipt:", transactionReceipt);
+            } else {
+                console.log("user already in the app.");
+                userLogged = userStored;
+            }
+            return userLogged;
+        } catch (error) {
+            console.error("Error storing user on the blockchain:", error);
+            // TODO: SEND A WARNING ON THE REQUIRE OF THE SMART CONTRACT
+            throw error; 
+        }
+        
+    }
+
+    const getFilesUploadedBlockchain = async () => {
         if(!isInitialized.current){
             console.log("User is not logged in");
             return
@@ -172,16 +202,15 @@ const Web3Provider = ({children}) => {
         logOut();
     });
 
-
-
     const value = {
         selectedAccount,
         isInitialized,
         storeFileContract,
+        storeUserContract,
         login,
         logOut,
         storeFileBlockchain,
-        getIPFSHashesBlockchain,
+        getFilesUploadedBlockchain,
     }
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>

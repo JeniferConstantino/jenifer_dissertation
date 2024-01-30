@@ -11,7 +11,7 @@ const Login = () => {
         console.log('Loggin the user ...')
         e.preventDefault()
         
-        let resultLogin = await login()
+        let resultLogin = await login();
         if(resultLogin.success){
             console.log(`User logged - ${resultLogin.messageError}`);
             navigate('/home');

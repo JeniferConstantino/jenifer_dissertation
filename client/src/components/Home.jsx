@@ -14,7 +14,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedAccount, logOut, getIPFSHashesBlockchain} = useWeb3();
+    const {selectedAccount, logOut, getFilesUploadedBlockchain} = useWeb3();
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -32,7 +32,7 @@ const Home = () => {
 
     // Get the IPFS Hash
     const fetchIPFSHashes = async () => {
-        getIPFSHashesBlockchain().then((files) => {
+        getFilesUploadedBlockchain().then((files) => {
             if(files.length !== 0){
                 setUploadedFiles(files);
             }

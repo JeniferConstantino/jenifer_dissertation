@@ -9,7 +9,7 @@ contract StoreUser {
     mapping(address => User) private users;
 
     // Adds a new user in the blockchain
-    function set(User memory user) public {
+    function login(User memory user) public {
         // Check if the address already has a user
         require(users[user.account].account == address(0), "User already exists for this address");
 
@@ -17,8 +17,8 @@ contract StoreUser {
     }
 
     // Gets the information of a given user
-    function getUser(address user) public view returns (User memory) {
-        return users[user];
+    function getUser(address account) public view returns (User memory) {
+        return users[account];
     }
   
 }
