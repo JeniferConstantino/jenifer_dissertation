@@ -18,7 +18,9 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn}) => {
                             className="uploaded-docs"
                         >
                             <FcImageFile size={50}/>
-                            <span style={{ marginTop: '5px' }}>{file.fileName}</span>
+                            <div className="fileName">
+                                <span>{file.fileName}</span>
+                            </div>
                         </a>
                     ) : file.fileType === FileHandler.FileType.File ? (
                         <>
@@ -28,7 +30,9 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn}) => {
                                 className="uploaded-docs"
                             >
                                 <FcDocument  size={50}/>
-                                <span style={{ marginTop: '5px' }}>{file.fileName}</span>
+                                <div className="fileName">
+                                    <span>{file.fileName}</span>
+                                </div>
                             </a>
                         </>
                     ) : (

@@ -151,6 +151,10 @@ h1 {
   top: 7%;
 }
 
+.fileName {
+  margin: 7px;
+}
+
 /*----------- Home Page // Files management section -----------*/
 
 .files-header {
