@@ -21,7 +21,6 @@ class FileHandler {
         const rsaKeyPair = forge.pki.rsa.generateKeyPair({bits: 2048});
         const privateKey = forge.pki.privateKeyToPem(rsaKeyPair.privateKey);
         const publicKey = forge.pki.publicKeyToPem(rsaKeyPair.publicKey);
-        console.log("privateKey: ", privateKey, " publicKey: ", publicKey);
         return {privateKey, publicKey};
     }
 

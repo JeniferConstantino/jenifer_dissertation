@@ -57,25 +57,45 @@ const Web3Provider = ({children}) => {
             return result;  
         });
 
-        // Generate a Key Pair
-        const keyPairExists = localStorage.getItem('rsaKeyPair');
-        if (!keyPairExists) {
-            const {privateKey, publicKey} = FileHandler.generateKeyPair();
+        // Creates the user and starts the app
+        if (accountSelected.current) {
+            // Initialize contracts
+            const contractInitializationResult = contractInitialization();
 
-            // Store the key pair in the localStorage
-            localStorage.setItem('rsaKeyPair', JSON.stringify({ privateKey, publicKey }));
-        
+            if (contractInitializationResult.messageError !== "") {
+                isInitialized.current = false;
+                result = { success: isInitialized.current, messageError: contractInitializationResult.messageError};
+                return result;
+            }
+
+            // Generate a Key Pair
+            const {privateKey, publicKey} = FileHandler.generateKeyPair();
             console.log("Key Pair generated");
+
+            isInitialized.current = true;
+            messageError = "success. User Initialized and Application ready.";
+            result = { success: isInitialized.current, messageError};
+            return result;
+
         }
 
+        
+        isInitialized.current = false;
+        messageError = "Make sure you're connected to MetaMask extention";
+        result = { success: isInitialized.current, messageError};
+        return result;
+    }, []);
 
+    const contractInitialization = () => {
         const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
+        let messageError = "";
+        let result = {};
 
         if (StoreFile_ContractAddress.address === "") {
             isInitialized.current = false;
-            messageError = "Contract address not found for the current network.";
+            messageError = "StoreFile Contract address not found for the current network.";
             result = { success: isInitialized.current, messageError };
-            return result;
+            return {messageError, result};
         }
 
         // Once instantiated we can do multiple things with the contract StoreFile
@@ -84,18 +104,8 @@ const Web3Provider = ({children}) => {
             StoreFile_ContractAddress.address
         );
 
-        if(accountSelected.current){
-            isInitialized.current = true;
-            messageError = "success";
-            result = { success: isInitialized.current, messageError};
-            return result;
-        } 
-        
-        isInitialized.current = false;
-        messageError = "Make sure you're connected to MetaMask extention";
-        result = { success: isInitialized.current, messageError};
-        return result;
-    }, []);
+        return {messageError, result};
+    }
 
     // Logs Out the user
     const logOut = () => {
