@@ -24,6 +24,7 @@ export const useWeb3 = () => {
 const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();
+    let selectedUser = useRef();
     let storeFileContract = useRef();
     let storeUserContract = useRef();
     let isInitialized = useRef(false);
@@ -158,6 +159,8 @@ const Web3Provider = ({children}) => {
         // Adds the user to the blockchain
         const transactionReceipt = await storeUserContract.current.methods.login(userLogged).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
         console.log("Transaction Receipt:", transactionReceipt);
+
+        selectedUser.current = userLogged;
         isInitialized.current = true;
     }
 
@@ -170,6 +173,8 @@ const Web3Provider = ({children}) => {
                 return false;
             } 
             console.log("user already in the app.");
+            selectedUser.current = userStored;
+
             return true;
         } catch (error) {
             console.error("Error storing user on the blockchain:", error);
@@ -207,6 +212,7 @@ const Web3Provider = ({children}) => {
 
     const value = {
         selectedAccount,
+        selectedUser,
         isInitialized,
         storeFileContract,
         storeUserContract,

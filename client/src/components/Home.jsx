@@ -5,6 +5,7 @@ import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
+import { GoPerson   } from "react-icons/go";
 
 
 const Home = () => {
@@ -14,7 +15,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedAccount, logOut, getFilesUploadedBlockchain} = useWeb3();
+    const {selectedAccount, selectedUser, logOut, getFilesUploadedBlockchain} = useWeb3();
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -87,11 +88,20 @@ const Home = () => {
         // Implement your share logic here
     };
 
+    // TODO: LATER, EXTRACT THE TOP LOGOUT MENU TO A COMPONENT
     return (
         <>
             <div className='content-container'>
                 <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
-                <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button>
+                <div className='logout-section'>
+                    <div className="icon-column">
+                        <GoPerson className='icon-person'/>
+                    </div>
+                    <div className='button-column'>
+                        <p className='username-text'>Username: {selectedUser.current.name}</p>
+                        <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button> 
+                    </div>
+                </div>
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />

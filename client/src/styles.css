@@ -63,6 +63,7 @@ h1 {
   background-color: white;
   border-radius: 20px;
   padding: 5%; /* Add horizontal padding */
+  padding-top: 2%;
 }
 
 .shadow-overlay {
@@ -129,15 +130,6 @@ h1 {
   z-index: 1; 
 }
 
-.app-button__logout {
-  position: absolute;
-  top: 3%;
-  right: 2%;
-  width: 140px; 
-  height: 40px; 
-  z-index: 1; 
-}
-
 /*----------- Welcome Page -----------*/
 
 .app-button__welcome {
@@ -177,10 +169,40 @@ h1 {
   margin: 7px;
 }
 
+/*----------- Home Page // Logout section -----------*/
+
+.icon-column {
+  padding-top: 16px;
+  padding-right: 10px;
+}
+.icon-person {
+  color: #4B4B4B;
+  font-size: 40px;
+}
+
+.username-text {
+  margin-bottom: 0px;
+  color: #4B4B4B;
+}
+
+.logout-section {
+  position: absolute;
+  top: 3%;
+  right: 2%;
+  display: flex;
+}
+
+.app-button__logout {
+  width: 80px; 
+  height: 25px; 
+  z-index: 1; 
+}
+
 /*----------- Home Page // Files management section -----------*/
 
 .files-header {
   padding-right: 10%;
+  color: #4B4B4B;
 }
 
 .uplBackground {
