@@ -163,7 +163,8 @@ const Web3Provider = ({children}) => {
     
             selectedUser.current = userLogged;
             isInitialized.current = true;
-        } catch (err) {
+        } catch (error) {
+            console.error("Transaction error: ", error.message);
             console.log("Make sure that the user is not already authenticated in the app. And make sure that the username is unique.");
         }
     }
