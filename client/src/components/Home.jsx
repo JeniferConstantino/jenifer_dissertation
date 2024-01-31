@@ -5,8 +5,7 @@ import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
-import { GoPerson   } from "react-icons/go";
-
+import Logout from './HomeSections/Logout'
 
 const Home = () => {
 
@@ -15,7 +14,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedAccount, selectedUser, logOut, getFilesUploadedBlockchain} = useWeb3();
+    const {selectedAccount, selectedUser, getFilesUploadedBlockchain} = useWeb3();
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -64,11 +63,6 @@ const Home = () => {
         handleCloseUploadPopup();
     };
 
-    // Performs the users' loggout
-    const handleLogout = () => {           
-        logOut();              
-    }
-
     // Placeholder functions for file actions (upload, delete, share)
     const handleOpenUploadPopup = () => {
         setShowUploadPopup(true);
@@ -93,15 +87,7 @@ const Home = () => {
         <>
             <div className='content-container'>
                 <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
-                <div className='logout-section'>
-                    <div className="icon-column">
-                        <GoPerson className='icon-person'/>
-                    </div>
-                    <div className='button-column'>
-                        <p className='username-text'>Username: {selectedUser.current.name}</p>
-                        <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button> 
-                    </div>
-                </div>
+                <Logout selectedUser={selectedUser}/>
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
