@@ -34,7 +34,8 @@ class FileHandler {
 
         // Encrypts uploaded file using symmetric encryption
         const symmetricKey = EncryptionHandler.generateSymmetricKey();
-        const encryptFile = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
+        const encryptFile = fileAsBuffer; // TEMPORARY: uncomment this line and comment the one bellow
+        //const encryptFile = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
 
         const addedFile = await ipfs.add({ content: encryptFile});
         const fileCID = addedFile.cid.toString();
