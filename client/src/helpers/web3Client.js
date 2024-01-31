@@ -118,6 +118,7 @@ const Web3Provider = ({children}) => {
         storeFileContract = null;
         storeUserContract = null;
         selectedAccount = null;
+        selectedUser = null;
         isInitialized = false;
         // Redirects the user to the login page
         window.location.href = '/';
@@ -125,7 +126,7 @@ const Web3Provider = ({children}) => {
         return true
     }
 
-    const storeFileBlockchain = (fileUpl, symmetricKey, selectedAccount, fileCID) => {
+    const storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID) => {
         return new Promise((resolve, reject) => {
             if(!isInitialized.current){
                 console.log("User is not logged in");
@@ -135,11 +136,11 @@ const Web3Provider = ({children}) => {
             // Prepares the file to be stored
             const fileName = fileUpl.name.toLowerCase();
             var fileType = FileHandler.determineFileType(fileName);
-            const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey); // Encrypt the symmetric key
-            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedAccount, fileCID, fileType);
+            const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
+            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedUser.account, fileCID, fileType);
         
             storeFileContract.current.methods.set(fileUploaded)
-                .send({ from: selectedAccount })
+                .send({ from: selectedUser.account })
                 .then(transactionResult => {
                     resolve({ transactionResult, fileUploaded })
                 })
@@ -177,9 +178,9 @@ const Web3Provider = ({children}) => {
                 console.log("user first time in the app");
                 return false;
             } 
+
             console.log("user already in the app.");
             selectedUser.current = userStored;
-
             return true;
         } catch (error) {
             console.error("Error storing user on the blockchain:", error);

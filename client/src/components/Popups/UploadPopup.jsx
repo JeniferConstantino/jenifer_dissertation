@@ -4,7 +4,7 @@ import FileHandler from '../../helpers/fileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, selectedAccount, children}) => {
+const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, selectedUser, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -42,7 +42,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
                 FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
 
                 // Adds the file to the blockchain
-                storeFileBlockchain(fileUpl, symmetricKey, selectedAccount.current, fileCID).then(({transactionResult, fileUploaded}) => {
+                storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID).then(({transactionResult, fileUploaded}) => {
                     // Updates the state with the result
                     var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');

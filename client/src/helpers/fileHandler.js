@@ -11,13 +11,9 @@ class FileHandler {
         File: 'file'
     }
 
-    static encryptSymmetricKey(symmetricKey) {
-        // Retrieve RSA public key from localStorage
-        const rsaKeyPair = JSON.parse(localStorage.getItem('rsaKeyPair'));
-        const rsaPublicKey = rsaKeyPair.publicKey;
-
+    static encryptSymmetricKey(symmetricKey, publicKey) {
         return crypto.publicEncrypt(
-            rsaPublicKey,
+            publicKey,
             Buffer.from(symmetricKey),
         ); 
     }
@@ -45,6 +41,25 @@ class FileHandler {
 
         return {fileCID, symmetricKey};
     }
+
+
+    // Decritpts files
+    static decryptFile (fileEncrypted, selectedUser) {
+
+        // Decrypt files' symmetric key using the users' private key
+        const decryptSymmetricKey = crypto.privateDecrypt(
+            {
+                key: selectedUser.current.privateKey,
+                padding: crypto.constants.RSA_PKCS1_PADDING,
+            },
+            fileEncrypted.encSymmetricKey
+        );
+
+        // Decrypts file using the symmetric key
+        const decipher = crypto.createDecipheriv('aes-256-cbc', decryptSymmetricKey, fileEncrypted.iv);
+        const decipherFile = Buffer.concat([decipher.update(), decipher.final()]);
+    }
+
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value
     static checkFileAlreadyUploaded = (fileCID, uploadedFiles) => {

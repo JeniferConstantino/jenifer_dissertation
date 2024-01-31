@@ -18,7 +18,7 @@ const Home = () => {
 
     // This component runs after the component has mounted
     useEffect(() => {
-        fetchIPFSHashes();
+        fetchFiles();
 
         // Add event listener for window resize
         window.addEventListener('resize', handleWindowResize);
@@ -30,8 +30,8 @@ const Home = () => {
 
     }, []);
 
-    // Get the IPFS Hash
-    const fetchIPFSHashes = async () => {
+    // Get Files
+    const fetchFiles = async () => {
         getFilesUploadedBlockchain().then((files) => {
             if(files.length !== 0){
                 setUploadedFiles(files);
@@ -105,7 +105,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
+            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
         </>
     );
 
