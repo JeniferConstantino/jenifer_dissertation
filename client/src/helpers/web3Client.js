@@ -60,10 +60,16 @@ const Web3Provider = ({children}) => {
             }
             
             // Adds the user in the blockchain if he isn't already
-            const user = await storeUserBlockchain(selectedAccount.current);
-            isInitialized.current = true;
-            messageError = "success. User: " + user.name + " Initialized and Application ready.";
-            return { success: isInitialized.current, messageError};
+            const userExists = await verifyIfUserExists(selectedAccount.current);
+            if (userExists) {
+                isInitialized.current = true;
+                messageError = "success. userExists: " + userExists + " Initialized and Application ready.";
+                return { success: isInitialized.current, messageError};
+            } else {
+                isInitialized.current = false;
+                messageError = "User doesn't exist.";
+                return { success: isInitialized.current, messageError};
+            }
 
         } catch (error) {
             console.log(error);
@@ -143,31 +149,28 @@ const Web3Provider = ({children}) => {
         });
     }
 
-    const storeUserBlockchain = async (selectedAccount) => {    
+    const storeUserBlockchain = async (userName) => {
+        // Prepares the user to be stored
+        const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
+        console.log("Key Pair generated");
+        var userLogged = new UserApp(selectedAccount.current, userName, publicKey, privateKey);
+
+        // Adds the user to the blockchain
+        const transactionReceipt = await storeUserContract.current.methods.login(userLogged).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+        console.log("Transaction Receipt:", transactionReceipt);
+        isInitialized.current = true;
+    }
+
+    const verifyIfUserExists = async (selectedAccount) => {    
         try {
-            var userLogged = null;
             // Verifies if the user exist
-            console.log("selectedAccount: ", selectedAccount);
             var userStored = await storeUserContract.current.methods.getUser(selectedAccount).call({from: selectedAccount.current});
             if (userStored.name === "") {
                 console.log("user first time in the app");
-
-                // Prepares the user to be stored
-                // --- >Asks for the username
-
-                const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
-                console.log("Key Pair generated");
-                console.log("selectedAccount: ", selectedAccount);
-                userLogged = new UserApp(selectedAccount, "JoaoTeste", publicKey, privateKey);
-
-                // Adds the user to the blockchain
-                const transactionReceipt = await storeUserContract.current.methods.login(userLogged).send({ from: selectedAccount }); // from indicates the account that will be actually sending the transaction
-                console.log("Transaction Receipt:", transactionReceipt);
-            } else {
-                console.log("user already in the app.");
-                userLogged = userStored;
-            }
-            return userLogged;
+                return false;
+            } 
+            console.log("user already in the app.");
+            return true;
         } catch (error) {
             console.error("Error storing user on the blockchain:", error);
             // TODO: SEND A WARNING ON THE REQUIRE OF THE SMART CONTRACT
@@ -210,6 +213,7 @@ const Web3Provider = ({children}) => {
         login,
         logOut,
         storeFileBlockchain,
+        storeUserBlockchain,
         getFilesUploadedBlockchain,
     }
 

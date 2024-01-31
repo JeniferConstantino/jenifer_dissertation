@@ -138,6 +138,28 @@ h1 {
   z-index: 1; 
 }
 
+/*----------- Welcome Page -----------*/
+
+.app-button__welcome {
+  padding: 10% 16%;
+  margin-top: 10%;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px; 
+  align-items: center;
+  margin-right: 20%;
+}
+
+.input-username {
+  border: 1px solid #ddd; 
+  border-radius: 10px; 
+  padding: 10px; 
+  margin-bottom: 10px; 
+  width: 80%;
+}
+
 /*----------- Home Page -----------*/
 
 .home-wrapper {
@@ -297,5 +319,7 @@ h1 {
 .app-button_back{
   cursor: pointer; 
 }
+
+
 
 
