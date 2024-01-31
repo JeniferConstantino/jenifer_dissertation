@@ -13,7 +13,7 @@ const Login = () => {
         e.preventDefault()
         
         let resultLogin = await login();
-        console.log("resultLogin: ", resultLogin);
+
         // The user is already in the blockchain so he can proceed 
         if (resultLogin.success) {
             console.log(`User logged - ${resultLogin.messageError}`);
