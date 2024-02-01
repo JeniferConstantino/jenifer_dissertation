@@ -7,8 +7,11 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
     const decryptAndDownload = async (file) => {
         
         try {
+            // Gets the file from IPFS
+            const fileContent = await FileHandler.getFileFromIPFS(file.ipfsCID);
+
             // Decrypts the file
-            const decryptedFileBuffer = await FileHandler.decryptFile(file, selectedUser);
+            const decryptedFileBuffer = await FileHandler.decryptFile(file, selectedUser, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             
             // Creates a downloaded link 

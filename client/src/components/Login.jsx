@@ -16,13 +16,12 @@ const Login = () => {
 
         // The user is already in the blockchain so he can proceed 
         if (selectedUser.current != null) {
-            console.log(`User logged - ${resultLogin.messageError}`);
             navigate('/home');
         } else if (selectedUser.current === null) {
             // Displays the interface asking for the user name 
             navigate('/welcome');
         } else {
-            console.log(`Failed to log in: ${resultLogin.messageError}`);
+            console.log(`Failed to log in: ${resultLogin}`);
         }
     };
 

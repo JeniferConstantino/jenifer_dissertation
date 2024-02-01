@@ -25,8 +25,8 @@ const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();     // Keeps track of wallet account change
     let selectedUser = useRef(null);    // User logged in
-    let storeFileContract = useRef();
-    let storeUserContract = useRef();
+    let storeFileContract = useRef();   // kesps the File Contract so its functions can be executed
+    let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
     let provider = useRef();
 
     const login = useCallback(async () => {
@@ -52,7 +52,7 @@ const Web3Provider = ({children}) => {
             
             // Adds the user in the blockchain if he isn't already
             const userExists = await verifyIfUserExists(selectedAccount.current);
-            console.log("userExists: ", userExists);
+            
             if (userExists !== null) {
                 selectedUser.current = userExists;
                 return "Success. Initialized and Application ready.";
@@ -72,16 +72,14 @@ const Web3Provider = ({children}) => {
         );
     }
 
-    // Logs Out the user
+    // Logs Out the user - clean variables
     const logOut = () => {
-        // Cleans variables
         provider = null;
         storeFileContract = null;
         storeUserContract = null;
         selectedAccount = null;
         selectedUser = null;
-        // Redirects the user to the login page
-        window.location.href = '/';
+        window.location.href = '/'; // Redirects the user to the login page
         return true
     }
 
@@ -191,8 +189,6 @@ const Web3Provider = ({children}) => {
 
     const value = {
         selectedUser,
-        storeFileContract,
-        storeUserContract,
         login,
         logOut,
         storeFileBlockchain,
