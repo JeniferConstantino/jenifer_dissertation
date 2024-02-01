@@ -2,6 +2,7 @@ import {ipfs} from '../../ipfs';
 import {Buffer} from 'buffer';
 import EncryptionHandler from './EncryptionHandler';
 import { IPFS_BASE_URL } from '../../ipfs';
+import FileApp from './FileApp';
 import axios from 'axios';
 const crypto = require('crypto-browserify');
 
@@ -78,6 +79,45 @@ class FileHandler {
         } else {
             throw new Error('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
         }
+    }
+
+    // Get files from the Blockchain
+    static getFilesUploadedBlockchain = async (storeFileContract, selectedUser) => {
+            
+        var result = await storeFileContract.current.methods.get().call({from: selectedUser.current.account});
+    
+        // Check if the first element is an array (file details) or not
+        let files = [];
+        if(result.length != null){
+            result.forEach(file => {
+                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType, file.iv);
+                files.push(fileApp);
+            });
+        }
+    
+        return files;
+    }
+
+    // Stores a file in the blockchain
+    static storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID, iv, storeFileContract) => {
+        return new Promise((resolve, reject) => {
+            // Prepares the file to be stored
+            const fileName = fileUpl.name.toLowerCase();
+            var fileType = FileHandler.determineFileType(fileName);
+            const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
+
+            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
+        
+            storeFileContract.current.methods.set(fileUploaded)
+                .send({ from: selectedUser.account })
+                .then(transactionResult => {
+                    resolve({ transactionResult, fileUploaded })
+                })
+                .catch(error => {
+                    console.error("Error storing file on the blockchain:", error);
+                    reject("Error storing file on the blockchain");
+                });
+        });
     }
 }
 

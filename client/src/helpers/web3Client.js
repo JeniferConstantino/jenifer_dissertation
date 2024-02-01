@@ -4,9 +4,7 @@ import StoreUser from '../contracts/contracts/StoreUser.sol/StoreUser.json'
 import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
 import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.json'
 
-import FileApp from './FileApp'
 import UserApp from './UserApp'
-import FileHandler from './fileHandler';
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
 import EncryptionHandler from './EncryptionHandler'
@@ -83,32 +81,6 @@ const Web3Provider = ({children}) => {
         return true
     }
 
-    const storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID, iv) => {
-        return new Promise((resolve, reject) => {
-            if(selectedUser === null){
-                console.log("User is not logged in");
-                return
-            }
-
-            // Prepares the file to be stored
-            const fileName = fileUpl.name.toLowerCase();
-            var fileType = FileHandler.determineFileType(fileName);
-            const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
-
-            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
-        
-            storeFileContract.current.methods.set(fileUploaded)
-                .send({ from: selectedUser.account })
-                .then(transactionResult => {
-                    resolve({ transactionResult, fileUploaded })
-                })
-                .catch(error => {
-                    console.error("Error storing file on the blockchain:", error);
-                    reject("Error storing file on the blockchain");
-                });
-        });
-    }
-
     const storeUserBlockchain = async (userName) => {
         // Prepares the user to be stored
         const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
@@ -161,26 +133,6 @@ const Web3Provider = ({children}) => {
         
     }
 
-    const getFilesUploadedBlockchain = async () => {
-        if(selectedUser === null){
-            console.log("User is not logged in");
-            return
-        }
-    
-        var result = await storeFileContract.current.methods.get().call({from: selectedAccount.current});
-    
-        // Check if the first element is an array (file details) or not
-        let files = [];
-        if(result.length != null){
-            result.forEach(file => {
-                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType, file.iv);
-                files.push(fileApp);
-            });
-        }
-    
-        return files;
-    }
-
     window.ethereum.on('accountsChanged', function (accounts){
         selectedAccount.current = accounts[0];
         console.log(`Selected account changed to ${selectedAccount.current}`);
@@ -189,11 +141,10 @@ const Web3Provider = ({children}) => {
 
     const value = {
         selectedUser,
+        storeFileContract,
         login,
         logOut,
-        storeFileBlockchain,
         storeUserBlockchain,
-        getFilesUploadedBlockchain,
     }
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>

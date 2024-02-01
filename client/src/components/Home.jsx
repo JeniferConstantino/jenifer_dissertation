@@ -5,7 +5,8 @@ import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
-import Logout from './HomeSections/Logout'
+import Logout from './HomeSections/Logout';
+import FileHandler from '../helpers/fileHandler';
 
 const Home = () => {
 
@@ -14,7 +15,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedUser, getFilesUploadedBlockchain} = useWeb3();
+    const {selectedUser, storeFileContract} = useWeb3();
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -32,7 +33,7 @@ const Home = () => {
 
     // Get Files
     const fetchFiles = async () => {
-        getFilesUploadedBlockchain().then((files) => {
+        FileHandler.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
             if(files.length !== 0){
                 setUploadedFiles(files);
             }
