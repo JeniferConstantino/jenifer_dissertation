@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import {useWeb3} from '../helpers/web3Client';
 
 
@@ -32,7 +31,6 @@ const Welcome = () => {
     return (
         <>
             <div className='content-container'>
-                <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
                 <div className='login-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {useWeb3} from '../helpers/web3Client';
 import DisplayUplDocs from './HomeSections/DisplayUplDocs';
-import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
@@ -87,7 +86,6 @@ const Home = () => {
     return (
         <>
             <div className='content-container'>
-                <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
                 <Logout selectedUser={selectedUser}/>
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
