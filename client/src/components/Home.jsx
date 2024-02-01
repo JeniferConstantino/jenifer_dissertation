@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {useWeb3} from '../helpers/web3Client';
 import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import nearsoftLogo from '../imgs/nearsoftLogo.png';
@@ -17,6 +17,20 @@ const Home = () => {
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const {selectedUser, storeFileContract} = useWeb3();
 
+    // Get Files
+    const fetchFiles = useCallback(async () => {
+        FileHandler.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+            if(files.length !== 0){
+                setUploadedFiles(files);
+            }
+        }).catch(err => {
+            console.log(err);
+        })
+        .finally( () => {
+            setLoading(false);   
+        });
+    }, [storeFileContract, selectedUser]);
+
     // This component runs after the component has mounted
     useEffect(() => {
         fetchFiles();
@@ -29,21 +43,7 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    }, []);
-
-    // Get Files
-    const fetchFiles = async () => {
-        FileHandler.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
-            if(files.length !== 0){
-                setUploadedFiles(files);
-            }
-        }).catch(err => {
-            console.log(err);
-        })
-        .finally( () => {
-            setLoading(false);   
-        });
-    };
+    }, [fetchFiles]);
 
     // Handle window resize
     const handleWindowResize = () => {
