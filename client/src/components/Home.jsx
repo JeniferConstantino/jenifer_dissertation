@@ -86,7 +86,7 @@ const Home = () => {
     return (
         <>
             <div className='content-container'>
-                <Logout selectedUser={selectedUser}/>
+                <Logout />
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />

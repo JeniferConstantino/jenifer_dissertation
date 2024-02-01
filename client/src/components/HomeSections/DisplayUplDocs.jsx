@@ -48,7 +48,7 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
                             <>
                                 <FcDocument  size={50}/>
                                 <div className="fileName">
-                                    <span className>{file.fileName}</span>
+                                    <span>{file.fileName}</span>
                                 </div>
                             </>
                         ) : (

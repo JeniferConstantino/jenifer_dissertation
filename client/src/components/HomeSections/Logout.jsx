@@ -2,9 +2,9 @@ import React from "react";
 import { GoPerson   } from "react-icons/go";
 import {useWeb3} from '../../helpers/web3Client';
 
-const Logout = ({selectedUser}) => {
+const Logout = () => {
 
-    const {logOut} = useWeb3();
+    const {logOut, selectedUser} = useWeb3();
 
     // Performs the users' loggout
     const handleLogout = () => {           
