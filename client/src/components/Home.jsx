@@ -92,7 +92,7 @@ const Home = () => {
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
                     <div className='uplBackground'>
-                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/>
+                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn} selectedUser={selectedUser}/>
                     </div>
                 </div>
             </div>

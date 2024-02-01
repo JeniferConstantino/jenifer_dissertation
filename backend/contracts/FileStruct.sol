@@ -7,4 +7,5 @@ struct File {
     string owner;
     string ipfsCID;
     string fileType;
+    string iv;
 }

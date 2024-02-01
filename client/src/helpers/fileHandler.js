@@ -1,6 +1,8 @@
 import {ipfs} from '../../ipfs';
 import {Buffer} from 'buffer';
 import EncryptionHandler from './EncryptionHandler';
+import { IPFS_BASE_URL } from '../../ipfs';
+import axios from 'axios';
 const crypto = require('crypto-browserify');
 
 class FileHandler {
@@ -13,7 +15,10 @@ class FileHandler {
 
     static encryptSymmetricKey(symmetricKey, publicKey) {
         return crypto.publicEncrypt(
-            publicKey,
+            {
+                key: publicKey,
+                padding: crypto.constants.RSA_PKCS1_PADDING,
+            },
             Buffer.from(symmetricKey),
         ); 
     }
@@ -25,8 +30,8 @@ class FileHandler {
 
         const cipher = crypto.createCipheriv('aes-256-cbc', symmetricKey, iv);
         const encryptedFile = Buffer.concat([cipher.update(fileBuffer), cipher.final()]);
-        
-        return encryptedFile;
+        console.log("encryptedFile 1st: ", encryptedFile);
+        return {encryptedFile, iv};
     }
 
     // Adds the file to IPFS
@@ -34,33 +39,50 @@ class FileHandler {
 
         // Encrypts uploaded file using symmetric encryption
         const symmetricKey = EncryptionHandler.generateSymmetricKey();
-        const encryptFile = fileAsBuffer; // TEMPORARY: uncomment this line and comment the one bellow
-        //const encryptFile = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
 
-        const addedFile = await ipfs.add({ content: encryptFile});
+        const {encryptedFile, iv} = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
+
+        const addedFile = await ipfs.add({ content: encryptedFile});
         const fileCID = addedFile.cid.toString();
-
-        return {fileCID, symmetricKey};
+        return {fileCID, symmetricKey, iv};
     }
 
 
     // Decritpts files
-    static decryptFile (fileEncrypted, selectedUser) {
+    static async decryptFile (fileEncrypted, selectedUser) {
+        try {
+            // Generates public and private keys 
+            const privateKey = selectedUser.current.privateKey;
 
-        // Decrypt files' symmetric key using the users' private key
-        const decryptSymmetricKey = crypto.privateDecrypt(
-            {
-                key: selectedUser.current.privateKey,
-                padding: crypto.constants.RSA_PKCS1_PADDING,
-            },
-            fileEncrypted.encSymmetricKey
-        );
+            const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
+            const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
+            console.log("ivBuffer: " , ivBuffer);
 
-        // Decrypts file using the symmetric key
-        const decipher = crypto.createDecipheriv('aes-256-cbc', decryptSymmetricKey, fileEncrypted.iv);
-        const decipherFile = Buffer.concat([decipher.update(), decipher.final()]);
+            // Decrypts the symmetric Key
+            const decryptSymmetricKey = crypto.privateDecrypt(
+                {
+                    key: privateKey,
+                    padding: crypto.constants.RSA_PKCS1_PADDING,
+                },
+                encryptedSymmetricKeyBuffer
+            );
+
+            // Fetch the encrypted file content from IPFS using its CID
+            const response = await axios.get(`${IPFS_BASE_URL}${fileEncrypted.ipfsCID}`, {
+                responseType: 'arraybuffer',
+            });
+
+            // Decrypt the file content using the decrypted symmetric key
+            const decipher = crypto.createDecipheriv('aes-256-cbc', decryptSymmetricKey, ivBuffer);
+
+            const decryptedFileBuffer = Buffer.concat([decipher.update(Buffer.from(response.data)), decipher.final()]);
+
+            return decryptedFileBuffer;
+        } catch (error) {
+            console.error("Error decrypting file: ", error);
+            throw new Error("Error decrypting file.");
+        }        
     }
-
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value
     static checkFileAlreadyUploaded = (fileCID, uploadedFiles) => {

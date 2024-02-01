@@ -35,14 +35,14 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
         if(fileAsBuffer){
             try{
                 // Encrypts and adds file to IPFS
-                const {fileCID, symmetricKey} = await FileHandler.addFileToIPFS(fileAsBuffer);
+                const {fileCID, symmetricKey, iv} = await FileHandler.addFileToIPFS(fileAsBuffer);
                 console.log('File encrypted and added to IPFS', fileCID);
 
                 // Verifies if the file exists
                 FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
 
                 // Adds the file to the blockchain
-                storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID).then(({transactionResult, fileUploaded}) => {
+                storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID, iv).then(({transactionResult, fileUploaded}) => {
                     // Updates the state with the result
                     var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');

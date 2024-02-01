@@ -126,7 +126,7 @@ const Web3Provider = ({children}) => {
         return true
     }
 
-    const storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID) => {
+    const storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID, iv) => {
         return new Promise((resolve, reject) => {
             if(!isInitialized.current){
                 console.log("User is not logged in");
@@ -137,7 +137,8 @@ const Web3Provider = ({children}) => {
             const fileName = fileUpl.name.toLowerCase();
             var fileType = FileHandler.determineFileType(fileName);
             const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
-            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString(), selectedUser.account, fileCID, fileType);
+
+            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
         
             storeFileContract.current.methods.set(fileUploaded)
                 .send({ from: selectedUser.account })
@@ -202,7 +203,7 @@ const Web3Provider = ({children}) => {
         let files = [];
         if(result.length != null){
             result.forEach(file => {
-                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType);
+                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType, file.iv);
                 files.push(fileApp);
             });
         }
