@@ -53,6 +53,30 @@ const Web3Provider = ({children}) => {
         }
     }, []);
 
+    const contractInitialization = (contract, contractAddress, contractVar, web3) => {
+        contractVar.current = new web3.eth.Contract(
+            contract.abi, 
+            contractAddress.address
+        );
+    }
+
+    window.ethereum.on('accountsChanged', function (accounts){
+        selectedAccount.current = accounts[0];
+        console.log(`Selected account changed to ${selectedAccount.current}`);
+        logOut();
+    });
+
+    // Logs Out the user - clean variables
+    const logOut = () => {
+        provider = null;
+        storeFileContract = null;
+        storeUserContract = null;
+        selectedAccount = null;
+        selectedUser = null;
+        window.location.href = '/'; // Redirects the user to the login page
+        return true
+    }
+
     const verifyIfUserExists = async () => {    
         try {
             // Verifies if the user exist
@@ -71,24 +95,6 @@ const Web3Provider = ({children}) => {
             // TODO: SEND A WARNING ON THE REQUIRE OF THE SMART CONTRACT
             throw error; 
         }   
-    }
-
-    const contractInitialization = (contract, contractAddress, contractVar, web3) => {
-        contractVar.current = new web3.eth.Contract(
-            contract.abi, 
-            contractAddress.address
-        );
-    }
-
-    // Logs Out the user - clean variables
-    const logOut = () => {
-        provider = null;
-        storeFileContract = null;
-        storeUserContract = null;
-        selectedAccount = null;
-        selectedUser = null;
-        window.location.href = '/'; // Redirects the user to the login page
-        return true
     }
 
     const storeUserBlockchain = async (userName) => {
@@ -123,12 +129,6 @@ const Web3Provider = ({children}) => {
             console.log("Make sure that the user is not already authenticated in the app. And make sure that the username is unique.");
         }
     }
-
-    window.ethereum.on('accountsChanged', function (accounts){
-        selectedAccount.current = accounts[0];
-        console.log(`Selected account changed to ${selectedAccount.current}`);
-        logOut();
-    });
 
     const value = {
         selectedUser,
