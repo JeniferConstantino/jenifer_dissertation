@@ -51,12 +51,11 @@ class FileHandler {
     // Decritpts files
     static async decryptFile (fileEncrypted, selectedUser) {
         try {
-            // Generates public and private keys 
+            // Gets users' private keys 
             const privateKey = selectedUser.current.privateKey;
 
             const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
-            console.log("ivBuffer: " , ivBuffer);
 
             // Decrypts the symmetric Key
             const decryptSymmetricKey = crypto.privateDecrypt(
@@ -74,7 +73,6 @@ class FileHandler {
 
             // Decrypt the file content using the decrypted symmetric key
             const decipher = crypto.createDecipheriv('aes-256-cbc', decryptSymmetricKey, ivBuffer);
-
             const decryptedFileBuffer = Buffer.concat([decipher.update(Buffer.from(response.data)), decipher.final()]);
 
             return decryptedFileBuffer;
