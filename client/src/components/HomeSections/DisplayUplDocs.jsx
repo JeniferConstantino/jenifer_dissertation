@@ -1,45 +1,63 @@
 import React from "react";
 import FileHandler from '../../helpers/fileHandler';
-import { IPFS_BASE_URL } from '../../../ipfs';
 import { FcDocument , FcImageFile} from "react-icons/fc";
 
-const DisplayUplDocs = ({ipfsCIDAndType, loading, maxFilesPerColumn}) => {
+const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser}) => {
+
+    const decryptAndDownload = async (file) => {
+        
+        try {
+            // Gets the file from IPFS
+            const fileContent = await FileHandler.getFileFromIPFS(file.ipfsCID);
+            console.log("Accessed file in IPFS.");
+
+            // Decrypts the file
+            const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(file, selectedUser, fileContent);
+            const blob = new Blob([decryptedFileBuffer]);
+            console.log("File Decrypted.");
+            
+            // Creates a downloaded link 
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = file.fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        } catch (error) {
+            console.error("Error decrypting or downloading file: ", error);
+        }
+
+    }
 
     const renderFiles = () => {
-        const files = Array.from(ipfsCIDAndType.entries());
         const rows = [];
-
+        
         for (let i=0; i<maxFilesPerColumn; i++) {
-            const row = files.filter((file, index) => index % maxFilesPerColumn === i).map(([ipfsCidHash, type], index) => (
-                <div key={index}>
-                    {type === FileHandler.FileType.Image ? (
-                        <a 
-                            href={`${IPFS_BASE_URL}${ipfsCidHash}`}
-                            download={`file.${type}`}
-                            className="uploaded-docs"
-                        >
-                            <FcImageFile size={50}/>
-                            <span style={{ marginTop: '5px' }}>Download Image</span>
-                        </a>
-                    ) : type === FileHandler.FileType.File ? (
-                        <>
-                            <a
-                                href={`${IPFS_BASE_URL}${ipfsCidHash}`}
-                                download={`file.${type}`}
-                                className="uploaded-docs"
-                            >
+            const row = uploadedFiles
+                .filter((file, index) => index % maxFilesPerColumn === i)
+                .map((file, index) => (
+                    <div key={index} className="uploaded-docs" onClick={() => decryptAndDownload(file)}>
+                        {file.fileType === FileHandler.FileType.Image ? (
+                            <>
+                                <FcImageFile size={50}/>
+                                <div className="fileName">
+                                    <span>{file.fileName}</span>
+                                </div>
+                            </>
+                        ) : file.fileType === FileHandler.FileType.File ? (
+                            <>
                                 <FcDocument  size={50}/>
-                                <span style={{ marginTop: '5px' }}>Download File</span>
-                            </a>
-                        </>
-                    ) : (
-                        // TODO: Later on I'll probably send an alert saying the type is not valid
-                        <>ERROR</>
-                    )}
-                </div>
+                                <div className="fileName">
+                                    <span>{file.fileName}</span>
+                                </div>
+                            </>
+                        ) : (
+                            // TODO: Later on I'll probably send an alert saying the type is not valid
+                            <>ERROR</>
+                        )}
+                    </div>
             ));
 
-            
             rows.push(<div key={i} className="file-column">{row}</div>);
         }
         return rows;
@@ -51,7 +69,7 @@ const DisplayUplDocs = ({ipfsCIDAndType, loading, maxFilesPerColumn}) => {
                 <div className="uploaded-files">
                     {loading ? (
                         <p>Loading...</p>
-                    ) : ipfsCIDAndType.size > 0 ? (
+                    ) : uploadedFiles.length > 0 ? (
                         renderFiles()
                     ) : (
                         <p>No documents uploaded</p>

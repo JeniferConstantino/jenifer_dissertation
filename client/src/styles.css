@@ -63,6 +63,7 @@ h1 {
   background-color: white;
   border-radius: 20px;
   padding: 5%; /* Add horizontal padding */
+  padding-top: 2%;
 }
 
 .shadow-overlay {
@@ -123,26 +124,40 @@ h1 {
 .nearsoftLogo {
   position: absolute;
   top: 3%;
-  left: 2%;
-  width: 140px; 
-  height: 40px; 
+  left: 4%;
+  width: 130px; 
+  height: 38px; 
   z-index: 1; 
 }
 
-.app-button__logout {
-  position: absolute;
-  top: 3%;
-  right: 2%;
-  width: 140px; 
-  height: 40px; 
-  z-index: 1; 
+/*----------- Welcome Page -----------*/
+
+.app-button__welcome {
+  padding: 10% 16%;
+  margin-top: 10%;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px; 
+  align-items: center;
+  margin-right: 20%;
+}
+
+.input-username {
+  border: 1px solid #ddd; 
+  border-radius: 10px; 
+  padding: 10px; 
+  margin-bottom: 10px; 
+  width: 80%;
 }
 
 /*----------- Home Page -----------*/
 
 .home-wrapper {
-  width: 60%;
+  width: 85%;
   height: 50%;
+  padding-left: 40px;
   flex-direction: column; /* Stack the child components vertically */
   align-items: center;    /* Center the child components horizontally */
 }
@@ -151,10 +166,48 @@ h1 {
   top: 7%;
 }
 
+.fileName {
+  margin: 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/*----------- Home Page // Logout section -----------*/
+
+.icon-column {
+  padding-top: 16px;
+  padding-right: 10px;
+}
+.icon-person {
+  color: #4B4B4B;
+  font-size: 40px;
+}
+
+.username-text {
+  margin-bottom: 0px;
+  color: #4B4B4B;
+}
+
+.logout-section {
+  position: absolute;
+  top: 3%;
+  right: 5%;
+  display: flex;
+}
+
+.app-button__logout {
+  width: 80px; 
+  height: 25px; 
+  z-index: 1; 
+}
+
 /*----------- Home Page // Files management section -----------*/
 
 .files-header {
   padding-right: 10%;
+  color: #4B4B4B;
 }
 
 .uplBackground {
@@ -196,6 +249,7 @@ h1 {
   display: flex; 
   flex-direction: column; 
   align-items: center; 
+  text-align: center;
   height: 100%;
 }
 
@@ -293,5 +347,7 @@ h1 {
 .app-button_back{
   cursor: pointer; 
 }
+
+
 
 

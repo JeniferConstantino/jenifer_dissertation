@@ -1,7 +1,10 @@
 import {ipfs} from '../../ipfs';
 import {Buffer} from 'buffer';
+import EncryptionHandler from './EncryptionHandler';
+import { IPFS_BASE_URL } from '../../ipfs';
+import FileApp from './FileApp';
+import axios from 'axios';
 const crypto = require('crypto-browserify');
-const forge = require('node-forge');
 
 class FileHandler {
 
@@ -11,55 +14,59 @@ class FileHandler {
         File: 'file'
     }
 
-    // Generate a random symmetric key (for each file)
-    static generateSymmetricKey() {
-        return crypto.randomBytes(32); // it uses AES-256 algorithm 
-    }
-
-    // Generate an RSA key pair (assymmetric encryption)
-    static generateKeyPair() {
-        const rsaKeyPair = forge.pki.rsa.generateKeyPair({bits: 2048});
-        const privateKey = forge.pki.privateKeyToPem(rsaKeyPair.privateKey);
-        const publicKey = forge.pki.publicKeyToPem(rsaKeyPair.publicKey);
-        console.log("privateKey: ", privateKey, " publicKey: ", publicKey);
-        return {privateKey, publicKey};
-    }
-
-    static encryptSymmetricKey(symmetricKey) {
-        // Retrieve RSA public key from localStorage
-        const rsaKeyPair = JSON.parse(localStorage.getItem('rsaKeyPair'));
-        const rsaPublicKey = rsaKeyPair.publicKey;
-
-        return crypto.publicEncrypt(
-            rsaPublicKey,
-            Buffer.from(symmetricKey),
-        ); 
-    }
-
-    // Encrypt the file with the symmetric key 
+    // Encrypts a given file using a given symmetric key 
     static async encryptFileWithSymmetricKey(fileBuffer, symmetricKey) {
-        // Initialization Vector for AES
-        const iv = crypto.randomBytes(16);
+        const iv = crypto.randomBytes(16); // Initialization Vector for AES
 
         const cipher = crypto.createCipheriv('aes-256-cbc', symmetricKey, iv);
         const encryptedFile = Buffer.concat([cipher.update(fileBuffer), cipher.final()]);
-        
-        return encryptedFile;
+
+        return {encryptedFile, iv};
+    }
+
+    // Decrypts a given file using a given symmetric key
+    static async decryptFileWithSymmetricKey (fileEncrypted, selectedUser, fileContent) {
+        try {
+            const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
+            const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
+            const decryptedSymmetricKey = EncryptionHandler.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.current.privateKey);
+
+            // Decrypt the file content using the decrypted symmetric key
+            const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
+            const decryptedFileBuffer = Buffer.concat([decipher.update(fileContent), decipher.final()]);
+
+            return decryptedFileBuffer;
+        } catch (error) {
+            console.error("Error decrypting file: ", error);
+            throw new Error("Error decrypting file.");
+        }        
     }
 
     // Adds the file to IPFS
     static async addFileToIPFS (fileAsBuffer) {
-        const addedFile = await ipfs.add({ content: fileAsBuffer});
+        const symmetricKey = EncryptionHandler.generateSymmetricKey(); // Encrypts uploaded file using symmetric encryption
+
+        const {encryptedFile, iv} = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
+
+        const addedFile = await ipfs.add({ content: encryptedFile});
         const fileCID = addedFile.cid.toString();
-        console.log('File added to IPFS', fileCID);
-        return fileCID;
+        return {fileCID, symmetricKey, iv};
+    }
+
+    // Gets a file from IPFS
+    static async getFileFromIPFS (cid) {
+        const response = await axios.get(`${IPFS_BASE_URL}${cid}`, { // Fetch the encrypted file content from IPFS using its CID
+            responseType: 'arraybuffer',
+        });
+        return Buffer.from(response.data);
     }
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value
-    static checkFileAlreadyUploaded = (fileCID, ipfsCIDAndType) => {
-        let fileImgAlreadyUploaded = ipfsCIDAndType.has(fileCID);
-        if(fileImgAlreadyUploaded){
-            throw new Error('File already uploaded!');
+    static checkFileAlreadyUploaded = (fileCID, uploadedFiles) => {
+        for (var file of uploadedFiles) {
+            if (file.ipfsCID === fileCID) {
+                throw new Error('File already uploaded!');
+            }
         }
     }
 
@@ -72,6 +79,45 @@ class FileHandler {
         } else {
             throw new Error('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
         }
+    }
+
+    // Get files from the Blockchain
+    static getFilesUploadedBlockchain = async (storeFileContract, selectedUser) => {
+            
+        var result = await storeFileContract.current.methods.get().call({from: selectedUser.current.account});
+    
+        // Check if the first element is an array (file details) or not
+        let files = [];
+        if(result.length != null){
+            result.forEach(file => {
+                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType, file.iv);
+                files.push(fileApp);
+            });
+        }
+    
+        return files;
+    }
+
+    // Stores a file in the blockchain
+    static storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID, iv, storeFileContract) => {
+        return new Promise((resolve, reject) => {
+            // Prepares the file to be stored
+            const fileName = fileUpl.name.toLowerCase();
+            var fileType = FileHandler.determineFileType(fileName);
+            const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
+
+            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
+        
+            storeFileContract.current.methods.set(fileUploaded)
+                .send({ from: selectedUser.account })
+                .then(transactionResult => {
+                    resolve({ transactionResult, fileUploaded })
+                })
+                .catch(error => {
+                    console.error("Error storing file on the blockchain:", error);
+                    reject("Error storing file on the blockchain");
+                });
+        });
     }
 }
 

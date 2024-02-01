@@ -1,23 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {useWeb3} from '../helpers/web3Client';
 import DisplayUplDocs from './HomeSections/DisplayUplDocs';
-import nearsoftLogo from '../imgs/nearsoftLogo.png';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
-
+import Logout from './HomeSections/Logout';
+import FileHandler from '../helpers/fileHandler';
 
 const Home = () => {
 
-    const [ipfsCIDAndType, setIpfsCIDAndType] = useState(new Map());
+    // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedAccount, logOut, getIPFSHashesBlockchain} = useWeb3();
+    const {selectedUser, storeFileContract} = useWeb3();
+
+    // Get Files
+    const fetchFiles = useCallback(async () => {
+        FileHandler.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+            if(files.length !== 0){
+                setUploadedFiles(files);
+            }
+        }).catch(err => {
+            console.log(err);
+        })
+        .finally( () => {
+            setLoading(false);   
+        });
+    }, [storeFileContract, selectedUser]);
 
     // This component runs after the component has mounted
     useEffect(() => {
-        fetchIPFSHashes();
+        fetchFiles();
 
         // Add event listener for window resize
         window.addEventListener('resize', handleWindowResize);
@@ -27,26 +42,7 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    });
-
-    // Get the IPFS Hash
-    const fetchIPFSHashes = async () => {
-        getIPFSHashesBlockchain().then((files) => {
-            if(files.length !== 0){
-                var tempMap = new Map();
-                files.forEach((file, index) => {
-                    tempMap.set(file.ipfsCID, file.fileType);
-                });
-                
-                setIpfsCIDAndType(tempMap);
-            }
-        }).catch(err => {
-            console.log(err);
-        })
-        .finally( () => {
-            setLoading(false);   
-        });
-    };
+    }, [fetchFiles]);
 
     // Handle window resize
     const handleWindowResize = () => {
@@ -62,45 +58,40 @@ const Home = () => {
     }
 
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
-    const handleUpload = async (e, tempUpdatedIpfsCidAndType) => {
-        setIpfsCIDAndType(tempUpdatedIpfsCidAndType);        
+    const handleUpload = async (e, tempUpdatedUploadedFiles) => {
+        setUploadedFiles(tempUpdatedUploadedFiles);        
         handleCloseUploadPopup();
     };
-
-    // Performs the users' loggout
-    const handleLogout = () => {           
-        logOut();              
-    }
 
     // Placeholder functions for file actions (upload, delete, share)
     const handleOpenUploadPopup = () => {
         setShowUploadPopup(true);
     }
 
+    // Performs setup of closing popup
     const handleCloseUploadPopup = () => {
         setShowUploadPopup(false);
     }
 
+    // Handle file deletion
     const handleDelete = () => {
         console.log('Delete file...');
-        // Implement your delete logic here
     };
 
+    // Handle file share
     const handleShare = () => {
         console.log('Share file...');
-        // Implement your share logic here
     };
 
     return (
         <>
             <div className='content-container'>
-                <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
-                <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button>
+                <Logout />
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
                     <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
                     <div className='uplBackground'>
-                        <DisplayUplDocs ipfsCIDAndType={ipfsCIDAndType} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/>
+                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn} selectedUser={selectedUser}/>
                     </div>
                 </div>
             </div>
@@ -113,7 +104,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <UploadPopup handleFileUploaded={handleUpload} ipfsCIDAndType={ipfsCIDAndType} show={showUploadPopup} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
+            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClose={handleCloseUploadPopup} /> 
         </>
     );
 
