@@ -6,7 +6,7 @@ import {useWeb3} from '../helpers/web3Client';
 
 const Welcome = () => {
     const navigate = useNavigate();
-    const {storeUserBlockchain} = useWeb3();
+    const {storeUserBlockchain, isInitialized} = useWeb3();
     const [username, setUsername] = useState('');
 
     const onNext = async (e) => {
@@ -17,7 +17,10 @@ const Welcome = () => {
 
         // Adds the user to the blockchain and redirects him to the home page
         storeUserBlockchain(username).then(()=>{
-            navigate('/home');
+            console.log("isInitialized: ", isInitialized);
+            if (isInitialized.current) {
+                navigate('/home');
+            }
         }).catch(err=>{
             console.log(err);
         })      

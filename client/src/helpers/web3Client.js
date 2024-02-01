@@ -160,11 +160,26 @@ const Web3Provider = ({children}) => {
 
         // Adds the user to the blockchain
         try {
-            const transactionReceipt = await storeUserContract.current.methods.login(userLogged).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
-            console.log("Transaction Receipt:", transactionReceipt);
-    
-            selectedUser.current = userLogged;
-            isInitialized.current = true;
+            var errorRegister = await storeUserContract.current.methods.checkRegistration(userLogged).call({from: selectedAccount.current});
+            
+            if (errorRegister.length === 0) { // The user can register, no error message was sent
+                const receipt = await storeUserContract.current.methods.register(userLogged).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+            
+                const registrationEvent  = receipt.events["RegistrationResult"];
+                
+                if (registrationEvent) {
+                    const { success, message } = registrationEvent.returnValues;
+                    if (success) {
+                        selectedUser.current = userLogged;
+                        isInitialized.current = true;
+                    } else {
+                        console.log("message: ", message);
+                    }
+                }
+            } else {
+                console.log("errorRegister: ", errorRegister);
+            }
+            
         } catch (error) {
             console.error("Transaction error: ", error.message);
             console.log("Make sure that the user is not already authenticated in the app. And make sure that the username is unique.");

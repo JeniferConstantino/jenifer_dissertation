@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./FileStruct.sol";
+import "../structs/FileStruct.sol";
 
 contract StoreFile {
 
   // Even though File[] already stores the address of the owner, putting thin in a map failitates when returning the files of a given owner (we don't have to go through all files in the system)
   mapping(address => File[]) private userFiles;
 
-  // Upload of a new file: stores in the blockchain the files' CID, type, and owner
+  // Upload of a new file
   function set(File memory file) public {
     require(!fileExists(file.fileName), "File with the same name already exists.");
 
@@ -23,7 +23,9 @@ contract StoreFile {
     return (new File[](0));
   }
 
-  function fileExists(string memory fileName) internal view returns (bool) {
+  // See if a user already has a file with a given name
+  function fileExists(string memory fileName) private view returns (bool) {
+    // Gets the files of a given user
     File[] memory files = userFiles[msg.sender];
 
     for (uint256 i=0; i<files.length; i++) {
