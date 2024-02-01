@@ -13,28 +13,6 @@ class FileHandler {
         File: 'file'
     }
 
-    // Encrypts a given symmetric key using a given public key
-    static encryptSymmetricKey(symmetricKey, publicKey) {
-        return crypto.publicEncrypt(
-            {
-                key: publicKey,
-                padding: crypto.constants.RSA_PKCS1_PADDING,
-            },
-            Buffer.from(symmetricKey),
-        ); 
-    }
-
-    // Decrypts a given symmetric key using a given private key
-    static decryptSymmetricKey(encryptedSymmetricKeyBuffer, privateKey) {
-        return crypto.privateDecrypt(
-            {
-                key: privateKey,
-                padding: crypto.constants.RSA_PKCS1_PADDING,
-            },
-            encryptedSymmetricKeyBuffer
-        );
-    }
-
     // Encrypts a given file using a given symmetric key 
     static async encryptFileWithSymmetricKey(fileBuffer, symmetricKey) {
         const iv = crypto.randomBytes(16); // Initialization Vector for AES
@@ -45,17 +23,26 @@ class FileHandler {
         return {encryptedFile, iv};
     }
 
-    // Decrypts a given file using a given symmetric key 
-    static async decryptFileWithSymmetricKey(fileContent, decryptedSymmetricKey, ivBuffer) {
-         // Decrypt the file content using the decrypted symmetric key
-         const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
-         return Buffer.concat([decipher.update(fileContent), decipher.final()]);
-    }
+    // Decrypts a given file using a given symmetric key
+    static async decryptFileWithSymmetricKey (fileEncrypted, selectedUser, fileContent) {
+        try {
+            const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
+            const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
+            const decryptedSymmetricKey = EncryptionHandler.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.current.privateKey);
 
+            // Decrypt the file content using the decrypted symmetric key
+            const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
+            const decryptedFileBuffer = Buffer.concat([decipher.update(fileContent), decipher.final()]);
+
+            return decryptedFileBuffer;
+        } catch (error) {
+            console.error("Error decrypting file: ", error);
+            throw new Error("Error decrypting file.");
+        }        
+    }
 
     // Adds the file to IPFS
     static async addFileToIPFS (fileAsBuffer) {
-        
         const symmetricKey = EncryptionHandler.generateSymmetricKey(); // Encrypts uploaded file using symmetric encryption
 
         const {encryptedFile, iv} = await FileHandler.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
@@ -71,26 +58,6 @@ class FileHandler {
             responseType: 'arraybuffer',
         });
         return Buffer.from(response.data);
-    }
-
-
-    // Decritpts a given file 
-    static async decryptFile (fileEncrypted, selectedUser, fileContent) {
-        try {
-            const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
-            const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
-
-            // Decrypts the symmetric Key
-            const decryptedSymmetricKey = FileHandler.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.current.privateKey);
-
-            // Decrypts the file
-            const decryptedFileBuffer = FileHandler.decryptFileWithSymmetricKey(fileContent, decryptedSymmetricKey, ivBuffer);
-
-            return decryptedFileBuffer;
-        } catch (error) {
-            console.error("Error decrypting file: ", error);
-            throw new Error("Error decrypting file.");
-        }        
     }
 
     // Checks if the user already uploaded the file by verifying if there is already a key with the CID value

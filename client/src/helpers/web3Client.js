@@ -93,7 +93,7 @@ const Web3Provider = ({children}) => {
             // Prepares the file to be stored
             const fileName = fileUpl.name.toLowerCase();
             var fileType = FileHandler.determineFileType(fileName);
-            const encryptedSymmetricKey = FileHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
+            const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
         

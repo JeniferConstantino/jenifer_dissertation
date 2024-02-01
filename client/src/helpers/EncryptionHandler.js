@@ -15,6 +15,30 @@ class EncryptionHandler {
     static generateSymmetricKey() {
         return crypto.randomBytes(32); // it uses AES-256 algorithm 
     }
+
+    // Encrypts a given symmetric key using a given public key
+    static encryptSymmetricKey(symmetricKey, publicKey) {
+        return crypto.publicEncrypt(
+            {
+                key: publicKey,
+                padding: crypto.constants.RSA_PKCS1_PADDING,
+            },
+            Buffer.from(symmetricKey),
+        ); 
+    }
+
+    // Decrypts a given symmetric key using a given private key
+    static decryptSymmetricKey(encryptedSymmetricKeyBuffer, privateKey) {
+        return crypto.privateDecrypt(
+            {
+                key: privateKey,
+                padding: crypto.constants.RSA_PKCS1_PADDING,
+            },
+            encryptedSymmetricKeyBuffer
+        );
+    }
+
+
 }
 
 export default EncryptionHandler;
