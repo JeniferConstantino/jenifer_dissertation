@@ -41,14 +41,14 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
                             <>
                                 <FcImageFile size={50}/>
                                 <div className="fileName">
-                                    <span>{file.fileName}</span>
+                                    <span className="sizeDescription">{file.fileName}</span>
                                 </div>
                             </>
                         ) : file.fileType === FileHandler.FileType.File ? (
                             <>
                                 <FcDocument  size={50}/>
                                 <div className="fileName">
-                                    <span>{file.fileName}</span>
+                                    <span className="sizeDescription">{file.fileName}</span>
                                 </div>
                             </>
                         ) : (

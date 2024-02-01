@@ -167,6 +167,15 @@ h1 {
 
 .fileName {
   margin: 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.sizeDescription{
+  background-color: red;
+
 }
 
 /*----------- Home Page // Logout section -----------*/
@@ -244,6 +253,7 @@ h1 {
   display: flex; 
   flex-direction: column; 
   align-items: center; 
+  text-align: center;
   height: 100%;
 }
 
