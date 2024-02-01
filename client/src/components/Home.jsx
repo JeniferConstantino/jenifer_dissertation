@@ -69,21 +69,21 @@ const Home = () => {
         setShowUploadPopup(true);
     }
 
+    // Performs setup of closing popup
     const handleCloseUploadPopup = () => {
         setShowUploadPopup(false);
     }
 
+    // Handle file deletion
     const handleDelete = () => {
         console.log('Delete file...');
-        // Implement your delete logic here
     };
 
+    // Handle file share
     const handleShare = () => {
         console.log('Share file...');
-        // Implement your share logic here
     };
 
-    // TODO: LATER, EXTRACT THE TOP LOGOUT MENU TO A COMPONENT
     return (
         <>
             <div className='content-container'>

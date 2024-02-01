@@ -15,11 +15,9 @@ const Login = () => {
         await setup();
         const existingUser = await verifyIfUserExists();
 
-        // The user is already in the blockchain so he can proceed 
         if (existingUser) {
             navigate('/home');
         } else if (!existingUser) {
-            // Displays the interface asking for the user name 
             navigate('/welcome');
         }
     };

@@ -37,7 +37,7 @@ const Welcome = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome!</h1>
-                        <p>Good to see you arrive here! Chose a unique name to use in the app.</p>
+                        <p>Good to see you arrive here! Set a unique name to use in the app.</p>
                     </div>
                     <div className='login-column'>
                         <input
