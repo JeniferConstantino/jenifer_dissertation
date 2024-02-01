@@ -24,10 +24,9 @@ export const useWeb3 = () => {
 const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();     // Keeps track of wallet account change
-    let selectedUser = useRef(null);
+    let selectedUser = useRef(null);    // User logged in
     let storeFileContract = useRef();
     let storeUserContract = useRef();
-    let accountSelected = useRef(false);
     let provider = useRef();
 
     const login = useCallback(async () => {
@@ -45,7 +44,6 @@ const Web3Provider = ({children}) => {
 
             selectedAccount.current = accounts[0];
             console.log(`Selected account is ${selectedAccount.current}`);
-            accountSelected.current = true;
 
             // Initialize contracts
             const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
@@ -84,7 +82,6 @@ const Web3Provider = ({children}) => {
         selectedUser = null;
         // Redirects the user to the login page
         window.location.href = '/';
-        accountSelected = false;
         return true
     }
 
