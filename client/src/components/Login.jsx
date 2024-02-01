@@ -6,22 +6,21 @@ import nearsoftLogo from '../imgs/nearsoftLogo.png';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login, selectedUser } = useWeb3();
+    const { verifyIfUserExists, setup } = useWeb3();
 
     const onSubmitLogin = async (e) => {
         console.log('Loggin the user ...')
         e.preventDefault()
         
-        let resultLogin = await login();
+        await setup();
+        const existingUser = await verifyIfUserExists();
 
         // The user is already in the blockchain so he can proceed 
-        if (selectedUser.current != null) {
+        if (existingUser) {
             navigate('/home');
-        } else if (selectedUser.current === null) {
+        } else if (!existingUser) {
             // Displays the interface asking for the user name 
             navigate('/welcome');
-        } else {
-            console.log(`Failed to log in: ${resultLogin}`);
         }
     };
 

@@ -27,7 +27,7 @@ const Web3Provider = ({children}) => {
     let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
     let provider = useRef();
 
-    const login = useCallback(async () => {
+    const setup = useCallback(async () => {
         try {
             // Link to my Ethereum node - a "gateway" to the rest of the network 
             provider.current = window.ethereum; 
@@ -47,21 +47,31 @@ const Web3Provider = ({children}) => {
             const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
             contractInitialization(StoreUser, StoreUser_ContractAddress, storeUserContract, web3);
             contractInitialization(StoreFile, StoreFile_ContractAddress, storeFileContract, web3);
-            
-            // Adds the user in the blockchain if he isn't already
-            const userExists = await verifyIfUserExists(selectedAccount.current);
-            
-            if (userExists !== null) {
-                selectedUser.current = userExists;
-                return "Success. Initialized and Application ready.";
-            } else {
-                return "User doesn't exist.";
-            }
 
         } catch (error) {
             return "Something went wrong while trying to authenticate the user. Make sure you're connected to metamask extension or ensure the contracts are deployed in the network you're in.";
         }
     }, []);
+
+    const verifyIfUserExists = async () => {    
+        try {
+            // Verifies if the user exist
+            var userStored = await storeUserContract.current.methods.getUser(selectedAccount.current).call({from: selectedAccount.current});
+            
+            if (userStored.name === "") {
+                console.log("user first time in the app");
+                return null;
+            } 
+
+            console.log("user already in the app.");
+            selectedUser.current = userStored;
+            return userStored;
+        } catch (error) {
+            console.error("Error storing user on the blockchain:", error);
+            // TODO: SEND A WARNING ON THE REQUIRE OF THE SMART CONTRACT
+            throw error; 
+        }   
+    }
 
     const contractInitialization = (contract, contractAddress, contractVar, web3) => {
         contractVar.current = new web3.eth.Contract(
@@ -114,25 +124,6 @@ const Web3Provider = ({children}) => {
         }
     }
 
-    const verifyIfUserExists = async (selectedAccount) => {    
-        try {
-            // Verifies if the user exist
-            var userStored = await storeUserContract.current.methods.getUser(selectedAccount).call({from: selectedAccount.current});
-            if (userStored.name === "") {
-                console.log("user first time in the app");
-                return null;
-            } 
-
-            console.log("user already in the app.");
-            return userStored;
-        } catch (error) {
-            console.error("Error storing user on the blockchain:", error);
-            // TODO: SEND A WARNING ON THE REQUIRE OF THE SMART CONTRACT
-            throw error; 
-        }
-        
-    }
-
     window.ethereum.on('accountsChanged', function (accounts){
         selectedAccount.current = accounts[0];
         console.log(`Selected account changed to ${selectedAccount.current}`);
@@ -142,7 +133,8 @@ const Web3Provider = ({children}) => {
     const value = {
         selectedUser,
         storeFileContract,
-        login,
+        verifyIfUserExists,
+        setup,
         logOut,
         storeUserBlockchain,
     }
