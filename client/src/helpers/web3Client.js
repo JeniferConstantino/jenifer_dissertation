@@ -23,7 +23,7 @@ export const useWeb3 = () => {
 
 const Web3Provider = ({children}) => {
 
-    let selectedAccount = useRef();
+    let selectedAccount = useRef();     // Keeps track of wallet account change
     let selectedUser = useRef(null);
     let storeFileContract = useRef();
     let storeUserContract = useRef();
@@ -193,7 +193,6 @@ const Web3Provider = ({children}) => {
     });
 
     const value = {
-        selectedAccount,
         selectedUser,
         storeFileContract,
         storeUserContract,

@@ -14,7 +14,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [showUploadPopup, setShowUploadPopup] = useState(false);
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedAccount, selectedUser, getFilesUploadedBlockchain} = useWeb3();
+    const {selectedUser, getFilesUploadedBlockchain} = useWeb3();
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -105,7 +105,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} selectedAccount={selectedAccount} handleClose={handleCloseUploadPopup} /> 
+            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClose={handleCloseUploadPopup} /> 
         </>
     );
 
