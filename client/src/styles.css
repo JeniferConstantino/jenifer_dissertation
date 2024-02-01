@@ -124,7 +124,7 @@ h1 {
 .nearsoftLogo {
   position: absolute;
   top: 3%;
-  left: 2%;
+  left: 4%;
   width: 130px; 
   height: 38px; 
   z-index: 1; 
@@ -155,8 +155,9 @@ h1 {
 /*----------- Home Page -----------*/
 
 .home-wrapper {
-  width: 60%;
+  width: 85%;
   height: 50%;
+  padding-left: 40px;
   flex-direction: column; /* Stack the child components vertically */
   align-items: center;    /* Center the child components horizontally */
 }
@@ -171,11 +172,6 @@ h1 {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 150px;
-}
-
-.sizeDescription{
-  background-color: red;
-
 }
 
 /*----------- Home Page // Logout section -----------*/
@@ -197,7 +193,7 @@ h1 {
 .logout-section {
   position: absolute;
   top: 3%;
-  right: 2%;
+  right: 5%;
   display: flex;
 }
 
