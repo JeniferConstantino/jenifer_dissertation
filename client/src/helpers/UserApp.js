@@ -1,9 +1,9 @@
 class UserApp {
     constructor(account, name, publicKey, privateKey) {
-      this.account = account; // Unique
-      this.name = name;
-      this.publicKey = publicKey;
-      this.privateKey = privateKey;
+      this.account = account;       // Address Account in MetaMask - Unique
+      this.name = name;             // Name of the user - unique
+      this.publicKey = publicKey;   // User's public key
+      this.privateKey = privateKey; // User's private key
     }
 }
 

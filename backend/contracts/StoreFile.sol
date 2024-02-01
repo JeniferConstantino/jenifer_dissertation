@@ -25,16 +25,13 @@ contract StoreFile {
 
   // See if a user already has a file with a given name
   function fileExists(string memory fileName) private view returns (bool) {
-    // Gets the files of a given user
-    File[] memory files = userFiles[msg.sender];
-
+    File[] memory files = userFiles[msg.sender]; // Gets the files of a given user
     for (uint256 i=0; i<files.length; i++) {
       if (keccak256(abi.encodePacked(files[i].fileName)) == keccak256(abi.encodePacked(fileName))) {
-        return true; // File with the same name already exists
+        return true;                            // File with the same name already exists
       }
     }
-
-    return false; // File with the same name doesn't exist
+    return false;                               // File with the same name doesn't exist
   }
   
 }

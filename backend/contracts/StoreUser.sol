@@ -10,15 +10,12 @@ contract StoreUser {
 
     // Adds a new user in the blockchain - registers the user
     function register(User memory user) public {
-        // Checks if the user already exists - in case the frontend doesn't call
-        string memory validRegistration = checkRegistration(user); 
-
+        string memory validRegistration = checkRegistration(user);  // Checks if the user already exists - in case the frontend doesn't call
         if (bytes(validRegistration).length == 0) {
-            users.push(user); // Adds the user in the blockchain
+            users.push(user);                                       // Adds the user in the blockchain
             emit RegistrationResult(true, "User registered successfully");
             return;
         } 
-        
         emit RegistrationResult(false, validRegistration);
         return;
     }
@@ -34,6 +31,7 @@ contract StoreUser {
         return emptyUser;
     }
 
+    // Checks if the user is elegible to register
     function checkRegistration(User memory user) public view returns (string memory) {
         for (uint i=0; i< users.length; i++) {
             if (users[i].account == user.account) {
