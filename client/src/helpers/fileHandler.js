@@ -61,15 +61,6 @@ class FileHandler {
         return Buffer.from(response.data);
     }
 
-    // Checks if the user already uploaded the file by verifying if there is already a key with the CID value
-    static checkFileAlreadyUploaded = (fileCID, uploadedFiles) => {
-        for (var file of uploadedFiles) {
-            if (file.ipfsCID === fileCID) {
-                throw new Error('File already uploaded!');
-            }
-        }
-    }
-
     // Determines if the file uploaded by the user is an image or a document, and if it has a vlaid extention
     static determineFileType = (fileName) => {
         if(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif')){
