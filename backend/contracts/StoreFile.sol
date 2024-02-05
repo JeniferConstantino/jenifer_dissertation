@@ -2,19 +2,20 @@
 pragma solidity ^0.8.0;
 
 import "../structs/FileStruct.sol";
+import "../structs/UserStruct.sol";
+
 
 contract StoreFile {
 
-  // Even though File[] already stores the address of the owner, putting thin in a map failitates when returning the files of a given owner (we don't have to go through all files in the system)
-  mapping(address => File[]) private userFiles;
   event UploadFileResult(bool success, string message);
+  File[] private userFiles;
 
   // Upload of a new file
-  function uploadFile(File memory file) public {
-    string memory validFileUpload = fileExists(file);  // Checks if there is a file with the same name
+  function uploadFile(File memory file, User memory user) public {
+    string memory validFileUpload = fileExists(file, user);  // Checks if there is a file with the same name
 
     if (bytes(validFileUpload).length == 0) {
-      userFiles[msg.sender].push(file);
+      userFiles.push(file);
       emit UploadFileResult(true, "File uploaded successfully.");
       return;
     }
@@ -22,19 +23,32 @@ contract StoreFile {
     return;
   }
 
-  // Returns the files of a calling user
-  function get() public view returns (File[] memory) {
-    if (userFiles[msg.sender].length != 0) {
-      return userFiles[msg.sender];
+  // Returns the files of a giving user
+  function get(address account) public view returns (File[] memory) {
+    File[] memory userFilesResult = new File[](userFiles.length);
+    uint resultIndex = 0;
+
+    // TODO: Later this will have to change. To get the users' files it will be seen in the UserHasFile table
+    for (uint i=0; i< userFiles.length; i++) {
+      if (userFiles[i].owner == account) {
+        userFilesResult[resultIndex] = userFiles[i];
+        resultIndex++;
+      }             
     }
-    return (new File[](0));
+
+    // Resize the result array to remove unused elements
+    assembly {
+      mstore(userFilesResult, resultIndex)
+    }
+
+    return userFilesResult;
   }
 
   // See if a user already has a file with a given name
-  function fileExists(File memory file) public view returns (string memory) {
-    File[] memory files = userFiles[msg.sender]; // Gets the files of a given user
-    for (uint256 i=0; i<files.length; i++) {
-      if (keccak256(abi.encodePacked(files[i].fileName)) == keccak256(abi.encodePacked(file.fileName))) {
+  function fileExists(File memory file, User memory user) public view returns (string memory) {    
+    File[] memory usersFiles = get(user.account); // gets the files of a given user
+    for (uint256 i=0; i<usersFiles.length; i++) {
+      if (keccak256(abi.encodePacked(usersFiles[i].fileName)) == keccak256(abi.encodePacked(file.fileName))) {
         return "File has to have a unique name."; // File with the same name already exists
       }
     }

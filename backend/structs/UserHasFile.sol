@@ -1,0 +1,8 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+struct UserHasFile {
+    address account;           // User account
+    string fileName;           // File Name 
+    string encSymmetricKey;    // Key used for the file encryption
+}

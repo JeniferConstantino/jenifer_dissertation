@@ -101,10 +101,10 @@ class FileHandler {
     
             // Verifies if the file is elegible to be stored
             try {
-                var errorUploadingFile = await storeFileContract.current.methods.fileExists(fileUploaded).call({from: selectedUser.account});
+                var errorUploadingFile = await storeFileContract.current.methods.fileExists(fileUploaded, selectedUser).call({from: selectedUser.account});
                 
                 if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
-                    const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded).send({ from: selectedUser.account });
+                    const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded, selectedUser).send({ from: selectedUser.account });
 
                     const uploadFileEvent = receipt.events["UploadFileResult"];
                     if (uploadFileEvent) {
