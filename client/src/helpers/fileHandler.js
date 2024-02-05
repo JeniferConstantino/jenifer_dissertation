@@ -100,23 +100,38 @@ class FileHandler {
 
     // Stores a file in the blockchain
     static storeFileBlockchain = (fileUpl, symmetricKey, selectedUser, fileCID, iv, storeFileContract) => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // Prepares the file to be stored
             const fileName = fileUpl.name.toLowerCase();
             var fileType = FileHandler.determineFileType(fileName);
             const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
-        
-            storeFileContract.current.methods.set(fileUploaded)
-                .send({ from: selectedUser.account })
-                .then(transactionResult => {
-                    resolve({ transactionResult, fileUploaded })
-                })
-                .catch(error => {
-                    console.error("Error storing file on the blockchain:", error);
-                    reject("Error storing file on the blockchain");
-                });
+    
+            // Verifies if the file is elegible to be stored
+            try {
+                var errorUploadingFile = await storeFileContract.current.methods.fileExists(fileUploaded).call({from: selectedUser.account});
+                
+                if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
+                    const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded).send({ from: selectedUser.account });
+
+                    const uploadFileEvent = receipt.events["UploadFileResult"];
+                    if (uploadFileEvent) {
+                        const { success, message } = uploadFileEvent.returnValues;
+                        if (success) {
+                            resolve({ receipt, fileUploaded }) // DON'T KNOW WHAT THIS DOES. 
+                        } else {
+                            console.log("message: ", message);
+                        }
+                    } 
+                } else {
+                    console.log("errorUploadingFile: ", errorUploadingFile);
+                }
+
+            } catch (error) {
+                console.error("Transaction error: ", error.message);
+                console.log("Make sure you haven't uploaded the file before, and that the file name is unique.");
+            }
         });
     }
 }

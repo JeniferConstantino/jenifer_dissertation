@@ -42,7 +42,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
                 FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
 
                 // Adds the file to the blockchain
-                FileHandler.storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID, iv, storeFileContract).then(({transactionResult, fileUploaded}) => {
+                FileHandler.storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID, iv, storeFileContract).then(({receipt, fileUploaded}) => {
                     // Updates the state with the result
                     var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
                     console.log('File added to the blockchain');
