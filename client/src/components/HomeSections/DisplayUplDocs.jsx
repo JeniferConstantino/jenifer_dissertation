@@ -1,8 +1,11 @@
 import React from "react";
 import FileHandler from '../../helpers/fileHandler';
 import { FcDocument , FcImageFile} from "react-icons/fc";
+import {useWeb3} from '../../helpers/web3Client';
 
 const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser}) => {
+
+    const {storeFileContract} = useWeb3();
 
     const decryptAndDownload = async (file) => {
         
@@ -12,7 +15,7 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
             console.log("Accessed file in IPFS.");
 
             // Decrypts the file
-            const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(file, selectedUser, fileContent);
+            const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(storeFileContract, file, selectedUser, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
             

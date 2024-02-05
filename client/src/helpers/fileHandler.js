@@ -25,9 +25,11 @@ class FileHandler {
     }
 
     // Decrypts a given file using a given symmetric key
-    static async decryptFileWithSymmetricKey (fileEncrypted, selectedUser, fileContent) {
+    static async decryptFileWithSymmetricKey (storeFileContract, fileEncrypted, selectedUser, fileContent) {
         try {
-            const encryptedSymmetricKeyBuffer = Buffer.from(fileEncrypted.encSymmetricKey, 'base64');
+            // Decrypts the symmetric key
+            const fileUserEncryptedSymmetricKey = await storeFileContract.current.methods.getEncSymmetricKeyFileUser(selectedUser.current, fileEncrypted).call({from: selectedUser.current.account});
+            const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
             const decryptedSymmetricKey = EncryptionHandler.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.current.privateKey);
 
@@ -75,13 +77,13 @@ class FileHandler {
     // Get files from the Blockchain
     static getFilesUploadedBlockchain = async (storeFileContract, selectedUser) => {
             
-        var result = await storeFileContract.current.methods.get().call({from: selectedUser.current.account});
+        var result = await storeFileContract.current.methods.getUserFiles(selectedUser.current.account).call({from: selectedUser.current.account});
     
         // Check if the first element is an array (file details) or not
         let files = [];
         if(result.length != null){
             result.forEach(file => {
-                var fileApp = new FileApp(file.fileName , file.encSymmetricKey ,file.owner, file.ipfsCID, file.fileType, file.iv);
+                var fileApp = new FileApp(file.fileName, file.owner, file.ipfsCID, file.fileType, file.iv);
                 files.push(fileApp);
             });
         }
@@ -97,20 +99,20 @@ class FileHandler {
             var fileType = FileHandler.determineFileType(fileName);
             const encryptedSymmetricKey = EncryptionHandler.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
-            let fileUploaded = new FileApp(fileName.toString(), encryptedSymmetricKey.toString('base64'), selectedUser.account, fileCID, fileType, iv.toString('base64'));
+            let fileUploaded = new FileApp(fileName.toString(), selectedUser.account, fileCID, fileType, iv.toString('base64'));
     
             // Verifies if the file is elegible to be stored
             try {
                 var errorUploadingFile = await storeFileContract.current.methods.fileExists(fileUploaded, selectedUser).call({from: selectedUser.account});
                 
                 if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
-                    const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded, selectedUser).send({ from: selectedUser.account });
+                    const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded, encryptedSymmetricKey.toString('base64'), selectedUser).send({ from: selectedUser.account });
 
                     const uploadFileEvent = receipt.events["UploadFileResult"];
                     if (uploadFileEvent) {
                         const { success, message } = uploadFileEvent.returnValues;
                         if (success) {
-                            resolve({ receipt, fileUploaded }) // DON'T KNOW WHAT THIS DOES. 
+                            resolve({ receipt, fileUploaded })
                         } else {
                             console.log("message: ", message);
                         }
