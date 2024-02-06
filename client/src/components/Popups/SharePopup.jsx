@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
 
-const SharePopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show, selectedUser, children}) => {
+const SharePopup = ({ handleClosePopup, show, selectedFile, children}) => {
     const [username, setUsername] = useState('');
 
 
@@ -34,7 +34,12 @@ const SharePopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show, 
                     <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseSharePopup}/>
                     <h2 className='upload-file-header'>Share File</h2>
                 </div>
-                <p>Input the name of the user to share the file with.</p>
+                { selectedFile ? (
+                    <p>You're about to share the file <strong><em>"{selectedFile.fileName}"</em></strong>. Input the name of the user to share the file with.</p>
+                ) : (
+                    <p>No file was selected.</p>
+                )
+                }
                 <div className='popup-section input-button-container'>
                     <input
                         type="text"

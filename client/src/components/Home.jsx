@@ -135,7 +135,7 @@ const Home = () => {
             </div>
 
             <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClosePopup={handleClosePopup} /> 
-            <SharePopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showSharePopup} selectedUser={selectedUser} handleClosePopup={handleClosePopup}/>
+            <SharePopup  show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
         </>
     );
 
