@@ -19,6 +19,8 @@ const Home = () => {
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
 
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const {selectedUser, storeFileContract} = useWeb3();
 
@@ -117,9 +119,9 @@ const Home = () => {
                 <Logout />
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
-                    <FileActions handleOpenPopup={handleOpenPopup} />
+                    <FileActions handleOpenPopup={handleOpenPopup} selectedUser={selectedUser} selectedFile={selectedFile}/>
                     <div className='uplBackground'>
-                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn} selectedUser={selectedUser}/>
+                        <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/>
                     </div>
                 </div>
             </div>

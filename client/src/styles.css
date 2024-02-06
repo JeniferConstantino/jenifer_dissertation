@@ -257,6 +257,11 @@ h1 {
   height: 100%;
 }
 
+.uploaded-docs.selected {
+  border-color: #007bff; 
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
 .uploaded-files-container {
   max-height: 240px; /* Adjust this value as needed */
   overflow-y: auto;

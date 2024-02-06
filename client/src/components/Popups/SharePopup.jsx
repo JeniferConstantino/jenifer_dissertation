@@ -13,6 +13,13 @@ const SharePopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show, 
         console.log('Share file ...')
         e.preventDefault()
 
+        // Read input name 
+
+            // Perform verification: is empty? user exists? user is already associated with that file? current user is owner?
+
+            // Perform the sharing 
+
+
     }
 
     const handleCloseSharePopup = () => {

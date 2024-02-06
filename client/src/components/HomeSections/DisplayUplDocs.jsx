@@ -1,35 +1,15 @@
 import React from "react";
 import FileHandler from '../../helpers/fileHandler';
 import { FcDocument , FcImageFile} from "react-icons/fc";
-import {useWeb3} from '../../helpers/web3Client';
 
-const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser}) => {
-
-    const {storeFileContract} = useWeb3();
+const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, maxFilesPerColumn}) => {
 
     const decryptAndDownload = async (file) => {
-        
-        try {
-            // Gets the file from IPFS
-            const fileContent = await FileHandler.getFileFromIPFS(file.ipfsCID);
-            console.log("Accessed file in IPFS.");
-
-            // Decrypts the file
-            const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(storeFileContract, file, selectedUser, fileContent);
-            const blob = new Blob([decryptedFileBuffer]);
-            console.log("File Decrypted.");
-            
-            // Creates a downloaded link 
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = file.fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        } catch (error) {
-            console.error("Error decrypting or downloading file: ", error);
+        if (selectedFile === file) {
+            setSelectedFile(null);
+        } else {
+            setSelectedFile(file);
         }
-
     }
 
     const renderFiles = () => {
@@ -39,7 +19,11 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
             const row = uploadedFiles
                 .filter((file, index) => index % maxFilesPerColumn === i)
                 .map((file, index) => (
-                    <div key={index} className="uploaded-docs" onClick={() => decryptAndDownload(file)}>
+                    <div 
+                        key={index} 
+                        className={`uploaded-docs ${selectedFile === file ? 'selected' : ''}`} 
+                        onClick={() => decryptAndDownload(file)}
+                    >
                         {file.fileType === FileHandler.FileType.Image ? (
                             <>
                                 <FcImageFile size={50}/>
