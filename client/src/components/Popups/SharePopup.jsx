@@ -18,16 +18,24 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         // Performs validations
         // TODO: Perform verification:  current user is owner?
         if (username !== "") {
-            console.log('Share file ...')
-            console.log("username: ", username);
+            console.log('Share file ...');
 
-            // Verifies if the file share can be performed
-            var messageCanShare = await FileHandler.verifyShareFile(username, storeUserContract, selectedUser, selectedFile);
-            
-            if (messageCanShare === "") {
+            // Verifies if the user exists 
+            var userExists = await FileHandler.verifyUserExist(username, storeUserContract, selectedUser, selectedFile);
+            if (userExists) {
+
+                // Verifies if the user is already associated with the file to be shared
+                /*var encSymmetricKey = await storeUserContract.current.methods.getEncSymmetricKeyFileUser(selectedUser, selectedFile).call({from: selectedUser.current.account});
+                if (encSymmetricKey !== "") {
+                    return `File: ${selectedFile.fileName} is already shared with user: ${nameUserToShare}.`;
+                } else {
+                    console.log("Encrypted Symmetric key: " + encSymmetricKey);
+                }*/
+
+
                 // Perform the sharing 
             } else {
-                console.log("The selected file cannot be shared: ", messageCanShare);
+                console.log(`The selected file cannot be shared: ${username} is not a user.`);
             }
 
         } else {
