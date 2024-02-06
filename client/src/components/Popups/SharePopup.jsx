@@ -4,9 +4,8 @@ import FileHandler from '../../helpers/fileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 
 const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, children}) => {
-    const [username, setUsername] = useState('');
-    const {storeUserContract} = useWeb3();
-
+    const [usernameToShare, setUsernameToShare] = useState('');
+    const {storeUserContract, storeFileContract} = useWeb3();
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
 
@@ -15,36 +14,27 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         
         e.preventDefault()
 
-        // Performs validations
         // TODO: Perform verification:  current user is owner?
-        if (username !== "") {
+        if (usernameToShare !== "") {
             console.log('Share file ...');
-
-            // Verifies if the user exists 
-            var userExists = await FileHandler.verifyUserExist(username, storeUserContract, selectedUser, selectedFile);
-            if (userExists) {
-
-                // Verifies if the user is already associated with the file to be shared
-                /*var encSymmetricKey = await storeUserContract.current.methods.getEncSymmetricKeyFileUser(selectedUser, selectedFile).call({from: selectedUser.current.account});
-                if (encSymmetricKey !== "") {
-                    return `File: ${selectedFile.fileName} is already shared with user: ${nameUserToShare}.`;
-                } else {
-                    console.log("Encrypted Symmetric key: " + encSymmetricKey);
-                }*/
-
-
-                // Perform the sharing 
+            // Gets the user to share the file with 
+            var userToShareFileWith = await FileHandler.getUserToShareFile(usernameToShare, storeUserContract, selectedUser);
+            if (userToShareFileWith !== null) { 
+                // Performs the sharing
+                FileHandler.performFileShare(storeFileContract, selectedFile, selectedUser, userToShareFileWith);
             } else {
-                console.log(`The selected file cannot be shared: ${username} is not a user.`);
+                console.log(`The selected file cannot be shared: ${usernameToShare} is not a user.`);
             }
-
         } else {
             console.log("No name was inputed.");
         } 
 
+        setUsernameToShare('');
+        handleClosePopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
     }
 
     const handleCloseSharePopup = () => {
+        setUsernameToShare('');
         handleClosePopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
     }
 
@@ -65,9 +55,9 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
                 <div className='popup-section input-button-container'>
                     <input
                         type="text"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        id="usernameToShare"
+                        value={usernameToShare}
+                        onChange={(e) => setUsernameToShare(e.target.value)}
                         placeholder='name'
                         className='input-username input-usernameShare'
                     />

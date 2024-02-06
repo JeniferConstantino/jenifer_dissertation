@@ -18,12 +18,8 @@ contract StoreFile {
     if (bytes(validFileUpload).length == 0) {
       // Adds the corresponding information to the corresponding structs
       userFiles.push(file);
-      UserHasFile memory userFileData = UserHasFile({
-        userAccount: user.account,
-        fileName: file.fileName,
-        encSymmetricKey: encSymmetricKey
-      });
-      userHasFile.push(userFileData);                 // TODO: before adding the file i need to ensure the file is not already associated with the user
+      storeUserHasFile(user, file, encSymmetricKey);
+
       // Emits the message that the file has been uploaded
       emit UploadFileResult(true, "File uploaded successfully.");
       return;
@@ -87,6 +83,16 @@ contract StoreFile {
       }
     }   
     return File({ fileName: "", owner: address(0), ipfsCID: "", fileType: "", iv: "" });
+  }
+
+  // Associates a user to a file
+  function storeUserHasFile(User memory user, File memory file, string memory encSymmetricKey) public {
+    UserHasFile memory userFileData = UserHasFile({
+      userAccount: user.account,
+      fileName: file.fileName,
+      encSymmetricKey: encSymmetricKey
+    });
+    userHasFile.push(userFileData);                 // TODO: before adding the file i need to ensure the file is not already associated with the user
   }
 
 }

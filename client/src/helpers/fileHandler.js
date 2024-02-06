@@ -128,14 +128,28 @@ class FileHandler {
         });
     }
 
-    // Verifies if a user exists so a file can be shared
-    static verifyUserExist = async (nameUserToShare, storeUserContract, selectedUser, selectedFile) => {
+    // Gets the user to share the file with
+    static getUserToShareFile = async (nameUserToShare, storeUserContract, selectedUser) => {
         // Verifies if there is a user with the given name
         var user = await storeUserContract.current.methods.getUserByName(nameUserToShare).call({from: selectedUser.current.account});
         if (user.name.length === 0) {
-            return false;
+            return null;
         } 
-        return true;
+        return user;
+    }
+
+    // Shares the file with a given user
+    static performFileShare = async (storeFileContract, selectedFile, selectedUser, userToShareFileWith) => {
+        // Decrypts the files' symmetric key using the current logged user private key
+        var encSymmetricKey = await storeFileContract.current.methods.getEncSymmetricKeyFileUser(selectedUser.current, selectedFile).call({from: selectedUser.current.account});
+        var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
+        var decryptedSymmetricKey = EncryptionHandler.decryptSymmetricKey(encSymmetricKeyBuffer, selectedUser.current.privateKey);
+        
+        // Encrypts the files' symmetric key using the public key of the user to share the file with
+        var encryptedSymmetricKeyShared = EncryptionHandler.encryptSymmetricKey(decryptedSymmetricKey, userToShareFileWith.publicKey);
+        // Stores the share information in the blockchain
+        const receipt = await storeFileContract.current.methods.storeUserHasFile(userToShareFileWith, selectedFile, encryptedSymmetricKeyShared.toString('base64')).send({ from: selectedUser.current.account });
+        console.log("File Shared.");
     }
 }
 
