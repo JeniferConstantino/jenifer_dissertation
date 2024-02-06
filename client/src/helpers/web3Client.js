@@ -139,6 +139,7 @@ const Web3Provider = ({children}) => {
     const value = {
         selectedUser,
         storeFileContract,
+        storeUserContract,
         verifyIfUserExists,
         setup,
         logOut,

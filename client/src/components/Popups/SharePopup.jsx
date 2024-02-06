@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
+import FileHandler from '../../helpers/fileHandler';
+import {useWeb3} from '../../helpers/web3Client';
 
-const SharePopup = ({ handleClosePopup, show, selectedFile, children}) => {
+const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, children}) => {
     const [username, setUsername] = useState('');
+    const {storeUserContract} = useWeb3();
 
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
@@ -10,15 +13,26 @@ const SharePopup = ({ handleClosePopup, show, selectedFile, children}) => {
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
     const handleFileShare = async (e) => {
         
-        console.log('Share file ...')
         e.preventDefault()
 
-        // Read input name 
+        // Performs validations
+        // TODO: Perform verification:  current user is owner?
+        if (username !== "") {
+            console.log('Share file ...')
+            console.log("username: ", username);
 
-            // Perform verification: is empty? user exists? user is already associated with that file? current user is owner?
+            // Verifies if the file share can be performed
+            var messageCanShare = await FileHandler.verifyShareFile(username, storeUserContract, selectedUser, selectedFile);
+            
+            if (messageCanShare === "") {
+                // Perform the sharing 
+            } else {
+                console.log("The selected file cannot be shared: ", messageCanShare);
+            }
 
-            // Perform the sharing 
-
+        } else {
+            console.log("No name was inputed.");
+        } 
 
     }
 

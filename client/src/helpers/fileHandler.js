@@ -127,6 +127,23 @@ class FileHandler {
             }
         });
     }
+
+    // Verifies if a file can be shared 
+    static verifyShareFile = async (nameUserToShare, storeUserContract, selectedUser, selectedFile) => {
+        // Verifies if there is a user with the given name
+        var user = await storeUserContract.current.methods.getUserByName(nameUserToShare).call({from: selectedUser.current.account});
+        if (user.name.length === 0) {
+            return `${nameUserToShare} is not an existing user.`;
+        } 
+
+        // Verifies if the user is already associated with the file to be shared
+        var encSymmetricKey = await storeUserContract.current.methods.getEncSymmetricKeyFileUser(selectedUser, selectedFile).call({from: selectedUser.current.account});
+        if (encSymmetricKey !== "") {
+            return `File: ${selectedFile.fileName} is already shared with user: ${nameUserToShare}.`;
+        } else {
+            console.log("Encrypted Symmetric key: " + encSymmetricKey);
+        }
+    }
 }
 
 export default FileHandler;

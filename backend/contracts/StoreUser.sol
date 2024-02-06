@@ -43,5 +43,15 @@ contract StoreUser {
         }
         return "";
     }
-  
+
+    // Gets a user having the users' name
+    function getUserByName(string memory name) public view returns (User memory) {
+        for (uint256 i=0; i<users.length; i++) {
+            if (keccak256(abi.encodePacked(users[i].name)) == keccak256(abi.encodePacked(name))) {
+                return users[i];
+        }
+        }   
+        return User({ name: "", account: address(0), publicKey: "", privateKey: ""});
+    }
+
 }
