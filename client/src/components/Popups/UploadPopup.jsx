@@ -4,7 +4,7 @@ import FileHandler from '../../helpers/fileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, selectedUser, children}) => {
+const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show, selectedUser, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -77,6 +77,10 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
         }
     };
 
+    const handleCloseUploadPopup = () => {
+        handleClosePopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+    }
+
     const resetFileState = () => {
         setDroppedFile(null);
     };
@@ -86,7 +90,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
             <section className='model-main'>
                 {children}
                 <div className='popup-section section-title-upload-popup'>
-                    <FaAngleLeft size={18} className="app-button_back" onClick={handleClose}/>
+                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
                     <h2 className='upload-file-header'>Upload File</h2>
                 </div>
                 <div 

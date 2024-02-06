@@ -6,13 +6,19 @@ import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
 import Logout from './HomeSections/Logout';
 import FileHandler from '../helpers/fileHandler';
+import SharePopup from './Popups/SharePopup';
 
 const Home = () => {
 
     // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [showUploadPopup, setShowUploadPopup] = useState(false);
+    const [showDeletePopup, setShowDeletePopup] = useState([]);
+    const [showSharePopup, setShowSharePopup] = useState([]);
+    const [showVerifyPopup, setShowVerifyPopup] = useState([]);
+
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const {selectedUser, storeFileContract} = useWeb3();
 
@@ -60,28 +66,50 @@ const Home = () => {
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
     const handleUpload = async (e, tempUpdatedUploadedFiles) => {
         setUploadedFiles(tempUpdatedUploadedFiles);        
-        handleCloseUploadPopup();
+        handleClosePopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
     };
 
     // Placeholder functions for file actions (upload, delete, share)
-    const handleOpenUploadPopup = () => {
-        setShowUploadPopup(true);
-    }
+    const handleOpenPopup = (chosenAction) => {
+        switch (chosenAction) {
+            case 'upload': // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+                setShowUploadPopup(true);
+                return;
+            case 'delte':
+                setShowDeletePopup(true);
+                return;
+            case 'share':
+                setShowSharePopup(true);
+                return;
+            case 'verify':
+                setShowVerifyPopup(true);
+                return;
+            default:
+                console.log("NOT A VALID OPERATION");
+                return;
+        }
+    };
 
     // Performs setup of closing popup
-    const handleCloseUploadPopup = () => {
-        setShowUploadPopup(false);
+    const handleClosePopup = (chosenAction) => {
+        switch(chosenAction) {
+            case 'upload': // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+                setShowUploadPopup(false);
+                return;
+            case 'delte':
+                setShowDeletePopup(false);
+                return;
+            case 'share':
+                setShowSharePopup(false);
+                return;
+            case 'verify':
+                setShowVerifyPopup(false);
+                return;
+            default:
+                console.log("NOT A VALID OPERATION");
+                return;
+        }
     }
-
-    // Handle file deletion
-    const handleDelete = () => {
-        console.log('Delete file...');
-    };
-
-    // Handle file share
-    const handleShare = () => {
-        console.log('Share file...');
-    };
 
     return (
         <>
@@ -89,7 +117,7 @@ const Home = () => {
                 <Logout />
                 <div className='home-wrapper content-wrapper'>
                     <div className='shadow-overlay shadow-overlay-home'></div>
-                    <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
+                    <FileActions handleOpenPopup={handleOpenPopup} />
                     <div className='uplBackground'>
                         <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn} selectedUser={selectedUser}/>
                     </div>
@@ -104,7 +132,8 @@ const Home = () => {
                 </div>
             </div>
 
-            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClose={handleCloseUploadPopup} /> 
+            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClosePopup={handleClosePopup} /> 
+            <SharePopup/>
         </>
     );
 
