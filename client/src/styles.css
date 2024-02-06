@@ -80,7 +80,7 @@ h1 {
   background-color: #FF812C;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 10px; 
   cursor: pointer;
 }
 
@@ -119,6 +119,7 @@ h1 {
 
 .app-button__login {
   padding: 13% 25%;
+  border-radius: 20px; 
 }
 
 .nearsoftLogo {
@@ -149,6 +150,9 @@ h1 {
   border-radius: 10px; 
   padding: 10px; 
   margin-bottom: 10px; 
+}
+
+.input-usernameWelcome {
   width: 80%;
 }
 
@@ -348,6 +352,20 @@ h1 {
   cursor: pointer; 
 }
 
+/*----------- Home Page // POPUP Share Document -----------*/
+.input-usernameShare {
+  flex: 1;
+}
+
+.input-button-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-button__share {
+  flex: 0 0 auto;
+  padding: 15px;
+}
 
 
 

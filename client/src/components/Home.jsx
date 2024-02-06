@@ -15,9 +15,9 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
 
     const [showUploadPopup, setShowUploadPopup] = useState(false);
-    const [showDeletePopup, setShowDeletePopup] = useState([]);
-    const [showSharePopup, setShowSharePopup] = useState([]);
-    const [showVerifyPopup, setShowVerifyPopup] = useState([]);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [showSharePopup, setShowSharePopup] = useState(false);
+    const [showVerifyPopup, setShowVerifyPopup] = useState(false);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const {selectedUser, storeFileContract} = useWeb3();
@@ -133,7 +133,7 @@ const Home = () => {
             </div>
 
             <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClosePopup={handleClosePopup} /> 
-            <SharePopup/>
+            <SharePopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showSharePopup} selectedUser={selectedUser} handleClosePopup={handleClosePopup}/>
         </>
     );
 

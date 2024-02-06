@@ -44,7 +44,7 @@ const Welcome = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder='username'
-                            className='input-username'
+                            className='input-username input-usernameWelcome'
                         />
                             <div className='button-container'>
                                 <button className='app-button app-button__welcome' onClick={handleBack}>Back</button>
