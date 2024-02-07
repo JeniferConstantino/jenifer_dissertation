@@ -367,7 +367,61 @@ h1 {
 }
 
 /*----------- Home Page // POPUP Share Document -----------*/
+.note { 
+  font-size: 13px;
+}
+
+.share-file-description {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  color: #2E231D;
+  padding-left: 1%;
+}
+
+.permissions-checkbox {
+  display: flex;
+  flex-direction: row;
+}
+
+.permissions-checkbox label {
+  margin-right: 30px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.permissions-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 15px;
+  background-color: #f4f4f4;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.permissions-checkbox input[type="checkbox"]::before {
+  content: '';
+  display: block;
+  width: 14px;
+  border-radius: 2px; /* Border radius of the checkbox */
+}
+
+.permissions-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 3px;
+  border-left: 2px solid #2E231D; /* Change the color of the checkmark */
+  border-bottom: 2px solid #2E231D; /* Change the color of the checkmark */
+  transform: rotate(-45deg); /* Rotate the checkmark */
+  margin-top: 3px; /* Adjust the position of the checkmark */
+  margin-left: 4px; /* Adjust the position of the checkmark */
+}
+
 .input-usernameShare {
+  margin-top: 2%;
   flex: 1;
 }
 
@@ -379,6 +433,13 @@ h1 {
 .app-button__share {
   flex: 0 0 auto;
   padding: 15px;
+}
+
+.readonly {
+  background-color: #f4f4f4; 
+  color: #888; 
+  cursor: not-allowed; 
+  outline: none;
 }
 
 
