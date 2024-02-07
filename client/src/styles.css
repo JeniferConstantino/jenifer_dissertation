@@ -207,6 +207,15 @@ h1 {
   z-index: 1; 
 }
 
+/*----------- Home Page // File Actions section -----------*/
+.faded {
+  opacity: 0.5; 
+}
+
+.not-faded {
+  opacity: 1;
+}
+
 /*----------- Home Page // Files management section -----------*/
 
 .files-header {

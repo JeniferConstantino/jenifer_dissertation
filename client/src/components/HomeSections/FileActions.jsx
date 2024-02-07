@@ -50,19 +50,19 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         <div className="file-actions-wrapper">
             <h1 className='files-header'>Files</h1>
             <button onClick={handlePopupOpenUpload}>
-                <FcExternal  size={25} />
+                <FcExternal size={25} />
             </button>
             <button onClick={handleDownload}>
-                <FcInternal size={25}/>
+                <FcInternal className={!selectedFile ? "faded" : "not-faded"} size={25}/>
             </button>
             <button onClick={handlePopupOpenDelete}>
-                <FcFullTrash  size={25} />
+                <FcFullTrash  className={!selectedFile ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenShare}>
-                <FcShare size={25} />
+                <FcShare className={!selectedFile ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenVerify}>
-                <FcOk  size={25} />
+                <FcOk  className={!selectedFile ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );
