@@ -57,10 +57,10 @@ contract StoreFile {
     File memory fileReceived = getFileByName(file.fileName, usersFiles); // Sees if there is an already existing file with the same name
 
     if (keccak256(abi.encodePacked(fileReceived.fileName)) != keccak256(abi.encodePacked(""))) {
-      return "File has to have a unique name."; // File with the same name already exists
+      return "User already associated with the file."; 
     }
     
-    return ""; // File with the same name doesn't exist
+    return ""; 
   }
 
   // Returns the encrypted symmetric key of a given user and file 

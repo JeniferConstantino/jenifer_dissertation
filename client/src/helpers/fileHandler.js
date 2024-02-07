@@ -103,7 +103,8 @@ class FileHandler {
     
             // Verifies if the file is elegible to be stored
             try {
-                var errorUploadingFile = await storeFileContract.current.methods.fileExists(fileUploaded, selectedUser).call({from: selectedUser.account});
+                // Verifies if the user already has a file with the same name
+                var errorUploadingFile = await FileHandler.verifyUserAssociatedWithFile(storeFileContract, fileUploaded, selectedUser, selectedUser);
                 
                 if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
                     const receipt = await storeFileContract.current.methods.uploadFile(fileUploaded, encryptedSymmetricKey.toString('base64'), selectedUser).send({ from: selectedUser.account });
@@ -118,7 +119,7 @@ class FileHandler {
                         }
                     } 
                 } else {
-                    console.log("errorUploadingFile: ", errorUploadingFile);
+                    console.log("errorUploadingFile: ", errorUploadingFile, " Make sure the there is no already uploaded file with the same name.");
                 }
 
             } catch (error) {
@@ -136,6 +137,12 @@ class FileHandler {
             return null;
         } 
         return user;
+    }
+
+    // Verifies if a user is already associated with a file 
+    static verifyUserAssociatedWithFile = async (storeFileContract, fileUploaded, userToVerify, selectedUser) => {
+        var fileAssociatedUser = await storeFileContract.current.methods.fileExists(fileUploaded, userToVerify).call({from: selectedUser.account});
+        return fileAssociatedUser;
     }
 
     // Shares the file with a given user

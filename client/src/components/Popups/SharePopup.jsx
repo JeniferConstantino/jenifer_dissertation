@@ -20,17 +20,23 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
             // Gets the user to share the file with 
             var userToShareFileWith = await FileHandler.getUserToShareFile(usernameToShare, storeUserContract, selectedUser);
             if (userToShareFileWith !== null) { 
-                // Performs the sharing
-                FileHandler.performFileShare(storeFileContract, selectedFile, selectedUser, userToShareFileWith);
+                // Make sure the user is not already associated with the given file
+                var errorUserAssociatedFile = await FileHandler.verifyUserAssociatedWithFile(storeFileContract, selectedFile, userToShareFileWith, selectedUser.current);
+                
+                if (errorUserAssociatedFile.length === 0) { // File can be shared 
+                    // Performs the sharing
+                    FileHandler.performFileShare(storeFileContract, selectedFile, selectedUser, userToShareFileWith);
+                } else {
+                    console.log(`The file: ${selectedFile.fileName} is already shared with: ${usernameToShare}. `);
+                }
             } else {
-                console.log(`The selected file cannot be shared: ${usernameToShare} is not a user.`);
+                console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
             }
         } else {
             console.log("No name was inputed.");
         } 
 
         setUsernameToShare('');
-        handleClosePopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
     }
 
     const handleCloseSharePopup = () => {
