@@ -175,6 +175,19 @@ class FileHandler {
         });
         return permissionsOverFile;
     }
+
+    // Validates if a given user has the given permission over a file
+    static validatesUserHasPermission = async (storeFileContract, permission, selectedUser, selectedFile) => {
+        // Get user permissions 
+        var permissionsOverFile = await storeFileContract.current.methods.getPermissionsOverFile(selectedUser.current, selectedFile).call({from: selectedUser.current.account});
+        // Verify if the permissions is inside the array of permissions
+        for (var permissionOverFile of permissionsOverFile) {
+            if (permissionOverFile === permission) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 export default FileHandler;

@@ -127,7 +127,6 @@ contract StoreFile {
       });
       userHasFile.push(userFileData);                
     }    
-
   }
 
 }
