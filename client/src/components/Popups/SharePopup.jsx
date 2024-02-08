@@ -28,6 +28,7 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         setShowPermissions(false);
     }
 
+    // Verifies if the user exists. If so, it displays the permissions of that user, so they can be edited
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
@@ -64,6 +65,7 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         } 
     }
 
+    // Hnadles changes on the checkboxes values
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setCheckboxes({
@@ -72,12 +74,14 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         });
     } 
 
+    // Closes the share name popup
     const handleCloseShareNamePopup = () => {
         setUsernameToShare('');
         setShowPermissions(false);
-        handleClosePopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+        handleClosePopup(FileHandler.FilePermissions.Share); 
     }
 
+    // Hides the permissions from the popup
     const handleCloseSharePermissionsPopup = () => {
         setShowPermissions(false);
     }
