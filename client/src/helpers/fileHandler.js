@@ -168,8 +168,8 @@ class FileHandler {
     }
 
     // Gets the permissions a user has over a file
-    static getPermissionsUserOverFile = async (storeFileContract, userToShareFileWith, selectedFile, selectedUser) => {
-        var permissionsOverFile = await storeFileContract.current.methods.getPermissionsOverFile(userToShareFileWith, selectedFile).call({from: selectedUser.current.account});
+    static getPermissionsUserOverFile = async (storeFileContract, userToSeePermission, selectedFile, selectedUser) => {
+        var permissionsOverFile = await storeFileContract.current.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.current.account});
         permissionsOverFile.forEach(permission => {
             console.log(permission);
         });

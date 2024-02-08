@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
 import FileHandler from '../../helpers/fileHandler';
 import {useWeb3} from '../../helpers/web3Client';
@@ -6,6 +6,20 @@ import {useWeb3} from '../../helpers/web3Client';
 const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     
     const {storeFileContract} = useWeb3();
+    const [permissions, setPermissions] = useState([]);
+
+    useEffect( () => {
+        const fetchPermissions = async () => {
+            if (selectedFile) {
+                const permissions = await FileHandler.getPermissionsUserOverFile(storeFileContract, selectedUser.current, selectedFile, selectedUser);
+                setPermissions(permissions);
+            } else {
+                setPermissions([]);
+            }
+        };
+
+        fetchPermissions();
+    }, [selectedFile, selectedUser, storeFileContract]);
 
     const handlePopupOpenUpload = () => {
         handleOpenPopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
@@ -16,8 +30,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
             console.log("Please select a file");
         } else {
             // Verifies if the user has permissions to download
-            var userHasPermissions = await FileHandler.validatesUserHasPermission(storeFileContract, "download", selectedUser, selectedFile);
-            if (userHasPermissions) {
+            if (permissions.includes("download")) {
                 try {
                     // Gets the file from IPFS
                     const fileContent = await FileHandler.getFileFromIPFS(selectedFile.ipfsCID);
@@ -47,8 +60,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     const handlePopupOpenDelete = async () => {
         // Verifies if the user has permissions to delete
         if (selectedFile !== null) {
-            var userHasPermissions = await FileHandler.validatesUserHasPermission(storeFileContract, "delete", selectedUser, selectedFile);
-            if (userHasPermissions) {
+            if (permissions.includes("delete")) {
                 handleOpenPopup("delte"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
             } else {
                 console.log("User does't have permissions to delete the file.");
@@ -61,9 +73,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     const handlePopupOpenShare = async () => {
         if (selectedFile !== null) {
             // Verifies if the user has permissions to share
-            var userHasPermissions = await FileHandler.validatesUserHasPermission(storeFileContract, "share", selectedUser, selectedFile);
-            if (userHasPermissions) {
-
+            if (permissions.includes("share")) {
                 handleOpenPopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
             } else {
                 console.log("User does't have permissions to share the file.");
@@ -76,8 +86,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     const handlePopupOpenVerify = async () => {
         if (selectedFile !== null) {
             // Verifies if the user has permissions to verify
-            var userHasPermissions = await FileHandler.validatesUserHasPermission(storeFileContract, "verify", selectedUser, selectedFile);
-            if (userHasPermissions) {
+            if (permissions.includes("verify")) {
                 handleOpenPopup("verify"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
             } else {
                 console.log("User does't have permissions to verify the file.");
@@ -94,16 +103,16 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
                 <FcExternal size={25} />
             </button>
             <button onClick={handleDownload}>
-                <FcInternal className={!selectedFile ? "faded" : "not-faded"} size={25}/>
+                <FcInternal className={!(selectedFile && permissions.includes("download")) ? "faded" : "not-faded"} size={25}/>
             </button>
             <button onClick={handlePopupOpenDelete}>
-                <FcFullTrash  className={!selectedFile ? "faded" : "not-faded"} size={25} />
+                <FcFullTrash  className={!(selectedFile && permissions.includes("delete")) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenShare}>
-                <FcShare className={!selectedFile ? "faded" : "not-faded"} size={25} />
+                <FcShare className={!(selectedFile && permissions.includes("share")) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenVerify}>
-                <FcOk  className={!selectedFile ? "faded" : "not-faded"} size={25} />
+                <FcOk  className={!(selectedFile && permissions.includes("verify")) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );
