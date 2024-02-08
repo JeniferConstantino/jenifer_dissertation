@@ -146,7 +146,10 @@ class FileHandler {
     }
 
     // Shares the file with a given user
-    static performFileShare = async (storeFileContract, selectedFile, selectedUser, userToShareFileWith) => {
+    static performFileShare = async (storeFileContract, selectedFile, permissions, selectedUser, userToShareFileWith) => {
+        // Gets only the selected permissions
+        const permissionsArray = Object.entries(permissions).filter(([key, value]) => value===true).map(([key, value]) => key);
+        
         // Decrypts the files' symmetric key using the current logged user private key
         var encSymmetricKey = await storeFileContract.current.methods.getEncSymmetricKeyFileUser(selectedUser.current, selectedFile).call({from: selectedUser.current.account});
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
@@ -155,8 +158,22 @@ class FileHandler {
         // Encrypts the files' symmetric key using the public key of the user to share the file with
         var encryptedSymmetricKeyShared = EncryptionHandler.encryptSymmetricKey(decryptedSymmetricKey, userToShareFileWith.publicKey);
         // Stores the share information in the blockchain
-        const receipt = await storeFileContract.current.methods.storeUserHasFile(userToShareFileWith, selectedFile, encryptedSymmetricKeyShared.toString('base64')).send({ from: selectedUser.current.account });
+        const receipt = await storeFileContract.current.methods.storeUserHasFile(
+            userToShareFileWith, 
+            selectedFile, 
+            encryptedSymmetricKeyShared.toString('base64'),
+            permissionsArray
+        ).send({ from: selectedUser.current.account });
         console.log("File Shared.");
+    }
+
+    // Gets the permissions a user has over a file
+    static getPermissionsUserOverFile = async (storeFileContract, userToShareFileWith, selectedFile, selectedUser) => {
+        var permissionsOverFile = await storeFileContract.current.methods.getPermissionsOverFile(userToShareFileWith, selectedFile).call({from: selectedUser.current.account});
+        permissionsOverFile.forEach(permission => {
+            console.log(permission);
+        });
+        return permissionsOverFile;
     }
 }
 

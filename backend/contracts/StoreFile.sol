@@ -18,7 +18,14 @@ contract StoreFile {
     if (bytes(validFileUpload).length == 0) {
       // Adds the corresponding information to the corresponding structs
       userFiles.push(file);
-      storeUserHasFile(user, file, encSymmetricKey);
+
+      // Sets the permissions. Who uploads the file is the owner. And for so he has: download, delete, and share file
+      string[] memory defaultPermissions = new string[](3);
+      defaultPermissions[0] = "download";
+      defaultPermissions[1] = "delete";
+      defaultPermissions[2] = "share";
+
+      storeUserHasFile(user, file, encSymmetricKey, defaultPermissions);
 
       // Emits the message that the file has been uploaded
       emit UploadFileResult(true, "File uploaded successfully.");
@@ -75,6 +82,18 @@ contract StoreFile {
     return "";   
   }
 
+  // Returns the permissions of a given user over a given file
+  function getPermissionsOverFile (User memory user, File memory file) public view returns (string[] memory) {
+    for (uint256 i=0; i<userHasFile.length; i++) {
+        if ((userHasFile[i].userAccount == user.account) && 
+            (keccak256(abi.encodePacked(userHasFile[i].fileName)) == keccak256(abi.encodePacked(file.fileName)))
+          ) {
+            return userHasFile[i].permissions;
+        }
+    }
+    return new string[](0);   
+  }
+
   // Gets a file having the files' name and the array to search on
   function getFileByName(string memory name, File[] memory files) private pure returns (File memory) {
     for (uint256 i=0; i<files.length; i++) {
@@ -86,13 +105,29 @@ contract StoreFile {
   }
 
   // Associates a user to a file
-  function storeUserHasFile(User memory user, File memory file, string memory encSymmetricKey) public {
-    UserHasFile memory userFileData = UserHasFile({
-      userAccount: user.account,
-      fileName: file.fileName,
-      encSymmetricKey: encSymmetricKey
-    });
-    userHasFile.push(userFileData);                 // TODO: before adding the file i need to ensure the file is not already associated with the user
+  function storeUserHasFile(User memory user, File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+    bool found = false;
+    // See if the user is already associated with the file
+    for (uint256 i=0; i<userHasFile.length; i++) {
+      if (userHasFile[i].userAccount == user.account && keccak256(abi.encodePacked(userHasFile[i].fileName)) == keccak256(abi.encodePacked(file.fileName))) {
+        // Update permissions
+        userHasFile[i].permissions = permissions;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Creates a new row
+      UserHasFile memory userFileData = UserHasFile({
+        userAccount: user.account,
+        fileName: file.fileName,
+        encSymmetricKey: encSymmetricKey,
+        permissions: permissions
+      });
+      userHasFile.push(userFileData);                
+    }    
+
   }
 
 }

@@ -5,9 +5,10 @@ import {useWeb3} from '../../helpers/web3Client';
 
 const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
+    const [userShareFileWith, setUserShareFileWith] = useState(null);
     const [showPermissions, setShowPermissions] = useState(false);
-    const [checkboxes, setCheckboxes] = useState({
-        upload: false,
+    const [permissions, setCheckboxes] = useState({
+        download: false,
         delete: false,
         share: false
     });
@@ -18,40 +19,55 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
 
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
     const handleFileShare = async (e) => {
-        
         e.preventDefault()
+        console.log('Share file ...');
+        
+        // Performs the sharing
+        FileHandler.performFileShare(storeFileContract, selectedFile, permissions, selectedUser, userShareFileWith);
+        setUsernameToShare('');
+        setShowPermissions(false);
+    }
 
+    const handleNext = async (e) => {
+        e.preventDefault()
         if (usernameToShare !== "") {
-
-            // Display permissions checkbox and make username field readonly
-            setShowPermissions(true);
-
-            /*console.log('Share file ...');
-            // Gets the user to share the file with 
             var userToShareFileWith = await FileHandler.getUserToShareFile(usernameToShare, storeUserContract, selectedUser);
             if (userToShareFileWith !== null) { 
-                // Make sure the user is not already associated with the given file
-                var errorUserAssociatedFile = await FileHandler.verifyUserAssociatedWithFile(storeFileContract, selectedFile, userToShareFileWith, selectedUser.current);
+
+                // Grabs the permissions that the user to share the file with already has over the current file
+                var userPermissions = await FileHandler.getPermissionsUserOverFile(storeFileContract, userToShareFileWith, selectedFile, selectedUser);
                 
-                if (errorUserAssociatedFile.length === 0) { // File can be shared 
-                    // Performs the sharing
-                    FileHandler.performFileShare(storeFileContract, selectedFile, selectedUser, userToShareFileWith);
-                } else {
-                    console.log(`The file: ${selectedFile.fileName} is already shared with: ${usernameToShare}. `);
-                }
+                // Sets the checkboxes to the permissions the user already has
+                userPermissions.forEach(permission => {
+                    switch (permission) {
+                      case "download":
+                        permissions.download = true;
+                        break;
+                      case "delete":
+                        permissions.delete = true;
+                        break;
+                      case "share":
+                        permissions.share = true;
+                        break;
+                      default:
+                        console.log("UNEXPECTED PERMISSION");
+                    }
+                  });
+                // Displays to the user the checkboxes and make username field readonly 
+                setShowPermissions(true);
+                setUserShareFileWith(userToShareFileWith);
             } else {
                 console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
-            }*/
+            }
         } else {
             console.log("No name was inputed.");
         } 
-
     }
 
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setCheckboxes({
-            ...checkboxes,
+            ...permissions,
             [name]: checked
         });
     } 
@@ -107,22 +123,22 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
                                 <>
                                     <div className="permissions-checkbox">
                                         <label >
-                                            <input type="checkbox" name="upload" checked={checkboxes.upload} onChange={handleCheckboxChange} />
-                                            Upload
+                                            <input type="checkbox" name="download" checked={permissions.download} onChange={handleCheckboxChange} />
+                                            Download
                                         </label>
                                         <label >
-                                            <input type="checkbox" name="delete" checked={checkboxes.delete} onChange={handleCheckboxChange} />
+                                            <input type="checkbox" name="delete" checked={permissions.delete} onChange={handleCheckboxChange} />
                                             Delete
                                         </label>
                                         <label >
-                                            <input type="checkbox" name="share" checked={checkboxes.share} onChange={handleCheckboxChange} />
+                                            <input type="checkbox" name="share" checked={permissions.share} onChange={handleCheckboxChange} />
                                             Share
                                         </label>
                                     </div> 
                                     <button className="app-button__share app-button" onClick={handleFileShare}>Share</button>
                                 </>
                             ):(
-                                <button className="app-button__share app-button" onClick={handleFileShare}>Next</button>
+                                <button className="app-button__share app-button" onClick={handleNext}>Next</button>
                             )}
                         </div>
                     </>
