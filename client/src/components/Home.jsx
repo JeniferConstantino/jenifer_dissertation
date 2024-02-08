@@ -68,26 +68,26 @@ const Home = () => {
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
     const handleUpload = async (e, tempUpdatedUploadedFiles) => {
         setUploadedFiles(tempUpdatedUploadedFiles);        
-        handleClosePopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+        handleClosePopup("upload");
     };
 
     // Placeholder functions for file actions (upload, delete, share)
     const handleOpenPopup = (chosenAction) => {
         switch (chosenAction) {
-            case 'upload': // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+            case "upload": 
                 setShowUploadPopup(true);
                 return;
-            case 'delte':
+            case FileHandler.FilePermissions.Delete:
                 setShowDeletePopup(true);
                 return;
-            case 'share':
+            case FileHandler.FilePermissions.Share:
                 setShowSharePopup(true);
                 return;
-            case 'verify':
+            case FileHandler.FilePermissions.Verify:
                 setShowVerifyPopup(true);
                 return;
             default:
-                console.log("NOT A VALID OPERATION");
+                console.log("NOT A VALID OPERATION: ", chosenAction);
                 return;
         }
     };
@@ -95,20 +95,20 @@ const Home = () => {
     // Performs setup of closing popup
     const handleClosePopup = (chosenAction) => {
         switch(chosenAction) {
-            case 'upload': // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+            case "upload": 
                 setShowUploadPopup(false);
                 return;
-            case 'delte':
+            case FileHandler.FilePermissions.Delete:
                 setShowDeletePopup(false);
                 return;
-            case 'share':
+            case FileHandler.FilePermissions.Share:
                 setShowSharePopup(false);
                 return;
-            case 'verify':
+            case FileHandler.FilePermissions.Verify:
                 setShowVerifyPopup(false);
                 return;
             default:
-                console.log("NOT A VALID OPERATION");
+                console.log("NOT A VALID OPERATION: ", chosenAction);
                 return;
         }
     }

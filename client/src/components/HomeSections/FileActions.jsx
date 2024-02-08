@@ -8,6 +8,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     const {storeFileContract} = useWeb3();
     const [permissions, setPermissions] = useState([]);
 
+    // When rendering the permissions of the selected file are set
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {
@@ -21,16 +22,18 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         fetchPermissions();
     }, [selectedFile, selectedUser, storeFileContract]);
 
+    // Sets to open the popup for upload file
     const handlePopupOpenUpload = () => {
-        handleOpenPopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+        handleOpenPopup("upload");
     }
 
+    // Downloads the selected file
     const handleDownload = async () => {
         if (selectedFile === null) {
             console.log("Please select a file");
         } else {
             // Verifies if the user has permissions to download
-            if (permissions.includes("download")) {
+            if (permissions.includes(FileHandler.FilePermissions.Download)) {
                 try {
                     // Gets the file from IPFS
                     const fileContent = await FileHandler.getFileFromIPFS(selectedFile.ipfsCID);
@@ -57,11 +60,12 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         }
     }
 
+    // Sets to open the popup to delete file
     const handlePopupOpenDelete = async () => {
         // Verifies if the user has permissions to delete
         if (selectedFile !== null) {
-            if (permissions.includes("delete")) {
-                handleOpenPopup("delte"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+            if (permissions.includes(FileHandler.FilePermissions.Delete)) {
+                handleOpenPopup(FileHandler.FilePermissions.Delete); 
             } else {
                 console.log("User does't have permissions to delete the file.");
             } 
@@ -70,11 +74,12 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         } 
     }
 
+    // Sets to open the popup to share file
     const handlePopupOpenShare = async () => {
         if (selectedFile !== null) {
             // Verifies if the user has permissions to share
-            if (permissions.includes("share")) {
-                handleOpenPopup("share"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+            if (permissions.includes(FileHandler.FilePermissions.Share)) {
+                handleOpenPopup(FileHandler.FilePermissions.Share); 
             } else {
                 console.log("User does't have permissions to share the file.");
             }
@@ -83,11 +88,12 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         }   
     }
 
+    // Sets to open the popup to verify file
     const handlePopupOpenVerify = async () => {
         if (selectedFile !== null) {
             // Verifies if the user has permissions to verify
-            if (permissions.includes("verify")) {
-                handleOpenPopup("verify"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+            if (permissions.includes(FileHandler.FilePermissions.Verify)) {
+                handleOpenPopup(FileHandler.FilePermissions.Verify); 
             } else {
                 console.log("User does't have permissions to verify the file.");
             }
@@ -103,16 +109,16 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
                 <FcExternal size={25} />
             </button>
             <button onClick={handleDownload}>
-                <FcInternal className={!(selectedFile && permissions.includes("download")) ? "faded" : "not-faded"} size={25}/>
+                <FcInternal className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Download)) ? "faded" : "not-faded"} size={25}/>
             </button>
             <button onClick={handlePopupOpenDelete}>
-                <FcFullTrash  className={!(selectedFile && permissions.includes("delete")) ? "faded" : "not-faded"} size={25} />
+                <FcFullTrash  className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Delete)) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenShare}>
-                <FcShare className={!(selectedFile && permissions.includes("share")) ? "faded" : "not-faded"} size={25} />
+                <FcShare className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Share)) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenVerify}>
-                <FcOk  className={!(selectedFile && permissions.includes("verify")) ? "faded" : "not-faded"} size={25} />
+                <FcOk  className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Verify)) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );

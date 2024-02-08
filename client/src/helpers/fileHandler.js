@@ -14,6 +14,14 @@ class FileHandler {
         File: 'file'
     }
 
+    // Enum permissions
+    static FilePermissions = {
+        Download: 'download',
+        Delete: 'delete',
+        Share: 'share',
+        Verify: 'verify'
+    }
+
     // Encrypts a given file using a given symmetric key 
     static async encryptFileWithSymmetricKey(fileBuffer, symmetricKey) {
         const iv = crypto.randomBytes(16); // Initialization Vector for AES

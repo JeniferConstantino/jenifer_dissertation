@@ -39,12 +39,10 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
                                 </div>
                             </>
                         ) : (
-                            // TODO: Later on I'll probably send an alert saying the type is not valid
                             <>ERROR</>
                         )}
                     </div>
             ));
-
             rows.push(<div key={i} className="file-column">{row}</div>);
         }
         return rows;

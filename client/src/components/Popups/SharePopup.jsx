@@ -32,7 +32,7 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         e.preventDefault()
         if (usernameToShare !== "") {
             var userToShareFileWith = await FileHandler.getUserToShareFile(usernameToShare, storeUserContract, selectedUser);
-            if (userToShareFileWith !== null) { 
+            if (userToShareFileWith !== null) {  // User exists
 
                 // Grabs the permissions that the user to share the file with already has over the current file
                 var userPermissions = await FileHandler.getPermissionsUserOverFile(storeFileContract, userToShareFileWith, selectedFile, selectedUser);
@@ -40,13 +40,13 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
                 // Sets the checkboxes to the permissions the user already has
                 userPermissions.forEach(permission => {
                     switch (permission) {
-                      case "download":
+                      case FileHandler.FilePermissions.Download:
                         permissions.download = true;
                         break;
-                      case "delete":
+                      case FileHandler.FilePermissions.Delete:
                         permissions.delete = true;
                         break;
-                      case "share":
+                      case FileHandler.FilePermissions.Share:
                         permissions.share = true;
                         break;
                       default:
