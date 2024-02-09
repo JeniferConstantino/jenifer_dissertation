@@ -5,33 +5,50 @@ import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
 import Logout from './HomeSections/Logout';
-import FileHandler from '../helpers/fileHandler';
+import SharePopup from './Popups/SharePopup';
+import BlockchainManager from '../helpers/BlockchainManager';
+import FileApp from '../helpers/FileApp';
 
 const Home = () => {
 
-    // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [showUploadPopup, setShowUploadPopup] = useState(false);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [showSharePopup, setShowSharePopup] = useState(false);
+    const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [storeFileContract, setStoreFileContract] = useState(null);
+
+
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const {selectedUser, storeFileContract} = useWeb3();
+    const { fileManagerInstance } = useWeb3();
 
     // Get Files
     const fetchFiles = useCallback(async () => {
-        FileHandler.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
-            if(files.length !== 0){
-                setUploadedFiles(files);
-            }
-        }).catch(err => {
-            console.log(err);
-        })
-        .finally( () => {
-            setLoading(false);   
-        });
-    }, [storeFileContract, selectedUser]);
+        setSelectedUser(fileManagerInstance.current.selectedUser);
+        setStoreFileContract(fileManagerInstance.current.storeFileContract);
+        if (storeFileContract!=null && selectedUser!=null) {
+            await BlockchainManager.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+                if(files.length !== 0){
+                    setUploadedFiles(files);
+                }
+            }).catch(err => {
+                console.log(err);
+            })
+            .finally( () => {
+                setLoading(false);   
+            });
+        }
+        
+    }, [fileManagerInstance, selectedUser, storeFileContract]);
 
     // This component runs after the component has mounted
     useEffect(() => {
+
         fetchFiles();
 
         // Add event listener for window resize
@@ -58,53 +75,83 @@ const Home = () => {
     }
 
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
-    const handleUpload = async (e, tempUpdatedUploadedFiles) => {
+    const handleUpload = async (tempUpdatedUploadedFiles) => {
         setUploadedFiles(tempUpdatedUploadedFiles);        
-        handleCloseUploadPopup();
+        handleClosePopup("upload");
     };
 
     // Placeholder functions for file actions (upload, delete, share)
-    const handleOpenUploadPopup = () => {
-        setShowUploadPopup(true);
-    }
+    const handleOpenPopup = (chosenAction) => {
+        switch (chosenAction) {
+            case "upload": 
+                setShowUploadPopup(true);
+                return;
+            case FileApp.FilePermissions.Delete:
+                setShowDeletePopup(true);
+                return;
+            case FileApp.FilePermissions.Share:
+                setShowSharePopup(true);
+                return;
+            case FileApp.FilePermissions.Verify:
+                setShowVerifyPopup(true);
+                return;
+            default:
+                console.log("NOT A VALID OPERATION: ", chosenAction);
+                return;
+        }
+    };
 
     // Performs setup of closing popup
-    const handleCloseUploadPopup = () => {
-        setShowUploadPopup(false);
+    const handleClosePopup = (chosenAction) => {
+        switch(chosenAction) {
+            case "upload": 
+                setShowUploadPopup(false);
+                return;
+            case FileApp.FilePermissions.Delete:
+                setShowDeletePopup(false);
+                return;
+            case FileApp.FilePermissions.Share:
+                setShowSharePopup(false);
+                return;
+            case FileApp.FilePermissions.Verify:
+                setShowVerifyPopup(false);
+                return;
+            default:
+                console.log("NOT A VALID OPERATION: ", chosenAction);
+                return;
+        }
     }
-
-    // Handle file deletion
-    const handleDelete = () => {
-        console.log('Delete file...');
-    };
-
-    // Handle file share
-    const handleShare = () => {
-        console.log('Share file...');
-    };
 
     return (
         <>
-            <div className='content-container'>
-                <Logout />
-                <div className='home-wrapper content-wrapper'>
-                    <div className='shadow-overlay shadow-overlay-home'></div>
-                    <FileActions handleOpenUploadPopup={handleOpenUploadPopup} onDelete={handleDelete} onShare={handleShare} />
-                    <div className='uplBackground'>
-                        <DisplayUplDocs uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn} selectedUser={selectedUser}/>
+            {storeFileContract && selectedUser && (
+                <> 
+                    <div className='content-container'>
+                    <Logout selectedUser={selectedUser}/>
+                    <div className='home-wrapper content-wrapper'>
+                        <div className='shadow-overlay shadow-overlay-home'></div>
+                            {
+                                <FileActions fileManagerInstance={fileManagerInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
+                            }
+                            <div className='uplBackground'>
+                                <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div className='content-container'>
-                <div className='home-wrapper content-wrapper'>
-                    <div className='shadow-overlay shadow-overlay-home'></div>
-                    <h1 className='auditlog-header'>Audit Log</h1>
-                    <AuditLog/>
-                </div>
-            </div>
-
-            <UploadPopup handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} selectedUser={selectedUser} handleClose={handleCloseUploadPopup} /> 
+                
+                    <div className='content-container'>
+                        <div className='home-wrapper content-wrapper'>
+                            <div className='shadow-overlay shadow-overlay-home'></div>
+                            <h1 className='auditlog-header'>Audit Log</h1>
+                            <AuditLog/>
+                        </div>
+                    </div>
+                    <UploadPopup fileManagerInstance={fileManagerInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <SharePopup  fileManagerInstance={fileManagerInstance.current} show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
+                </>
+            )}
+            
+            
         </>
     );
 

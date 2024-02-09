@@ -5,7 +5,7 @@ import {useWeb3} from '../helpers/web3Client';
 
 const Welcome = () => {
     const navigate = useNavigate();
-    const {storeUserBlockchain, selectedUser} = useWeb3();
+    const {storeUserBlockchain, fileManagerInstance} = useWeb3();
     const [username, setUsername] = useState('');
 
     const onNext = async (e) => {
@@ -16,7 +16,7 @@ const Welcome = () => {
 
         // Adds the user to the blockchain and redirects him to the home page
         storeUserBlockchain(username).then(()=>{
-            if (selectedUser.current != null) {
+            if (fileManagerInstance.current != null) {
                 navigate('/home');
             }
         }).catch(err=>{
@@ -44,7 +44,7 @@ const Welcome = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder='username'
-                            className='input-username'
+                            className='input-username input-usernameWelcome'
                         />
                             <div className='button-container'>
                                 <button className='app-button app-button__welcome' onClick={handleBack}>Back</button>

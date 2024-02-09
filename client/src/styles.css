@@ -80,7 +80,7 @@ h1 {
   background-color: #FF812C;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 10px; 
   cursor: pointer;
 }
 
@@ -119,6 +119,7 @@ h1 {
 
 .app-button__login {
   padding: 13% 25%;
+  border-radius: 20px; 
 }
 
 .nearsoftLogo {
@@ -149,6 +150,9 @@ h1 {
   border-radius: 10px; 
   padding: 10px; 
   margin-bottom: 10px; 
+}
+
+.input-usernameWelcome {
   width: 80%;
 }
 
@@ -203,6 +207,15 @@ h1 {
   z-index: 1; 
 }
 
+/*----------- Home Page // File Actions section -----------*/
+.faded {
+  opacity: 0.5; 
+}
+
+.not-faded {
+  opacity: 1;
+}
+
 /*----------- Home Page // Files management section -----------*/
 
 .files-header {
@@ -251,6 +264,11 @@ h1 {
   align-items: center; 
   text-align: center;
   height: 100%;
+}
+
+.uploaded-docs.selected {
+  border-color: #007bff; 
+  background-color: rgba(0, 123, 255, 0.1);
 }
 
 .uploaded-files-container {
@@ -348,6 +366,81 @@ h1 {
   cursor: pointer; 
 }
 
+/*----------- Home Page // POPUP Share Document -----------*/
+.note { 
+  font-size: 13px;
+}
+
+.share-file-description {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  color: #2E231D;
+  padding-left: 1%;
+}
+
+.permissions-checkbox {
+  display: flex;
+  flex-direction: row;
+}
+
+.permissions-checkbox label {
+  margin-right: 30px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.permissions-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 15px;
+  background-color: #f4f4f4;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.permissions-checkbox input[type="checkbox"]::before {
+  content: '';
+  display: block;
+  width: 14px;
+  border-radius: 2px; /* Border radius of the checkbox */
+}
+
+.permissions-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 3px;
+  border-left: 2px solid #2E231D; /* Change the color of the checkmark */
+  border-bottom: 2px solid #2E231D; /* Change the color of the checkmark */
+  transform: rotate(-45deg); /* Rotate the checkmark */
+  margin-top: 3px; /* Adjust the position of the checkmark */
+  margin-left: 4px; /* Adjust the position of the checkmark */
+}
+
+.input-usernameShare {
+  margin-top: 2%;
+  flex: 1;
+}
+
+.input-button-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-button__share {
+  flex: 0 0 auto;
+  padding: 15px;
+}
+
+.readonly {
+  background-color: #f4f4f4; 
+  color: #888; 
+  cursor: not-allowed; 
+  outline: none;
+}
 
 
 

@@ -7,7 +7,9 @@ import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.js
 import UserApp from './UserApp'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
-import EncryptionHandler from './EncryptionHandler'
+import FileManager from './FileManager'
+import EncryptionManager from './EncryptionManager'
+
 
 const Web3Context= createContext();
 
@@ -26,6 +28,7 @@ const Web3Provider = ({children}) => {
     let storeFileContract = useRef();   // kesps the File Contract so its functions can be executed
     let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
     let provider = useRef();
+    let fileManagerInstance = useRef(null);
 
     // Starts the app: contracts and metamask connection 
     const setup = useCallback(async () => {
@@ -63,7 +66,7 @@ const Web3Provider = ({children}) => {
         );
     }
 
-    // Keeps on listening ig the account has changed
+    // Keeps on listening if the account has changed
     window.ethereum.on('accountsChanged', function (accounts){
         selectedAccount.current = accounts[0];
         console.log(`Selected account changed to ${selectedAccount.current}`);
@@ -73,6 +76,7 @@ const Web3Provider = ({children}) => {
     // Logs Out the user - clean variables
     const logOut = () => {
         provider = null;
+        fileManagerInstance.current = null;
         storeFileContract = null;
         storeUserContract = null;
         selectedAccount = null;
@@ -94,6 +98,9 @@ const Web3Provider = ({children}) => {
 
             console.log("User already in the app.");
             selectedUser.current = userStored;
+            // --------- Registration setup ---------------------
+            fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
+            // --------------------------------------------------
             return userStored;
         } catch (error) {
             console.error("Error storing user on the blockchain:", error);
@@ -101,10 +108,10 @@ const Web3Provider = ({children}) => {
         }   
     }
 
-    // Stores the user in the blockchain
+    // Stores the user in the blockchain TODO: I DON'T THINK THIS SHOULD BE HERE
     const storeUserBlockchain = async (userName) => {
         // Prepares the user to be stored
-        const {privateKey, publicKey} = EncryptionHandler.generateKeyPair();
+        const {privateKey, publicKey} = EncryptionManager.generateKeyPair();
         console.log("Key Pair generated");
         var userLogged = new UserApp(selectedAccount.current, userName, publicKey, privateKey);
 
@@ -121,6 +128,9 @@ const Web3Provider = ({children}) => {
                     const { success, message } = registrationEvent.returnValues;
                     if (success) {
                         selectedUser.current = userLogged;
+                        // --------- Registration setup ---------------------
+                        fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
+                        // --------------------------------------------------
                         console.log("Registration - user added in the blockchain.");
                     } else {
                         console.log("message: ", message);
@@ -137,12 +147,11 @@ const Web3Provider = ({children}) => {
     }
 
     const value = {
-        selectedUser,
-        storeFileContract,
         verifyIfUserExists,
         setup,
         logOut,
         storeUserBlockchain,
+        fileManagerInstance,
     }
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>

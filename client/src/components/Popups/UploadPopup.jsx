@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
-import FileHandler from '../../helpers/fileHandler';
-import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, selectedUser, children}) => {
+const UploadPopup = ({fileManagerInstance, handleFileUploaded, uploadedFiles, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -12,8 +10,6 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
 
     const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
-
-    const {storeFileContract} = useWeb3();
 
 
     const handleDragOver = (e) => {
@@ -34,23 +30,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
 
         if(fileAsBuffer){
             try{
-                // Encrypts and adds file to IPFS
-                const {fileCID, symmetricKey, iv} = await FileHandler.addFileToIPFS(fileAsBuffer);
-                console.log('File encrypted and added to IPFS', fileCID);
-
-                // Verifies if the file exists
-                FileHandler.checkFileAlreadyUploaded(fileCID, uploadedFiles);
-
-                // Adds the file to the blockchain
-                FileHandler.storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID, iv, storeFileContract).then(({transactionResult, fileUploaded}) => {
-                    // Updates the state with the result
-                    var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
-                    console.log('File added to the blockchain');
-
-                    handleFileUploaded(e, tempUpdatedUploadedFiles);
-                }).catch(err => {
-                    console.log(err);
-                })       
+                fileManagerInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);       
             } catch (error) {
                 console.error("Error uploading file to IPFS:", error);
             }
@@ -80,6 +60,11 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
         }
     };
 
+    // Sets to close the popup to upload a file
+    const handleCloseUploadPopup = () => {
+        handleClosePopup("upload"); 
+    }
+
     const resetFileState = () => {
         setDroppedFile(null);
     };
@@ -89,7 +74,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClose, show, sele
             <section className='model-main'>
                 {children}
                 <div className='popup-section section-title-upload-popup'>
-                    <FaAngleLeft size={18} className="app-button_back" onClick={handleClose}/>
+                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
                     <h2 className='upload-file-header'>Upload File</h2>
                 </div>
                 <div 

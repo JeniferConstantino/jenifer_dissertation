@@ -1,50 +1,37 @@
 import React from "react";
-import FileHandler from '../../helpers/fileHandler';
 import { FcDocument , FcImageFile} from "react-icons/fc";
+import FileApp from "../../helpers/FileApp";
 
-const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser}) => {
+const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, maxFilesPerColumn}) => {
 
+    // Sends the file to be decrypt
     const decryptAndDownload = async (file) => {
-        
-        try {
-            // Gets the file from IPFS
-            const fileContent = await FileHandler.getFileFromIPFS(file.ipfsCID);
-            console.log("Accessed file in IPFS.");
-
-            // Decrypts the file
-            const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(file, selectedUser, fileContent);
-            const blob = new Blob([decryptedFileBuffer]);
-            console.log("File Decrypted.");
-            
-            // Creates a downloaded link 
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = file.fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        } catch (error) {
-            console.error("Error decrypting or downloading file: ", error);
+        if (selectedFile === file) {
+            setSelectedFile(null);
+        } else {
+            setSelectedFile(file);
         }
-
     }
 
     const renderFiles = () => {
         const rows = [];
-        
         for (let i=0; i<maxFilesPerColumn; i++) {
             const row = uploadedFiles
                 .filter((file, index) => index % maxFilesPerColumn === i)
                 .map((file, index) => (
-                    <div key={index} className="uploaded-docs" onClick={() => decryptAndDownload(file)}>
-                        {file.fileType === FileHandler.FileType.Image ? (
+                    <div 
+                        key={index} 
+                        className={`uploaded-docs ${selectedFile === file ? 'selected' : ''}`} 
+                        onClick={() => decryptAndDownload(file)}
+                    >
+                        {file.fileType === FileApp.FileType.Image ? (
                             <>
                                 <FcImageFile size={50}/>
                                 <div className="fileName">
                                     <span>{file.fileName}</span>
                                 </div>
                             </>
-                        ) : file.fileType === FileHandler.FileType.File ? (
+                        ) : file.fileType === FileApp.FileType.File ? (
                             <>
                                 <FcDocument  size={50}/>
                                 <div className="fileName">
@@ -52,12 +39,10 @@ const DisplayUplDocs = ({uploadedFiles, loading, maxFilesPerColumn, selectedUser
                                 </div>
                             </>
                         ) : (
-                            // TODO: Later on I'll probably send an alert saying the type is not valid
-                            <>ERROR</>
+                            <>ERROR. Type of file not permited: {file.fileType}</>
                         )}
                     </div>
             ));
-
             rows.push(<div key={i} className="file-column">{row}</div>);
         }
         return rows;
