@@ -7,7 +7,6 @@ import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.js
 import UserApp from './UserApp'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
-import EncryptionHandler from './EncryptionHandler'
 import FileManager from './FileManager'
 import EncryptionManager from './EncryptionManager'
 
