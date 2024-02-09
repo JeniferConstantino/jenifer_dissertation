@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
-import FileHandler from '../../helpers/fileHandler';
+import FileHandler from '../../helpers/FileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
@@ -77,8 +77,9 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show,
         }
     };
 
+    // Sets to close the popup to upload a file
     const handleCloseUploadPopup = () => {
-        handleClosePopup("upload"); // TODO: PUT THIS AS A VARIABLE READ FROM ANOTHER PLACE
+        handleClosePopup("upload"); 
     }
 
     const resetFileState = () => {

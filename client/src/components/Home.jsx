@@ -5,12 +5,11 @@ import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
 import Logout from './HomeSections/Logout';
-import FileHandler from '../helpers/fileHandler';
+import FileHandler from '../helpers/FileHandler';
 import SharePopup from './Popups/SharePopup';
 
 const Home = () => {
 
-    // TODO: I think this will have to change and instead I'll have to keep an array of uploaded files. (This way I can also get the file name)
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [loading, setLoading] = useState(true);
 

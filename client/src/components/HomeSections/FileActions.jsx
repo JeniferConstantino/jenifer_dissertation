@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
-import FileHandler from '../../helpers/fileHandler';
+import FileHandler from '../../helpers/FileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 
 const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
@@ -8,7 +8,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
     const {storeFileContract} = useWeb3();
     const [permissions, setPermissions] = useState([]);
 
-    // When rendering the permissions of the selected file are set
+    // When rendering, the permissions of the selected file are set
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {

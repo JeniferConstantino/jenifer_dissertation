@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import FileHandler from '../../helpers/fileHandler';
+import FileHandler from '../../helpers/FileHandler';
 import {useWeb3} from '../../helpers/web3Client';
 
 const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, children}) => {

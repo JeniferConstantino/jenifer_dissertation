@@ -63,7 +63,7 @@ const Web3Provider = ({children}) => {
         );
     }
 
-    // Keeps on listening ig the account has changed
+    // Keeps on listening if the account has changed
     window.ethereum.on('accountsChanged', function (accounts){
         selectedAccount.current = accounts[0];
         console.log(`Selected account changed to ${selectedAccount.current}`);

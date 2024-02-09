@@ -1,9 +1,10 @@
 import React from "react";
-import FileHandler from '../../helpers/fileHandler';
+import FileHandler from '../../helpers/FileHandler';
 import { FcDocument , FcImageFile} from "react-icons/fc";
 
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, maxFilesPerColumn}) => {
 
+    // Sends the file to be decrypt
     const decryptAndDownload = async (file) => {
         if (selectedFile === file) {
             setSelectedFile(null);
