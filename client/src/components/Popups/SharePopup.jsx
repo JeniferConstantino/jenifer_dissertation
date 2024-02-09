@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import FileHandler from '../../helpers/FileHandler';
-import {useWeb3} from '../../helpers/web3Client';
+import BlockchainManager from '../../helpers/BlockchainManager';
+import FileApp from '../../helpers/FileApp';
 
-const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, children}) => {
+const SharePopup = ({fileManagerInstance, handleClosePopup, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
     const [userShareFileWith, setUserShareFileWith] = useState(null);
     const [showPermissions, setShowPermissions] = useState(false);
@@ -13,8 +13,6 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         share: false
     });
 
-    const {storeUserContract, storeFileContract} = useWeb3();
-
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
 
     // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
@@ -23,7 +21,7 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
         console.log('Share file ...');
         
         // Performs the sharing
-        FileHandler.performFileShare(storeFileContract, selectedFile, permissions, selectedUser, userShareFileWith);
+        fileManagerInstance.shareFile(selectedFile, permissions, userShareFileWith);
         setUsernameToShare('');
         setShowPermissions(false);
     }
@@ -32,22 +30,22 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
-            var userToShareFileWith = await FileHandler.getUserToShareFile(usernameToShare, storeUserContract, selectedUser);
+            var userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, fileManagerInstance.storeUserContract, fileManagerInstance.selectedUser);
             if (userToShareFileWith !== null) {  // User exists
 
                 // Grabs the permissions that the user to share the file with already has over the current file
-                var userPermissions = await FileHandler.getPermissionsUserOverFile(storeFileContract, userToShareFileWith, selectedFile, selectedUser);
+                var userPermissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerInstance.storeFileContract, userToShareFileWith, selectedFile, fileManagerInstance.selectedUser);
                 
                 // Sets the checkboxes to the permissions the user already has
                 userPermissions.forEach(permission => {
                     switch (permission) {
-                      case FileHandler.FilePermissions.Download:
+                      case FileApp.FilePermissions.Download:
                         permissions.download = true;
                         break;
-                      case FileHandler.FilePermissions.Delete:
+                      case FileApp.FilePermissions.Delete:
                         permissions.delete = true;
                         break;
-                      case FileHandler.FilePermissions.Share:
+                      case FileApp.FilePermissions.Share:
                         permissions.share = true;
                         break;
                       default:
@@ -78,7 +76,7 @@ const SharePopup = ({handleClosePopup, show, selectedFile, selectedUser, childre
     const handleCloseShareNamePopup = () => {
         setUsernameToShare('');
         setShowPermissions(false);
-        handleClosePopup(FileHandler.FilePermissions.Share); 
+        handleClosePopup(FileApp.FilePermissions.Share); 
     }
 
     // Hides the permissions from the popup

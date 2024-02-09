@@ -2,11 +2,11 @@ import React from "react";
 import { GoPerson   } from "react-icons/go";
 import {useWeb3} from '../../helpers/web3Client';
 
-const Logout = () => {
+const Logout = ({selectedUser}) => {
 
-    const {logOut, selectedUser} = useWeb3();
+    const {logOut} = useWeb3();
 
-    // Performs the users' loggout
+    // Performs the users' logout
     const handleLogout = () => {           
         logOut();              
     }
@@ -17,7 +17,7 @@ const Logout = () => {
                 <GoPerson className='icon-person'/>
             </div>
             <div className='button-column'>
-                <p className='username-text'>Username: {selectedUser.current.name}</p>
+                <p className='username-text'>Username: {selectedUser.name}</p>
                 <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button> 
             </div>
         </div>

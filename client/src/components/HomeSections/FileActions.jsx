@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
-import FileHandler from '../../helpers/FileHandler';
-import {useWeb3} from '../../helpers/web3Client';
+import FileApp from '../../helpers/FileApp';
+import BlockchainManager from '../../helpers/BlockchainManager';
 
-const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
+const FileActions = ({fileManagerInstance, handleOpenPopup, selectedFile}) => {
     
-    const {storeFileContract} = useWeb3();
     const [permissions, setPermissions] = useState([]);
 
     // When rendering, the permissions of the selected file are set
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {
-                const permissions = await FileHandler.getPermissionsUserOverFile(storeFileContract, selectedUser.current, selectedFile, selectedUser);
+                const permissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerInstance.storeFileContract, fileManagerInstance.selectedUser, selectedFile, fileManagerInstance.selectedUser);
                 setPermissions(permissions);
             } else {
                 setPermissions([]);
@@ -20,7 +19,7 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
         };
 
         fetchPermissions();
-    }, [selectedFile, selectedUser, storeFileContract]);
+    }, [selectedFile, fileManagerInstance]);
 
     // Sets to open the popup for upload file
     const handlePopupOpenUpload = () => {
@@ -29,76 +28,57 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
 
     // Downloads the selected file
     const handleDownload = async () => {
-        if (selectedFile === null) {
-            console.log("Please select a file");
-        } else {
-            // Verifies if the user has permissions to download
-            if (permissions.includes(FileHandler.FilePermissions.Download)) {
-                try {
-                    // Gets the file from IPFS
-                    const fileContent = await FileHandler.getFileFromIPFS(selectedFile.ipfsCID);
-                    console.log("Accessed file in IPFS.");
-        
-                    // Decrypts the file
-                    const decryptedFileBuffer = await FileHandler.decryptFileWithSymmetricKey(storeFileContract, selectedFile, selectedUser, fileContent);
-                    const blob = new Blob([decryptedFileBuffer]);
-                    console.log("File Decrypted.");
-                    
-                    // Creates a downloaded link 
-                    const downloadLink = document.createElement("a");
-                    downloadLink.href = URL.createObjectURL(blob);
-                    downloadLink.download = selectedFile.fileName;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                } catch (error) {
-                    console.error("Error decrypting or downloading file: ", error);
-                }
+        // Verifies if the user has permissions to download
+        if (permissions.includes(FileApp.FilePermissions.Download)) {
+            if (selectedFile === null) {
+                console.log("Please select a file");
             } else {
-                console.log("User does't have permissions to download the file.");
+                fileManagerInstance.downloadFile(selectedFile);
             }
+        } else {
+            console.log("User does't have permissions to download the file.");
         }
     }
 
     // Sets to open the popup to delete file
     const handlePopupOpenDelete = async () => {
-        // Verifies if the user has permissions to delete
-        if (selectedFile !== null) {
-            if (permissions.includes(FileHandler.FilePermissions.Delete)) {
-                handleOpenPopup(FileHandler.FilePermissions.Delete); 
+        if (selectedFile === null) {
+            console.log("Please select a file");
+        } else {
+            // Verifies if the user has permissions to delete
+            if (permissions.includes(FileApp.FilePermissions.Delete)) {
+                handleOpenPopup(FileApp.FilePermissions.Delete); 
             } else {
                 console.log("User does't have permissions to delete the file.");
             } 
-        } else {
-            console.log("Please select a file");
-        } 
+        }
     }
 
     // Sets to open the popup to share file
     const handlePopupOpenShare = async () => {
-        if (selectedFile !== null) {
+        if (selectedFile === null) {
+            console.log("Please select a file");
+        } else {
             // Verifies if the user has permissions to share
-            if (permissions.includes(FileHandler.FilePermissions.Share)) {
-                handleOpenPopup(FileHandler.FilePermissions.Share); 
+            if (permissions.includes(FileApp.FilePermissions.Share)) {
+                handleOpenPopup(FileApp.FilePermissions.Share); 
             } else {
                 console.log("User does't have permissions to share the file.");
             }
-        } else {
-            console.log("Please select a file");
-        }   
+        }
     }
 
     // Sets to open the popup to verify file
     const handlePopupOpenVerify = async () => {
-        if (selectedFile !== null) {
+        if (selectedFile === null) {
+            console.log("Please select a file");
+        } else {
             // Verifies if the user has permissions to verify
-            if (permissions.includes(FileHandler.FilePermissions.Verify)) {
-                handleOpenPopup(FileHandler.FilePermissions.Verify); 
+            if (permissions.includes(FileApp.FilePermissions.Verify)) {
+                handleOpenPopup(FileApp.FilePermissions.Verify); 
             } else {
                 console.log("User does't have permissions to verify the file.");
             }
-        } else {
-            console.log("Please select a file");
         }
     }
 
@@ -109,16 +89,16 @@ const FileActions = ({handleOpenPopup, selectedUser, selectedFile}) => {
                 <FcExternal size={25} />
             </button>
             <button onClick={handleDownload}>
-                <FcInternal className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Download)) ? "faded" : "not-faded"} size={25}/>
+                <FcInternal className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Download)) ? "faded" : "not-faded"} size={25}/>
             </button>
             <button onClick={handlePopupOpenDelete}>
-                <FcFullTrash  className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Delete)) ? "faded" : "not-faded"} size={25} />
+                <FcFullTrash  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Delete)) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenShare}>
-                <FcShare className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Share)) ? "faded" : "not-faded"} size={25} />
+                <FcShare className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Share)) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenVerify}>
-                <FcOk  className={!(selectedFile && permissions.includes(FileHandler.FilePermissions.Verify)) ? "faded" : "not-faded"} size={25} />
+                <FcOk  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Verify)) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );

@@ -1,6 +1,6 @@
 import React from "react";
-import FileHandler from '../../helpers/FileHandler';
 import { FcDocument , FcImageFile} from "react-icons/fc";
+import FileApp from "../../helpers/FileApp";
 
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, maxFilesPerColumn}) => {
 
@@ -15,7 +15,6 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
 
     const renderFiles = () => {
         const rows = [];
-        
         for (let i=0; i<maxFilesPerColumn; i++) {
             const row = uploadedFiles
                 .filter((file, index) => index % maxFilesPerColumn === i)
@@ -25,14 +24,14 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
                         className={`uploaded-docs ${selectedFile === file ? 'selected' : ''}`} 
                         onClick={() => decryptAndDownload(file)}
                     >
-                        {file.fileType === FileHandler.FileType.Image ? (
+                        {file.fileType === FileApp.FileType.Image ? (
                             <>
                                 <FcImageFile size={50}/>
                                 <div className="fileName">
                                     <span>{file.fileName}</span>
                                 </div>
                             </>
-                        ) : file.fileType === FileHandler.FileType.File ? (
+                        ) : file.fileType === FileApp.FileType.File ? (
                             <>
                                 <FcDocument  size={50}/>
                                 <div className="fileName">
@@ -40,7 +39,7 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
                                 </div>
                             </>
                         ) : (
-                            <>ERROR</>
+                            <>ERROR. Type of file not permited: {file.fileType}</>
                         )}
                     </div>
             ));

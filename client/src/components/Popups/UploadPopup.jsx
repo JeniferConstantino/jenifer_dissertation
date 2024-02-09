@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
-import FileHandler from '../../helpers/FileHandler';
-import {useWeb3} from '../../helpers/web3Client';
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show, selectedUser, children}) => {
+const UploadPopup = ({fileManagerInstance, handleFileUploaded, uploadedFiles, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -12,8 +10,6 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show,
 
     const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
-
-    const {storeFileContract} = useWeb3();
 
 
     const handleDragOver = (e) => {
@@ -34,20 +30,7 @@ const UploadPopup = ({handleFileUploaded, uploadedFiles, handleClosePopup, show,
 
         if(fileAsBuffer){
             try{
-                // Encrypts and adds file to IPFS
-                const {fileCID, symmetricKey, iv} = await FileHandler.addFileToIPFS(fileAsBuffer);
-                console.log('File encrypted and added to IPFS', fileCID);
-
-                // Adds the file to the blockchain
-                FileHandler.storeFileBlockchain(fileUpl, symmetricKey, selectedUser.current, fileCID, iv, storeFileContract).then(({receipt, fileUploaded}) => {
-                    // Updates the state with the result
-                    var tempUpdatedUploadedFiles = [...uploadedFiles, fileUploaded];
-                    console.log('File added to the blockchain');
-
-                    handleFileUploaded(e, tempUpdatedUploadedFiles);
-                }).catch(err => {
-                    console.log(err);
-                })       
+                fileManagerInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);       
             } catch (error) {
                 console.error("Error uploading file to IPFS:", error);
             }
