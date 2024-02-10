@@ -6,7 +6,6 @@ import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
 import Logout from './HomeSections/Logout';
 import SharePopup from './Popups/SharePopup';
-import BlockchainManager from '../helpers/BlockchainManager';
 import FileApp from '../helpers/FileApp';
 
 const Home = () => {
@@ -32,7 +31,7 @@ const Home = () => {
         setSelectedUser(fileManagerFacadeInstance.current.selectedUser);
         setStoreFileContract(fileManagerFacadeInstance.current.storeFileContract);
         if (storeFileContract!=null && selectedUser!=null) {
-            await BlockchainManager.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
                 if(files.length !== 0){
                     setUploadedFiles(files);
                 }

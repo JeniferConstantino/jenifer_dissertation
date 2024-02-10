@@ -1,7 +1,7 @@
 import Command from "./Command";
 import FileApp from './../FileApp';
-import IPFSManager from './../IPFSManager';
-import BlockchainManager from './../BlockchainManager';
+import IPFSManager from '../Managers/IPFSManager';
+import BlockchainManager from '../Managers/BlockchainManager';
 
 
 // Concrete command for uploading a file

@@ -1,6 +1,6 @@
-import IPFSManager from './IPFSManager';
-import BlockchainManager from './BlockchainManager';
-import EncryptionManager from './EncryptionManager';
+import IPFSManager from './Managers/IPFSManager';
+import BlockchainManager from './Managers/BlockchainManager';
+import EncryptionManager from './Managers/EncryptionManager';
 import UploadFileCommand from './Commands/UploadFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
@@ -32,6 +32,25 @@ class FileManagerFacade {
   async shareFile(selectedFile, permissions, userToShareFileWith) {
     const shareCommand = new ShareFileCommand(this, selectedFile, permissions, userToShareFileWith);
     shareCommand.execute();
+  }
+
+  async getFilesUploadedBlockchain(storeFileContract, selectedUser) {
+    const files = await BlockchainManager.getFilesUploadedBlockchain(storeFileContract, selectedUser);
+    return files;
+  }
+
+  async getUserToShareFile(usernameToShare) {
+    const userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, this.storeUserContract, this.selectedUser);
+    return userToShareFileWith;
+  }
+
+  async getPermissionsUserOverFile(userToSeePermission, selectedFile){
+    const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.storeFileContract, userToSeePermission, selectedFile, this.selectedUser);
+    return userPermissions;
+  }
+
+  generateKeyPair() {
+    EncryptionManager.generateKeyPair();
   }
 
   // TODO: get CID from the blockchain, delete file from IPFS, delete CID from the blockchain

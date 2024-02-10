@@ -8,7 +8,6 @@ import UserApp from './UserApp'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
 import FileManagerFacade from './FileManagerFacade'
-import EncryptionManager from './EncryptionManager'
 
 
 const Web3Context= createContext();
@@ -111,7 +110,7 @@ const Web3Provider = ({children}) => {
     // Stores the user in the blockchain TODO: I DON'T THINK THIS SHOULD BE HERE
     const storeUserBlockchain = async (userName) => {
         // Prepares the user to be stored
-        const {privateKey, publicKey} = EncryptionManager.generateKeyPair();
+        const {privateKey, publicKey} = fileManagerFacadeInstance.generateKeyPair();
         console.log("Key Pair generated");
         var userLogged = new UserApp(selectedAccount.current, userName, publicKey, privateKey);
 

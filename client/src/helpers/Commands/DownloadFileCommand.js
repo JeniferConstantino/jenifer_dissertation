@@ -1,6 +1,6 @@
 import Command from "./Command";
-import IPFSManager from './../IPFSManager';
-import EncryptionManager from './../EncryptionManager';
+import IPFSManager from '../Managers/IPFSManager';
+import EncryptionManager from '../Managers/EncryptionManager';
 
 class DownloadFileCommand extends Command {
     constructor(fileManager, selectedFile){

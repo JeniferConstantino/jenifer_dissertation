@@ -1,6 +1,6 @@
 import Command from "./Command";
 import {Buffer} from 'buffer';
-import EncryptionManager from './../EncryptionManager';
+import EncryptionManager from '../Managers/EncryptionManager';
 
 
 class ShareFileCommand extends Command {

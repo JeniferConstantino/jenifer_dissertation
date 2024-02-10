@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import BlockchainManager from '../../helpers/BlockchainManager';
 import FileApp from '../../helpers/FileApp';
 
 const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selectedFile, children}) => {
@@ -30,11 +29,11 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
-            var userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, fileManagerFacadeInstance.storeUserContract, fileManagerFacadeInstance.selectedUser);
+            var userToShareFileWith = await fileManagerFacadeInstance.getUserToShareFile(usernameToShare);
             if (userToShareFileWith !== null) {  // User exists
 
                 // Grabs the permissions that the user to share the file with already has over the current file
-                var userPermissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerFacadeInstance.storeFileContract, userToShareFileWith, selectedFile, fileManagerFacadeInstance.selectedUser);
+                var userPermissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(userToShareFileWith, selectedFile);
                 
                 // Sets the checkboxes to the permissions the user already has
                 userPermissions.forEach(permission => {

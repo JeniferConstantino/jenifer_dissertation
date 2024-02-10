@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
 import FileApp from '../../helpers/FileApp';
-import BlockchainManager from '../../helpers/BlockchainManager';
 
 const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile}) => {
     
@@ -11,7 +10,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {
-                const permissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerFacadeInstance.storeFileContract, fileManagerFacadeInstance.selectedUser, selectedFile, fileManagerFacadeInstance.selectedUser);
+                const permissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(fileManagerFacadeInstance.selectedUser, selectedFile);
                 setPermissions(permissions);
             } else {
                 setPermissions([]);
