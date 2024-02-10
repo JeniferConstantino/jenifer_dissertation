@@ -3,7 +3,7 @@ import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-ico
 import FileApp from '../../helpers/FileApp';
 import BlockchainManager from '../../helpers/BlockchainManager';
 
-const FileActions = ({fileManagerInstance, handleOpenPopup, selectedFile}) => {
+const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile}) => {
     
     const [permissions, setPermissions] = useState([]);
 
@@ -11,7 +11,7 @@ const FileActions = ({fileManagerInstance, handleOpenPopup, selectedFile}) => {
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {
-                const permissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerInstance.storeFileContract, fileManagerInstance.selectedUser, selectedFile, fileManagerInstance.selectedUser);
+                const permissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerFacadeInstance.storeFileContract, fileManagerFacadeInstance.selectedUser, selectedFile, fileManagerFacadeInstance.selectedUser);
                 setPermissions(permissions);
             } else {
                 setPermissions([]);
@@ -19,7 +19,7 @@ const FileActions = ({fileManagerInstance, handleOpenPopup, selectedFile}) => {
         };
 
         fetchPermissions();
-    }, [selectedFile, fileManagerInstance]);
+    }, [selectedFile, fileManagerFacadeInstance]);
 
     // Sets to open the popup for upload file
     const handlePopupOpenUpload = () => {
@@ -33,7 +33,7 @@ const FileActions = ({fileManagerInstance, handleOpenPopup, selectedFile}) => {
             if (selectedFile === null) {
                 console.log("Please select a file");
             } else {
-                fileManagerInstance.downloadFile(selectedFile);
+                fileManagerFacadeInstance.downloadFile(selectedFile);
             }
         } else {
             console.log("User does't have permissions to download the file.");

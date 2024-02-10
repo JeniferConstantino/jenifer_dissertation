@@ -23,10 +23,7 @@ class IPFSManager {
         });
         return Buffer.from(response.data);
     }
-
-    deleteFile(ipfsCID) {
-        // Implementation of deleting file from IPFS
-    }
+    
 }
 
 export default IPFSManager;

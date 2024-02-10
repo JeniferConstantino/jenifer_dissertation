@@ -7,7 +7,7 @@ import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.js
 import UserApp from './UserApp'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
-import FileManager from './FileManager'
+import FileManagerFacade from './FileManagerFacade'
 import EncryptionManager from './EncryptionManager'
 
 
@@ -28,7 +28,7 @@ const Web3Provider = ({children}) => {
     let storeFileContract = useRef();   // kesps the File Contract so its functions can be executed
     let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
     let provider = useRef();
-    let fileManagerInstance = useRef(null);
+    let fileManagerFacadeInstance = useRef(null);
 
     // Starts the app: contracts and metamask connection 
     const setup = useCallback(async () => {
@@ -76,7 +76,7 @@ const Web3Provider = ({children}) => {
     // Logs Out the user - clean variables
     const logOut = () => {
         provider = null;
-        fileManagerInstance.current = null;
+        fileManagerFacadeInstance.current = null;
         storeFileContract = null;
         storeUserContract = null;
         selectedAccount = null;
@@ -99,7 +99,7 @@ const Web3Provider = ({children}) => {
             console.log("User already in the app.");
             selectedUser.current = userStored;
             // --------- Registration setup ---------------------
-            fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
+            fileManagerFacadeInstance.current = new FileManagerFacade(storeFileContract.current, storeUserContract.current, selectedUser.current);
             // --------------------------------------------------
             return userStored;
         } catch (error) {
@@ -129,7 +129,7 @@ const Web3Provider = ({children}) => {
                     if (success) {
                         selectedUser.current = userLogged;
                         // --------- Registration setup ---------------------
-                        fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
+                        fileManagerFacadeInstance.current = new FileManagerFacade(storeFileContract.current, storeUserContract.current, selectedUser.current);
                         // --------------------------------------------------
                         console.log("Registration - user added in the blockchain.");
                     } else {
@@ -151,7 +151,7 @@ const Web3Provider = ({children}) => {
         setup,
         logOut,
         storeUserBlockchain,
-        fileManagerInstance,
+        fileManagerFacadeInstance,
     }
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>

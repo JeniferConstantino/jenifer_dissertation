@@ -3,7 +3,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 import BlockchainManager from '../../helpers/BlockchainManager';
 import FileApp from '../../helpers/FileApp';
 
-const SharePopup = ({fileManagerInstance, handleClosePopup, show, selectedFile, children}) => {
+const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
     const [userShareFileWith, setUserShareFileWith] = useState(null);
     const [showPermissions, setShowPermissions] = useState(false);
@@ -21,7 +21,7 @@ const SharePopup = ({fileManagerInstance, handleClosePopup, show, selectedFile, 
         console.log('Share file ...');
         
         // Performs the sharing
-        fileManagerInstance.shareFile(selectedFile, permissions, userShareFileWith);
+        fileManagerFacadeInstance.shareFile(selectedFile, permissions, userShareFileWith);
         setUsernameToShare('');
         setShowPermissions(false);
     }
@@ -30,11 +30,11 @@ const SharePopup = ({fileManagerInstance, handleClosePopup, show, selectedFile, 
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
-            var userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, fileManagerInstance.storeUserContract, fileManagerInstance.selectedUser);
+            var userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, fileManagerFacadeInstance.storeUserContract, fileManagerFacadeInstance.selectedUser);
             if (userToShareFileWith !== null) {  // User exists
 
                 // Grabs the permissions that the user to share the file with already has over the current file
-                var userPermissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerInstance.storeFileContract, userToShareFileWith, selectedFile, fileManagerInstance.selectedUser);
+                var userPermissions = await BlockchainManager.getPermissionsUserOverFile(fileManagerFacadeInstance.storeFileContract, userToShareFileWith, selectedFile, fileManagerFacadeInstance.selectedUser);
                 
                 // Sets the checkboxes to the permissions the user already has
                 userPermissions.forEach(permission => {

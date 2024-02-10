@@ -5,7 +5,7 @@ import {useWeb3} from '../helpers/web3Client';
 
 const Welcome = () => {
     const navigate = useNavigate();
-    const {storeUserBlockchain, fileManagerInstance} = useWeb3();
+    const {storeUserBlockchain, fileManagerFacadeInstance} = useWeb3();
     const [username, setUsername] = useState('');
 
     const onNext = async (e) => {
@@ -16,7 +16,7 @@ const Welcome = () => {
 
         // Adds the user to the blockchain and redirects him to the home page
         storeUserBlockchain(username).then(()=>{
-            if (fileManagerInstance.current != null) {
+            if (fileManagerFacadeInstance.current != null) {
                 navigate('/home');
             }
         }).catch(err=>{

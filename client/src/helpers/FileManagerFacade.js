@@ -4,7 +4,7 @@ import EncryptionManager from './EncryptionManager';
 import FileApp from './FileApp';
 import {Buffer} from 'buffer';
 
-class FileManager {
+class FileManagerFacade {
 
   constructor(storeFileContract, storeUserContract, selectedUser) {
       this.ipfsManager = new IPFSManager();
@@ -92,4 +92,4 @@ class FileManager {
 
 }
 
-export default FileManager;
+export default FileManagerFacade;
