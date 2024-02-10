@@ -47,12 +47,9 @@ const Home = () => {
 
     // This component runs after the component has mounted
     useEffect(() => {
-
         fetchFiles();
-
         // Add event listener for window resize
         window.addEventListener('resize', handleWindowResize);
-
         // Cleanup the event listener on component unmount
         return () => {
             window.removeEventListener('resize', handleWindowResize);
