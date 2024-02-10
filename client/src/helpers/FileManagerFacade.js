@@ -15,6 +15,7 @@ class FileManagerFacade {
       this.selectedUser = selectedUser;
   }
 
+  // Uploads File into the system
   async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles) {
     // Encrypts and adds file to IPFS
     const {fileCID, symmetricKey, iv} = await IPFSManager.addFileToIPFS(fileAsBuffer);
@@ -35,10 +36,10 @@ class FileManagerFacade {
     })
   }
   
+  // Gets the file from IPFS, decryts and downloads
   async downloadFile(selectedFile) {
     try {
       // Gets the file from IPFS
-      console.log("selectedFile.ipfsCID: ", selectedFile);
       const fileContent = await IPFSManager.getFileFromIPFS(selectedFile.ipfsCID);
       console.log("Accessed file in IPFS.");
 
@@ -59,7 +60,7 @@ class FileManagerFacade {
     } 
   }
   
-  // todo: get CID from the blockchain, delete file from IPFS, delete CID from the blockchain
+  // TODO: get CID from the blockchain, delete file from IPFS, delete CID from the blockchain
   deleteFile() {
     
   }
@@ -86,6 +87,7 @@ class FileManagerFacade {
     console.log("File Shared. Receipt: ", receipt); 
   }
 
+  // TODO
   verifyFile() {
       
   }
