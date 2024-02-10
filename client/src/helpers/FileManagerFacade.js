@@ -1,4 +1,3 @@
-import IPFSManager from './Managers/IPFSManager';
 import BlockchainManager from './Managers/BlockchainManager';
 import EncryptionManager from './Managers/EncryptionManager';
 import UploadFileCommand from './Commands/UploadFileCommand';
@@ -8,9 +7,6 @@ import ShareFileCommand from './Commands/ShareFileCommand';
 class FileManagerFacade {
 
   constructor(storeFileContract, storeUserContract, selectedUser) {
-      this.ipfsManager = new IPFSManager();
-      this.blockchainManager = new BlockchainManager();
-      this.encryptionManager = new EncryptionManager();
       this.storeFileContract = storeFileContract;
       this.storeUserContract = storeUserContract;
       this.selectedUser = selectedUser;
