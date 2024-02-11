@@ -6,7 +6,6 @@ import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './Popups/UploadPopup';
 import Logout from './HomeSections/Logout';
 import SharePopup from './Popups/SharePopup';
-import BlockchainManager from '../helpers/BlockchainManager';
 import FileApp from '../helpers/FileApp';
 
 const Home = () => {
@@ -25,14 +24,14 @@ const Home = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
-    const { fileManagerInstance } = useWeb3();
+    const { fileManagerFacadeInstance } = useWeb3();
 
     // Get Files
     const fetchFiles = useCallback(async () => {
-        setSelectedUser(fileManagerInstance.current.selectedUser);
-        setStoreFileContract(fileManagerInstance.current.storeFileContract);
+        setSelectedUser(fileManagerFacadeInstance.current.selectedUser);
+        setStoreFileContract(fileManagerFacadeInstance.current.storeFileContract);
         if (storeFileContract!=null && selectedUser!=null) {
-            await BlockchainManager.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
                 if(files.length !== 0){
                     setUploadedFiles(files);
                 }
@@ -44,16 +43,13 @@ const Home = () => {
             });
         }
         
-    }, [fileManagerInstance, selectedUser, storeFileContract]);
+    }, [fileManagerFacadeInstance, selectedUser, storeFileContract]);
 
     // This component runs after the component has mounted
     useEffect(() => {
-
         fetchFiles();
-
         // Add event listener for window resize
         window.addEventListener('resize', handleWindowResize);
-
         // Cleanup the event listener on component unmount
         return () => {
             window.removeEventListener('resize', handleWindowResize);
@@ -131,7 +127,7 @@ const Home = () => {
                     <div className='home-wrapper content-wrapper'>
                         <div className='shadow-overlay shadow-overlay-home'></div>
                             {
-                                <FileActions fileManagerInstance={fileManagerInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
+                                <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
                             }
                             <div className='uplBackground'>
                                 <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
@@ -146,8 +142,8 @@ const Home = () => {
                             <AuditLog/>
                         </div>
                     </div>
-                    <UploadPopup fileManagerInstance={fileManagerInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
-                    <SharePopup  fileManagerInstance={fileManagerInstance.current} show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                 </>
             )}
             

@@ -1,6 +1,6 @@
 import React from "react";
 
-const AuditLog = ({ipfsCIDAndType, loading}) => {
+const AuditLog = () => {
     return (
         <>
             <div className="auditLog-container">

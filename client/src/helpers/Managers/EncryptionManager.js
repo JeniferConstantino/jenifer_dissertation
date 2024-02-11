@@ -67,16 +67,6 @@ class EncryptionManager {
             throw new Error("Error decrypting file.");
         }        
     }
-
-    encrypt(fileData) {
-        // Implementation of encryption
-        // Returns encrypted file data
-    }
-
-    decrypt(encryptedFileData) {
-        // Implementation of decryption
-        // Returns decrypted file data
-    }
 }
 
 export default EncryptionManager;

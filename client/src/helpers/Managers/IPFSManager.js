@@ -1,7 +1,7 @@
-import {ipfs} from '../../ipfs';
+import {ipfs} from '../../../ipfs';
 import EncryptionManager from './EncryptionManager';
 import axios from 'axios';
-import { IPFS_BASE_URL } from '../../ipfs';
+import { IPFS_BASE_URL } from '../../../ipfs';
 
 class IPFSManager {
 
@@ -23,10 +23,7 @@ class IPFSManager {
         });
         return Buffer.from(response.data);
     }
-
-    deleteFile(ipfsCID) {
-        // Implementation of deleting file from IPFS
-    }
+    
 }
 
 export default IPFSManager;

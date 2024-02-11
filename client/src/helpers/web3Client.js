@@ -3,12 +3,9 @@ import StoreFile from '../contracts/contracts/StoreFile.sol/StoreFile.json'
 import StoreUser from '../contracts/contracts/StoreUser.sol/StoreUser.json'
 import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
 import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.json'
-
-import UserApp from './UserApp'
+import FileManagerFacade from './FileManagerFacade'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
-import FileManager from './FileManager'
-import EncryptionManager from './EncryptionManager'
 
 
 const Web3Context= createContext();
@@ -24,11 +21,10 @@ export const useWeb3 = () => {
 const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();     // Keeps track of wallet account change
-    let selectedUser = useRef(null);    // User logged in
-    let storeFileContract = useRef();   // kesps the File Contract so its functions can be executed
+    let storeFileContract = useRef();   // keeps the File Contract so its functions can be executed
     let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
     let provider = useRef();
-    let fileManagerInstance = useRef(null);
+    let fileManagerFacadeInstance = useRef(null);
 
     // Starts the app: contracts and metamask connection 
     const setup = useCallback(async () => {
@@ -53,6 +49,8 @@ const Web3Provider = ({children}) => {
             contractInitialization(StoreFile, StoreFile_ContractAddress, storeFileContract, web3);
             console.log("Contracts initialized");
 
+            fileManagerFacadeInstance.current = new FileManagerFacade(storeFileContract.current, storeUserContract.current);
+            fileManagerFacadeInstance.current._selectedAccount = selectedAccount;
         } catch (error) {
             return "Something went wrong while trying to authenticate the user. Make sure you're connected to metamask extension or ensure the contracts are deployed in the network you're in.";
         }
@@ -76,82 +74,18 @@ const Web3Provider = ({children}) => {
     // Logs Out the user - clean variables
     const logOut = () => {
         provider = null;
-        fileManagerInstance.current = null;
+        fileManagerFacadeInstance.current = null;
         storeFileContract = null;
         storeUserContract = null;
         selectedAccount = null;
-        selectedUser = null;
         window.location.href = '/'; // Redirects the user to the login page
         return true
     }
 
-    // Sees if the user already exists in the app by seeing if the account is already stored in the blockchain
-    const verifyIfUserExists = async () => {    
-        try {
-            // Verifies if the user exist
-            var userStored = await storeUserContract.current.methods.getUser(selectedAccount.current).call({from: selectedAccount.current});
-            
-            if (userStored.name === "") {
-                console.log("User first time in the app");
-                return null;
-            } 
-
-            console.log("User already in the app.");
-            selectedUser.current = userStored;
-            // --------- Registration setup ---------------------
-            fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
-            // --------------------------------------------------
-            return userStored;
-        } catch (error) {
-            console.error("Error storing user on the blockchain:", error);
-            throw error; 
-        }   
-    }
-
-    // Stores the user in the blockchain TODO: I DON'T THINK THIS SHOULD BE HERE
-    const storeUserBlockchain = async (userName) => {
-        // Prepares the user to be stored
-        const {privateKey, publicKey} = EncryptionManager.generateKeyPair();
-        console.log("Key Pair generated");
-        var userLogged = new UserApp(selectedAccount.current, userName, publicKey, privateKey);
-
-        // Adds the user to the blockchain
-        try {
-            var errorRegister = await storeUserContract.current.methods.checkRegistration(userLogged).call({from: selectedAccount.current});
-            
-            if (errorRegister.length === 0) { // The user can register, no error message was sent
-                const receipt = await storeUserContract.current.methods.register(userLogged).send({ from: selectedAccount.current }); // from indicates the account that will be actually sending the transaction
-            
-                const registrationEvent  = receipt.events["RegistrationResult"];
-                
-                if (registrationEvent) {
-                    const { success, message } = registrationEvent.returnValues;
-                    if (success) {
-                        selectedUser.current = userLogged;
-                        // --------- Registration setup ---------------------
-                        fileManagerInstance.current = new FileManager(storeFileContract.current, storeUserContract.current, selectedUser.current);
-                        // --------------------------------------------------
-                        console.log("Registration - user added in the blockchain.");
-                    } else {
-                        console.log("message: ", message);
-                    }
-                }
-            } else {
-                console.log("errorRegister: ", errorRegister);
-            }
-            
-        } catch (error) {
-            console.error("Transaction error: ", error.message);
-            console.log("Make sure that the user is not already authenticated in the app. And make sure that the username is unique.");
-        }
-    }
-
     const value = {
-        verifyIfUserExists,
         setup,
         logOut,
-        storeUserBlockchain,
-        fileManagerInstance,
+        fileManagerFacadeInstance,
     }
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>

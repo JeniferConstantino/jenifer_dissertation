@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
-
+import UserApp from '../helpers/UserApp';
 
 const Welcome = () => {
     const navigate = useNavigate();
-    const {storeUserBlockchain, fileManagerInstance} = useWeb3();
+    const {fileManagerFacadeInstance} = useWeb3();
     const [username, setUsername] = useState('');
 
     const onNext = async (e) => {
@@ -15,8 +15,8 @@ const Welcome = () => {
         }
 
         // Adds the user to the blockchain and redirects him to the home page
-        storeUserBlockchain(username).then(()=>{
-            if (fileManagerInstance.current != null) {
+        UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username).then(()=>{
+            if (fileManagerFacadeInstance.current._selectedUser != null) {
                 navigate('/home');
             }
         }).catch(err=>{

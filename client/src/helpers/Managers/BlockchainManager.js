@@ -1,5 +1,5 @@
 import EncryptionManager from "./EncryptionManager";
-import FileApp from "./FileApp";
+import FileApp from "../FileApp";
 
 class BlockchainManager {
 
