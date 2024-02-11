@@ -1,6 +1,4 @@
 import Command from "./Command";
-import IPFSManager from '../Managers/IPFSManager';
-import EncryptionManager from '../Managers/EncryptionManager';
 
 class DownloadFileCommand extends Command {
     constructor(fileManager, selectedFile){
@@ -12,11 +10,11 @@ class DownloadFileCommand extends Command {
     async execute(){
         try {
             // Gets the file from IPFS
-            const fileContent = await IPFSManager.getFileFromIPFS(this.selectedFile.ipfsCID);
+            const fileContent = await this.fileManager.getFileFromIPFS(this.selectedFile.ipfsCID);
             console.log("Accessed file in IPFS.");
         
             // Decrypts the file
-            const decryptedFileBuffer = await EncryptionManager.decryptFileWithSymmetricKey(this.fileManager.storeFileContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
+            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.fileManager.storeFileContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
             

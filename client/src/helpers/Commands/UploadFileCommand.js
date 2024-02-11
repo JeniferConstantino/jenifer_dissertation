@@ -18,7 +18,7 @@ class UploadFileCommand extends Command {
 
     async execute(){
         // Encrypts and adds file to IPFS
-        const {fileCID, symmetricKey, iv} = await IPFSManager.addFileToIPFS(this.fileAsBuffer);
+        const {fileCID, symmetricKey, iv} = await this.fileManager.addFileToIPFS(this.fileAsBuffer);
         console.log('File encrypted and added to IPFS', fileCID);
 
         // Prepares the file to be stored
@@ -26,7 +26,7 @@ class UploadFileCommand extends Command {
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
 
         // Adds the file to the blockchain
-        BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, this.fileManager.selectedUser, this.fileManager.storeFileContract).then(({receipt, fileUploaded}) => {
+        this.fileManager.storeFileBlockchain(fileUploaded, symmetricKey, this.fileManager.selectedUser, this.fileManager.storeFileContract).then(({receipt, fileUploaded}) => {
         var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUploaded]; // Updates the state with the result
         console.log('File added to the blockchain');
 

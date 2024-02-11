@@ -1,6 +1,5 @@
 import Command from "./Command";
 import {Buffer} from 'buffer';
-import EncryptionManager from '../Managers/EncryptionManager';
 
 
 class ShareFileCommand extends Command {
@@ -19,10 +18,10 @@ class ShareFileCommand extends Command {
         // Decrypts the files' symmetric key using the current logged user private key
         var encSymmetricKey = await this.fileManager.storeFileContract.methods.getEncSymmetricKeyFileUser(this.fileManager.selectedUser, this.selectedFile).call({from: this.fileManager.selectedUser.account});
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
-        var decryptedSymmetricKey = EncryptionManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
+        var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
         
         // Encrypts the files' symmetric key using the public key of the user to share the file with
-        var encryptedSymmetricKeyShared = EncryptionManager.encryptSymmetricKey(decryptedSymmetricKey, this.userToShareFileWith.publicKey);
+        var encryptedSymmetricKeyShared = this.fileManager.encryptSymmetricKey(decryptedSymmetricKey, this.userToShareFileWith.publicKey);
         // Stores the share information in the blockchain
         const receipt = await this.fileManager.storeFileContract.methods.storeUserHasFile(
             this.userToShareFileWith, 

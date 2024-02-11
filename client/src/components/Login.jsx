@@ -1,18 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWeb3 } from '../helpers/web3Client';
+import UserApp from '../helpers/UserApp'
 
 
 const Login = () => {
     const navigate = useNavigate();
-    const { verifyIfUserExists, setup } = useWeb3();
+    const {setup, fileManagerFacadeInstance } = useWeb3();
 
     const onSubmitLogin = async (e) => {
         console.log('Loggin the user ...')
         e.preventDefault()
         
         await setup();
-        const existingUser = await verifyIfUserExists();
+        const existingUser = await UserApp.verifyIfAccountExists(fileManagerFacadeInstance.current);
 
         if (existingUser) {
             navigate('/home');
