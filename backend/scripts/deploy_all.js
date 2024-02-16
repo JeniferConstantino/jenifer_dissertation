@@ -4,11 +4,11 @@ const path = require('path');
 const fs = require('fs');
 
 async function main() {
-    async function deployContract(contractName) {
-        const contract = await hre.ethers.deployContract(contractName);
-    
-        await contract.waitForDeployment();
-    
+    async function deployContract(contractName, args = []) {
+
+        const contractFactory = await hre.ethers.getContractFactory(contractName);
+        const contract = await contractFactory.deploy(...args);
+        await contract.waitForDeployment();    
         const contractAddress = contract.target;
     
         const contractData = {
@@ -26,27 +26,9 @@ async function main() {
         return contractAddress;
     }
 
-    async function deployFileManager(fileManagerAddress) {
-        const accessManagerContractFactory = await hre.ethers.getContractFactory("FileManager");
-        const accessManagerContract = await accessManagerContractFactory.deploy(fileManagerAddress);
-    
-        await accessManagerContract.waitForDeployment();
-    
-        const contractData = {
-            address: accessManagerContract.target
-        }
-    
-        const filePath = path.join(__dirname, `../../client/src/contracts/FileManager_ContractAddress.json`);
-        fs.writeFileSync(filePath, JSON.stringify(contractData, null, 2));
-    
-        console.log(
-            `AccessManager deployed to ${accessManagerContract.target}`
-        );
-    }
-
     const accessManagerContractAddress = await deployContract("AccessManager");
+    await deployContract("FileManager", [accessManagerContractAddress]);
     await deployContract("UserManager"); 
-    await deployFileManager(accessManagerContractAddress);
 }
 
 main()
