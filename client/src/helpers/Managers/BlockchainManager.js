@@ -4,17 +4,17 @@ import FileApp from "../FileApp";
 class BlockchainManager {
 
     // Stores a file in the blockchain
-    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, storeFileContract) => {
+    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, fileManagerContract) => {
         return new Promise(async (resolve, reject) => {
             const encryptedSymmetricKey = EncryptionManager.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             // Verifies if the file is elegible to be stored
             try {
                 // Verifies if the user already has a file with the same name
-                var errorUploadingFile = await BlockchainManager.verifyUserAssociatedWithFile(storeFileContract, fileUploaded, selectedUser, selectedUser);
+                var errorUploadingFile = await BlockchainManager.verifyUserAssociatedWithFile(fileManagerContract, fileUploaded, selectedUser, selectedUser);
                 
                 if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
-                    const receipt = await storeFileContract.methods.uploadFile(fileUploaded, encryptedSymmetricKey.toString('base64'), selectedUser).send({ from: selectedUser.account });
+                    const receipt = await fileManagerContract.methods.uploadFile(fileUploaded, encryptedSymmetricKey.toString('base64'), selectedUser).send({ from: selectedUser.account });
 
                     const uploadFileEvent = receipt.events["UploadFileResult"];
                     if (uploadFileEvent) {
@@ -37,8 +37,8 @@ class BlockchainManager {
     }
 
     // Get files from the Blockchain
-    static getFilesUploadedBlockchain = async (storeFileContract, selectedUser) => {
-        var result = await storeFileContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
+    static getFilesUploadedBlockchain = async (fileManagerContract, selectedUser) => {
+        var result = await fileManagerContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
         let files = [];
         if(result.length != null){
             result.forEach(file => {
@@ -51,21 +51,21 @@ class BlockchainManager {
     }
 
     // Verifies if a user is already associated with a file 
-    static verifyUserAssociatedWithFile = async (storeFileContract, fileUploaded, userToVerify, selectedUser) => {
-        var fileAssociatedUser = await storeFileContract.methods.fileExists(fileUploaded, userToVerify).call({from: selectedUser.account});
+    static verifyUserAssociatedWithFile = async (fileManagerContract, fileUploaded, userToVerify, selectedUser) => {
+        var fileAssociatedUser = await fileManagerContract.methods.fileExists(fileUploaded, userToVerify).call({from: selectedUser.account});
         return fileAssociatedUser;
     }
 
     // Gets the permissions a user has over a file
-    static getPermissionsUserOverFile = async (storeFileContract, userToSeePermission, selectedFile, selectedUser) => {
-        var permissionsOverFile = await storeFileContract.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.account});
+    static getPermissionsUserOverFile = async (accessManagerContract, userToSeePermission, selectedFile, selectedUser) => {
+        var permissionsOverFile = await accessManagerContract.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.account});
         return permissionsOverFile;
     }
 
     // Gets the user to share the file with
-    static getUserToShareFile = async (nameUserToShare, storeUserContract, selectedUser) => {
+    static getUserToShareFile = async (nameUserToShare, userManagerContract, selectedUser) => {
         // Verifies if there is a user with the given name
-        var user = await storeUserContract.methods.getUserByName(nameUserToShare).call({from: selectedUser.account});
+        var user = await userManagerContract.methods.getUserByName(nameUserToShare).call({from: selectedUser.account});
         if (user.name.length === 0) {
             return null;
         } 

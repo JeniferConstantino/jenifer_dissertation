@@ -22,10 +22,31 @@ async function main() {
         console.log(
             `${contractName} deployed to ${contractAddress}`
         );
+
+        return contractAddress;
     }
 
-    await deployContract("StoreFile");
-    await deployContract("StoreUser"); 
+    async function deployFileManager(fileManagerAddress) {
+        const accessManagerContractFactory = await hre.ethers.getContractFactory("FileManager");
+        const accessManagerContract = await accessManagerContractFactory.deploy(fileManagerAddress);
+    
+        await accessManagerContract.waitForDeployment();
+    
+        const contractData = {
+            address: accessManagerContract.target
+        }
+    
+        const filePath = path.join(__dirname, `../../client/src/contracts/FileManager_ContractAddress.json`);
+        fs.writeFileSync(filePath, JSON.stringify(contractData, null, 2));
+    
+        console.log(
+            `AccessManager deployed to ${accessManagerContract.target}`
+        );
+    }
+
+    const accessManagerContractAddress = await deployContract("AccessManager");
+    await deployContract("UserManager"); 
+    await deployFileManager(accessManagerContractAddress);
 }
 
 main()

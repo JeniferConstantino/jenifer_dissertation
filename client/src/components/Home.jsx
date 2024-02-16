@@ -18,7 +18,7 @@ const Home = () => {
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [storeFileContract, setStoreFileContract] = useState(null);
+    const [fileManagerContract, setFileManagerContract] = useState(null);
 
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -29,9 +29,9 @@ const Home = () => {
     // Get Files
     const fetchFiles = useCallback(async () => {
         setSelectedUser(fileManagerFacadeInstance.current.selectedUser);
-        setStoreFileContract(fileManagerFacadeInstance.current.storeFileContract);
-        if (storeFileContract!=null && selectedUser!=null) {
-            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(storeFileContract, selectedUser).then((files) => {
+        setFileManagerContract(fileManagerFacadeInstance.current.fileManagerContract);
+        if (fileManagerContract!=null && selectedUser!=null) {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(fileManagerContract, selectedUser).then((files) => {
                 if(files.length !== 0){
                     setUploadedFiles(files);
                 }
@@ -43,7 +43,7 @@ const Home = () => {
             });
         }
         
-    }, [fileManagerFacadeInstance, selectedUser, storeFileContract]);
+    }, [fileManagerFacadeInstance, selectedUser, fileManagerContract]);
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -120,7 +120,7 @@ const Home = () => {
 
     return (
         <>
-            {storeFileContract && selectedUser && (
+            {fileManagerContract && selectedUser && (
                 <> 
                     <div className='content-container'>
                     <Logout selectedUser={selectedUser}/>

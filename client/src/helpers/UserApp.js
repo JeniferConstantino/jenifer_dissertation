@@ -12,7 +12,7 @@ class UserApp {
   static async verifyIfAccountExists(fileManagerFacadeInstance) {
     try {
       // Verifies if the user exist
-      var userStored = await fileManagerFacadeInstance.storeUserContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
+      var userStored = await fileManagerFacadeInstance.userManagerContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
       
       if (userStored.name === "") {
           console.log("User first time in the app");
@@ -40,9 +40,9 @@ class UserApp {
 
     // Adds the user to the blockchain
     try {
-      var errorRegister = await fileManagerFacadeInstance.storeUserContract.methods.checkRegistration(userLogged).call({from: fileManagerFacadeInstance._selectedAccount.current});
+      var errorRegister = await fileManagerFacadeInstance.userManagerContract.methods.checkRegistration(userLogged).call({from: fileManagerFacadeInstance._selectedAccount.current});
       if (errorRegister.length === 0) { // The user can register, no error message was sent
-          const receipt = await fileManagerFacadeInstance.storeUserContract.methods.register(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+          const receipt = await fileManagerFacadeInstance.userManagerContract.methods.register(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
           const registrationEvent  = receipt.events["RegistrationResult"];
           if (registrationEvent) {
             const { success, message } = registrationEvent.returnValues;
