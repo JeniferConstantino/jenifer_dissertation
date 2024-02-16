@@ -54,8 +54,8 @@ class FileManagerFacade {
   }
 
   // Get all files that were uploaded too the blockchain
-  async getFilesUploadedBlockchain(fileManagerContract, selectedUser) {
-    const files = await BlockchainManager.getFilesUploadedBlockchain(fileManagerContract, selectedUser);
+  async getFilesUploadedBlockchain(accessManagerContract, selectedUser) {
+    const files = await BlockchainManager.getFilesUploadedBlockchain(accessManagerContract, selectedUser);
     return files;
   }
 
@@ -72,8 +72,8 @@ class FileManagerFacade {
   }
 
   // Stores a file in the blockchain
-  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, fileManagerContract) {
-    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, fileManagerContract);
+  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessManagerContract) {
+    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessManagerContract);
   }
 
   // Gets a key pair: public key and private key

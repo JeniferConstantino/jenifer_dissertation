@@ -4,17 +4,19 @@ import FileApp from "../FileApp";
 class BlockchainManager {
 
     // Stores a file in the blockchain
-    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, fileManagerContract) => {
+    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, accessManagerContract) => {
         return new Promise(async (resolve, reject) => {
             const encryptedSymmetricKey = EncryptionManager.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             // Verifies if the file is elegible to be stored
             try {
+                const permissionsOwner = ["download", "delete", "share"]; // Who uploads the file is the owner of the file and therefore has all permissions
+
                 // Verifies if the user already has a file with the same name
-                var errorUploadingFile = await BlockchainManager.verifyUserAssociatedWithFile(fileManagerContract, fileUploaded, selectedUser, selectedUser);
+                var errorUploadingFile = await BlockchainManager.verifyUserAssociatedWithFile(accessManagerContract, fileUploaded, selectedUser, selectedUser, permissionsOwner);
                 
                 if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
-                    const receipt = await fileManagerContract.methods.uploadFile(fileUploaded, encryptedSymmetricKey.toString('base64'), selectedUser).send({ from: selectedUser.account });
+                    const receipt = await accessManagerContract.methods.storeUserHasFile(selectedUser, fileUploaded, encryptedSymmetricKey.toString('base64'), permissionsOwner).send({ from: selectedUser.account });
 
                     const uploadFileEvent = receipt.events["UploadFileResult"];
                     if (uploadFileEvent) {
@@ -37,8 +39,8 @@ class BlockchainManager {
     }
 
     // Get files from the Blockchain
-    static getFilesUploadedBlockchain = async (fileManagerContract, selectedUser) => {
-        var result = await fileManagerContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
+    static getFilesUploadedBlockchain = async (accessManagerContract, selectedUser) => {
+        var result = await accessManagerContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
         let files = [];
         if(result.length != null){
             result.forEach(file => {
@@ -51,8 +53,8 @@ class BlockchainManager {
     }
 
     // Verifies if a user is already associated with a file 
-    static verifyUserAssociatedWithFile = async (fileManagerContract, fileUploaded, userToVerify, selectedUser) => {
-        var fileAssociatedUser = await fileManagerContract.methods.fileExists(fileUploaded, userToVerify).call({from: selectedUser.account});
+    static verifyUserAssociatedWithFile = async (accessManagerContract, fileUploaded, userToVerify, selectedUser, permissionsOwner) => {
+        var fileAssociatedUser = await accessManagerContract.methods.fileExists(userToVerify, fileUploaded, permissionsOwner).call({from: selectedUser.account});
         return fileAssociatedUser;
     }
 
