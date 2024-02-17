@@ -1,8 +1,10 @@
 import Web3 from 'web3'
-import StoreFile from '../contracts/contracts/StoreFile.sol/StoreFile.json'
-import StoreUser from '../contracts/contracts/StoreUser.sol/StoreUser.json'
-import StoreFile_ContractAddress from '../contracts/StoreFile_ContractAddress.json'
-import StoreUser_ContractAddress from '../contracts/StoreUser_ContractAddress.json'
+import AccessManager from '../contracts/contracts/AccessManager.sol/AccessManager.json'
+import FileManager from '../contracts/contracts/FileManager.sol/FileManager.json'
+import UserManager from '../contracts/contracts/UserManager.sol/UserManager.json'
+import UserManager_ContractAddress from '../contracts/UserManager_ContractAddress.json'
+import FileManager_ContractAddress from '../contracts/FileManager_ContractAddress.json'
+import AccessManager_ContractAddress from '../contracts/AccessManager_ContractAddress.json'
 import FileManagerFacade from './FileManagerFacade'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
@@ -21,8 +23,9 @@ export const useWeb3 = () => {
 const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();     // Keeps track of wallet account change
-    let storeFileContract = useRef();   // keeps the File Contract so its functions can be executed
-    let storeUserContract = useRef();   // keeps the User Contract so its functions can be executed
+    let fileManagerContract = useRef();   // keeps the File Manager Contract so its functions can be executed
+    let userManagerContract = useRef();   // keeps the User Manager Contract so its functions can be executed
+    let accessManagerContract = useRef();   // keeps the User Manager Contract so its functions can be executed
     let provider = useRef();
     let fileManagerFacadeInstance = useRef(null);
 
@@ -45,11 +48,12 @@ const Web3Provider = ({children}) => {
 
             // Initialize contracts
             const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
-            contractInitialization(StoreUser, StoreUser_ContractAddress, storeUserContract, web3);
-            contractInitialization(StoreFile, StoreFile_ContractAddress, storeFileContract, web3);
+            contractInitialization(UserManager, UserManager_ContractAddress, userManagerContract, web3);
+            contractInitialization(FileManager, FileManager_ContractAddress, fileManagerContract, web3);
+            contractInitialization(AccessManager, AccessManager_ContractAddress, accessManagerContract, web3);
             console.log("Contracts initialized");
 
-            fileManagerFacadeInstance.current = new FileManagerFacade(storeFileContract.current, storeUserContract.current);
+            fileManagerFacadeInstance.current = new FileManagerFacade(fileManagerContract.current, userManagerContract.current, accessManagerContract.current);
             fileManagerFacadeInstance.current._selectedAccount = selectedAccount;
         } catch (error) {
             return "Something went wrong while trying to authenticate the user. Make sure you're connected to metamask extension or ensure the contracts are deployed in the network you're in.";
@@ -75,8 +79,9 @@ const Web3Provider = ({children}) => {
     const logOut = () => {
         provider = null;
         fileManagerFacadeInstance.current = null;
-        storeFileContract = null;
-        storeUserContract = null;
+        fileManagerContract = null;
+        userManagerContract = null;
+        accessManagerContract = null;
         selectedAccount = null;
         window.location.href = '/'; // Redirects the user to the login page
         return true

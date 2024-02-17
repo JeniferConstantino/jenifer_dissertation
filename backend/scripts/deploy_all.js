@@ -4,11 +4,11 @@ const path = require('path');
 const fs = require('fs');
 
 async function main() {
-    async function deployContract(contractName) {
-        const contract = await hre.ethers.deployContract(contractName);
-    
-        await contract.waitForDeployment();
-    
+    async function deployContract(contractName, args = []) {
+
+        const contractFactory = await hre.ethers.getContractFactory(contractName);
+        const contract = await contractFactory.deploy(...args);
+        await contract.waitForDeployment();    
         const contractAddress = contract.target;
     
         const contractData = {
@@ -22,10 +22,13 @@ async function main() {
         console.log(
             `${contractName} deployed to ${contractAddress}`
         );
+
+        return contractAddress;
     }
 
-    await deployContract("StoreFile");
-    await deployContract("StoreUser"); 
+    await deployContract("UserManager"); 
+    const fileManagerContractAddress = await deployContract("FileManager"); 
+    await deployContract("AccessManager", [fileManagerContractAddress]);
 }
 
 main()

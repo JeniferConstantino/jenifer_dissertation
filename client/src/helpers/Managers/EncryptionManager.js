@@ -49,10 +49,10 @@ class EncryptionManager {
     }
 
     // Decrypts a given file using a given symmetric key
-    static async decryptFileWithSymmetricKey (storeFileContract, fileEncrypted, selectedUser, fileContent) {
+    static async decryptFileWithSymmetricKey (accessManagerContract, fileEncrypted, selectedUser, fileContent) {
         try {
             // Decrypts the symmetric key
-            const fileUserEncryptedSymmetricKey = await storeFileContract.methods.getEncSymmetricKeyFileUser(selectedUser, fileEncrypted).call({from: selectedUser.account});
+            const fileUserEncryptedSymmetricKey = await accessManagerContract.methods.getEncSymmetricKeyFileUser(selectedUser, fileEncrypted).call({from: selectedUser.account});
             const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
             const decryptedSymmetricKey = EncryptionManager.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);
