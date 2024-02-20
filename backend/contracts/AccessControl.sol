@@ -4,7 +4,7 @@ import "./UserRegister.sol";
 import "./FileRegister.sol";
 
 
-contract AccessManager {
+contract AccessControl {
 
     struct UserHasFile {
         address userAccount;       // User account
