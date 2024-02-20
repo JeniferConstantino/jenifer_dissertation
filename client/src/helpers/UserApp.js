@@ -1,9 +1,9 @@
 
 class UserApp {
 
-  constructor(account, name, publicKey, privateKey) {
+  constructor(account, userName, publicKey, privateKey) {
     this.account = account;       // Address Account in MetaMask - Unique
-    this.name = name;             // Name of the user - unique
+    this.userName = userName;     // Name of the user - unique
     this.publicKey = publicKey;   // User's public key
     this.privateKey = privateKey; // User's private key
   }
@@ -14,7 +14,7 @@ class UserApp {
       // Verifies if the user exist
       var userStored = await fileManagerFacadeInstance.userManagerContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
       
-      if (userStored.name === "") {
+      if (userStored.userName === "") {
           console.log("User first time in the app");
           return null;
       } 

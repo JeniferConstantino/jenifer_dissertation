@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract FileManager {
+contract FileRegister {
 
     struct File {
         string ipfsCID;            // CID from IPFS (hash) - Unique
@@ -25,7 +25,7 @@ contract FileManager {
     }
 
     // Gets a file having the files' IPFS CID
-    function getFileByIpfsCID(string memory fileIpfsCid) public view returns (FileManager.File memory) {
+    function getFileByIpfsCID(string memory fileIpfsCid) public view returns (FileRegister.File memory) {
         for (uint256 i=0; i<userFiles.length; i++) {
             if (keccak256(abi.encodePacked(userFiles[i].ipfsCID)) == keccak256(abi.encodePacked(fileIpfsCid))) {
                 return userFiles[i];

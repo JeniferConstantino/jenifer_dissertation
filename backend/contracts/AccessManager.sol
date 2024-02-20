@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./UserManager.sol";
-import "./FileManager.sol";
+import "./UserRegister.sol";
+import "./FileRegister.sol";
 
 
 contract AccessManager {
@@ -14,14 +14,14 @@ contract AccessManager {
     }
 
     UserHasFile[] private userHasFile;
-    FileManager fileManager;
+    FileRegister fileRegister;
     event UploadFileResult(bool success, string message);
 
-    constructor(address fileManagerContract) {
-        fileManager = FileManager(fileManagerContract);
+    constructor(address fileRegisterContract) {
+        fileRegister = FileRegister(fileRegisterContract);
     }
     // Associates a user to a file
-    function storeUserHasFile(UserManager.User memory user, FileManager.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+    function storeUserHasFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
         // See if the user is already associated with the file
         string memory validFileUpload = fileExists(user, file, permissions);
 
@@ -35,8 +35,8 @@ contract AccessManager {
             });
             userHasFile.push(userFileData);    
 
-            // Adds the file to the fileManager table
-            fileManager.uploadFile(file);
+            // Adds the file to the fileRegister table
+            fileRegister.uploadFile(file);
 
             // Emits the message that the file has been uploaded
             emit UploadFileResult(true, "File uploaded successfully.");
@@ -48,7 +48,7 @@ contract AccessManager {
     }
 
     // Returns the encrypted symmetric key of a given user and file 
-    function getEncSymmetricKeyFileUser (UserManager.User memory user, FileManager.File memory file) public view returns (string memory) {
+    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 return userHasFile[i].encSymmetricKey;
@@ -58,7 +58,7 @@ contract AccessManager {
     }
 
     // Returns the permissions of a given user over a given file
-    function getPermissionsOverFile (UserManager.User memory user, FileManager.File memory file) public view returns (string[] memory) {
+    function getPermissionsOverFile (UserRegister.User memory user, FileRegister.File memory file) public view returns (string[] memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 return userHasFile[i].permissions;
@@ -68,15 +68,15 @@ contract AccessManager {
     }
 
     // Returns the files of a giving user
-    function getUserFiles(address account) public view returns (FileManager.File[] memory) {
+    function getUserFiles(address account) public view returns (FileRegister.File[] memory) {
         // Stores the users' files
-        FileManager.File[] memory userFilesResult = new FileManager.File[](userHasFile.length);
+        FileRegister.File[] memory userFilesResult = new FileRegister.File[](userHasFile.length);
         uint resultIndex = 0;
 
         for (uint i=0; i<userHasFile.length; i++) {
         if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
             string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
-            FileManager.File memory fileUser = fileManager.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
+            FileRegister.File memory fileUser = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
 
             // Stores the file in the array to be returned
             userFilesResult[resultIndex] = fileUser;
@@ -91,7 +91,7 @@ contract AccessManager {
     }
 
     // See if a user already has a file with a given name
-    function fileExists(UserManager.User memory user, FileManager.File memory file, string[] memory permissions) public returns (string memory) {    
+    function fileExists(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public returns (string memory) {    
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 // Update permissions

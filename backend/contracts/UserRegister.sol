@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract UserManager {
+contract UserRegister {
     
     struct User {
         address account;           // Address Account in MetaMask - Unique
-        string name;               // Name of the user - unique
+        string userName;           // Name of the user - unique
         string publicKey;          // User's public key
         string privateKey;         // User's private key
     }
@@ -36,14 +36,14 @@ contract UserManager {
         return emptyUser;
     }
 
-    // Gets a user having the users' name
-    function getUserByName(string memory name) public view returns (User memory) {
+    // Gets a user having the users' userName
+    function getUserByUserName(string memory userName) public view returns (User memory) {
         for (uint256 i=0; i<users.length; i++) {
-            if (keccak256(abi.encodePacked(users[i].name)) == keccak256(abi.encodePacked(name))) {
+            if (keccak256(abi.encodePacked(users[i].userName)) == keccak256(abi.encodePacked(userName))) {
                 return users[i];
         }
         }   
-        return User({ name: "", account: address(0), publicKey: "", privateKey: ""});
+        return User({ userName: "", account: address(0), publicKey: "", privateKey: ""});
     }
 
     // Checks if the user is elegible to register
@@ -52,8 +52,8 @@ contract UserManager {
             if (users[i].account == user.account) {
                 return "User already exists for this address.";
             }
-            else if (keccak256(bytes(users[i].name)) == keccak256(bytes(user.name))) {
-                return "User has to have a unique name.";
+            else if (keccak256(bytes(users[i].userName)) == keccak256(bytes(user.userName))) {
+                return "User has to have a unique userName.";
             }
         }
         return "";
