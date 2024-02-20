@@ -7,10 +7,10 @@ import ShareFileCommand from './Commands/ShareFileCommand';
 
 class FileManagerFacade {
 
-  constructor(fileManagerContract, userManagerContract, accessManagerContract) {
-      this.fileManagerContract = fileManagerContract;
-      this.userManagerContract = userManagerContract;
-      this.accessManagerContract = accessManagerContract;
+  constructor(fileRegisterContract, userRegisterContract, accessControlContract) {
+      this.fileRegisterContract = fileRegisterContract;
+      this.userRegisterContract = userRegisterContract;
+      this.accessControlContract = accessControlContract;
       this._selectedAccount = "";
       this._selectedUser = null;
   }
@@ -54,26 +54,26 @@ class FileManagerFacade {
   }
 
   // Get all files that were uploaded too the blockchain
-  async getFilesUploadedBlockchain(accessManagerContract, selectedUser) {
-    const files = await BlockchainManager.getFilesUploadedBlockchain(accessManagerContract, selectedUser);
+  async getFilesUploadedBlockchain(accessControlContract, selectedUser) {
+    const files = await BlockchainManager.getFilesUploadedBlockchain(accessControlContract, selectedUser);
     return files;
   }
 
   // Gets the user, according to a certain username
   async getUserToShareFile(usernameToShare) {
-    const userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, this.userManagerContract, this.selectedUser);
+    const userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, this.userRegisterContract, this.selectedUser);
     return userToShareFileWith;
   }
 
   // Gets the permissions a given user has over a file
   async getPermissionsUserOverFile(userToSeePermission, selectedFile){
-    const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.accessManagerContract, userToSeePermission, selectedFile, this.selectedUser);
+    const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.accessControlContract, userToSeePermission, selectedFile, this.selectedUser);
     return userPermissions;
   }
 
   // Stores a file in the blockchain
-  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessManagerContract) {
-    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessManagerContract);
+  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract) {
+    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract);
   }
 
   // Gets a key pair: public key and private key
@@ -92,8 +92,8 @@ class FileManagerFacade {
   }
 
   // Decrypts a file uising a symmetric key
-  async decryptFileWithSymmetricKey(accessManagerContract, selectedFile, selectedUser, fileContent) {
-    return await EncryptionManager.decryptFileWithSymmetricKey(accessManagerContract, selectedFile, selectedUser, fileContent);
+  async decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent) {
+    return await EncryptionManager.decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent);
   }
 
   // Retursn all files in IPFS

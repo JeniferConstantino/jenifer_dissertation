@@ -1,10 +1,10 @@
 import Web3 from 'web3'
-import AccessManager from '../contracts/contracts/AccessManager.sol/AccessManager.json'
-import FileManager from '../contracts/contracts/FileManager.sol/FileManager.json'
-import UserManager from '../contracts/contracts/UserManager.sol/UserManager.json'
-import UserManager_ContractAddress from '../contracts/UserManager_ContractAddress.json'
-import FileManager_ContractAddress from '../contracts/FileManager_ContractAddress.json'
-import AccessManager_ContractAddress from '../contracts/AccessManager_ContractAddress.json'
+import AccessControl from '../contracts/contracts/AccessControl.sol/AccessControl.json'
+import FileRegister from '../contracts/contracts/FileRegister.sol/FileRegister.json'
+import UserRegister from '../contracts/contracts/UserRegister.sol/UserRegister.json'
+import UserRegister_ContractAddress from '../contracts/UserRegister_ContractAddress.json'
+import FileRegister_ContractAddress from '../contracts/FileRegister_ContractAddress.json'
+import AccessControl_ContractAddress from '../contracts/AccessControl_ContractAddress.json'
 import FileManagerFacade from './FileManagerFacade'
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
@@ -23,9 +23,9 @@ export const useWeb3 = () => {
 const Web3Provider = ({children}) => {
 
     let selectedAccount = useRef();     // Keeps track of wallet account change
-    let fileManagerContract = useRef();   // keeps the File Manager Contract so its functions can be executed
-    let userManagerContract = useRef();   // keeps the User Manager Contract so its functions can be executed
-    let accessManagerContract = useRef();   // keeps the User Manager Contract so its functions can be executed
+    let fileRegisterContract = useRef();   // keeps the File Register Contract so its functions can be executed
+    let userRegisterContract = useRef();   // keeps the User Register Contract so its functions can be executed
+    let accessControlContract = useRef();   // keeps the Access Control Contract so its functions can be executed
     let provider = useRef();
     let fileManagerFacadeInstance = useRef(null);
 
@@ -48,12 +48,12 @@ const Web3Provider = ({children}) => {
 
             // Initialize contracts
             const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
-            contractInitialization(UserManager, UserManager_ContractAddress, userManagerContract, web3);
-            contractInitialization(FileManager, FileManager_ContractAddress, fileManagerContract, web3);
-            contractInitialization(AccessManager, AccessManager_ContractAddress, accessManagerContract, web3);
+            contractInitialization(UserRegister, UserRegister_ContractAddress, userRegisterContract, web3);
+            contractInitialization(FileRegister, FileRegister_ContractAddress, fileRegisterContract, web3);
+            contractInitialization(AccessControl, AccessControl_ContractAddress, accessControlContract, web3);
             console.log("Contracts initialized");
 
-            fileManagerFacadeInstance.current = new FileManagerFacade(fileManagerContract.current, userManagerContract.current, accessManagerContract.current);
+            fileManagerFacadeInstance.current = new FileManagerFacade(fileRegisterContract.current, userRegisterContract.current, accessControlContract.current);
             fileManagerFacadeInstance.current._selectedAccount = selectedAccount;
         } catch (error) {
             return "Something went wrong while trying to authenticate the user. Make sure you're connected to metamask extension or ensure the contracts are deployed in the network you're in.";
@@ -79,9 +79,9 @@ const Web3Provider = ({children}) => {
     const logOut = () => {
         provider = null;
         fileManagerFacadeInstance.current = null;
-        fileManagerContract = null;
-        userManagerContract = null;
-        accessManagerContract = null;
+        fileRegisterContract = null;
+        userRegisterContract = null;
+        accessControlContract = null;
         selectedAccount = null;
         window.location.href = '/'; // Redirects the user to the login page
         return true

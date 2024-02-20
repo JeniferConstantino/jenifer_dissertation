@@ -12,19 +12,18 @@ class UserApp {
   static async verifyIfAccountExists(fileManagerFacadeInstance) {
     try {
       // Verifies if the user exist
-      var userStored = await fileManagerFacadeInstance.userManagerContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
-      
-      if (userStored.userName === "") {
+      var result = await fileManagerFacadeInstance.userRegisterContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
+    
+      if (result.success === false) {
           console.log("User first time in the app");
           return null;
       } 
 
       console.log("User already in the app.");
-      const selectedUser = userStored;
       // --------- Registration setup ---------------------
-      fileManagerFacadeInstance._selectedUser = selectedUser;
+      fileManagerFacadeInstance._selectedUser = result.user;
       // --------------------------------------------------
-      return userStored;
+      return result.user;
     } catch (error) {
       console.error("Error storing user on the blockchain:", error);
       throw error; 
@@ -36,32 +35,31 @@ class UserApp {
     // Prepares the user to be stored
     const {privateKey, publicKey} = fileManagerFacadeInstance.generateKeyPair();
     console.log("Key Pair generated");
-    var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, publicKey, privateKey);
 
     // Adds the user to the blockchain
     try {
-      var errorRegister = await fileManagerFacadeInstance.userManagerContract.methods.checkRegistration(userLogged).call({from: fileManagerFacadeInstance._selectedAccount.current});
-      if (errorRegister.length === 0) { // The user can register, no error message was sent
-          const receipt = await fileManagerFacadeInstance.userManagerContract.methods.register(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
-          const registrationEvent  = receipt.events["RegistrationResult"];
-          if (registrationEvent) {
-            const { success, message } = registrationEvent.returnValues;
-            if (success) {
-              const selectedUser = userLogged;
-              // --------- Registration setup ---------------------
-              fileManagerFacadeInstance._selectedUser = selectedUser;
-              // --------------------------------------------------
-              console.log("Registration - user added in the blockchain.");
-            } else {
-              console.log("message: ", message);
-            }
-          }
-      } else {
-          console.log("errorRegister: ", errorRegister);
-      }    
+      var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, publicKey, privateKey);
+      // Verifies if the user is elegible to register
+      var existingAddress = await fileManagerFacadeInstance.userRegisterContract.methods.existingAddress(userLogged.account).call({from: fileManagerFacadeInstance._selectedAccount.current});
+      var existingUserName = await fileManagerFacadeInstance.userRegisterContract.methods.existingUserName(userLogged.userName).call({from: fileManagerFacadeInstance._selectedAccount.current})
+      
+      if (existingAddress || existingUserName) {
+        console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
+        return;
+      }
+      
+      // Stors the user in the blockchain
+      const result = await fileManagerFacadeInstance.userRegisterContract.methods.userRegistered(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+      if (result) {
+        // --------- Registration setup ---------------------
+        fileManagerFacadeInstance._selectedUser = userLogged;
+        // --------------------------------------------------
+        console.log("Registration - user added in the blockchain.");
+        return;
+      }
+      console.log("Something went wrong when trying to add the user to the blockchain.");       
     } catch (error) {
         console.error("Transaction error: ", error.message);
-        console.log("Make sure that the user is not already authenticated in the app. And make sure that the username is unique.");
     }
   }
 

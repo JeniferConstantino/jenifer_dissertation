@@ -10,52 +10,63 @@ contract UserRegister {
         string privateKey;         // User's private key
     }
 
-    User[] private users;
-    event RegistrationResult(bool success, string message);
+    struct ResultAction {
+        bool success;
+        User user;
+    }
 
-    // Create a new user - adds a new user in the blockchain
-    function register(User memory user) public {
-        string memory validRegistration = checkRegistration(user);  // Checks if the user already exists - in case the frontend doesn't call
-        if (bytes(validRegistration).length == 0) {
-            users.push(user);                                       // Adds the user in the blockchain
-            emit RegistrationResult(true, "User registered successfully");
-            return;
+    mapping(address => User) private users;
+    mapping(string => bool) private userNameExists;
+    event ResultUser(bool success, User user);
+
+    // Create a new user by adding him to the blockchain
+    function userRegistered(User memory user) public returns (bool) {
+        // Checks if the user is elegible to register
+        if (canRegister(user)) {
+            users[user.account] = User(user.account, user.userName, user.publicKey, user.privateKey);
+            userNameExists[user.userName] = true;
+            return true;
         } 
-        emit RegistrationResult(false, validRegistration);
-        return;
+        return false;
     }
 
     // Gets the information of a given user. If the user doesn't exist it returns an empty user.
-    function getUser(address account) public view returns (User memory) {
-        for (uint i=0; i< users.length; i++) {
-            if (users[i].account == account) {
-                return users[i];
-            }
+    function getUser(address account) public view returns (ResultAction memory) {
+        if (users[account].account != address(0)) {
+            return ResultAction(true, users[account]);
+        } else {
+            return ResultAction(false, User(address(0), "", "", ""));
         }
-        User memory emptyUser;
-        return emptyUser;
     }
 
     // Gets a user having the users' userName
-    function getUserByUserName(string memory userName) public view returns (User memory) {
+    /*function getUserByUserName(string memory userName) public view returns (User memory) {
         for (uint256 i=0; i<users.length; i++) {
             if (keccak256(abi.encodePacked(users[i].userName)) == keccak256(abi.encodePacked(userName))) {
                 return users[i];
         }
         }   
         return User({ userName: "", account: address(0), publicKey: "", privateKey: ""});
-    }
+    }*/
 
     // Checks if the user is elegible to register
-    function checkRegistration(User memory user) public view returns (string memory) {
-        for (uint i=0; i< users.length; i++) {
-            if (users[i].account == user.account) {
-                return "User already exists for this address.";
-            }
-            else if (keccak256(bytes(users[i].userName)) == keccak256(bytes(user.userName))) {
-                return "User has to have a unique userName.";
-            }
+    function canRegister(User memory user) public view returns (bool) {
+        if (existingAddress(user.account) || existingUserName(user.userName)) {
+            return false;
         }
-        return "";
+        return true;        
+    }
+
+    // Verifies if the address exists (if the user already exists)
+    function existingAddress(address account) public view returns (bool) {
+        if (users[account].account != address(0)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verifies if the username is taken
+    function existingUserName(string memory userName) public view returns (bool) {
+        return userNameExists[userName];
     }
 }
