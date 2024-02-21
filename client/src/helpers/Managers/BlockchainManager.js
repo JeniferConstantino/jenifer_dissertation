@@ -48,8 +48,8 @@ class BlockchainManager {
     }
 
     // Gets the permissions a user has over a file
-    static getPermissionsUserOverFile = async (accessManagerContract, userToSeePermission, selectedFile, selectedUser) => {
-        var permissionsOverFile = await accessManagerContract.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.account});
+    static getPermissionsUserOverFile = async (accessControlContract, userToSeePermission, selectedFile, selectedUser) => {
+        var permissionsOverFile = await accessControlContract.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.account});
         return permissionsOverFile;
     }
 

@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 import "./UserRegister.sol";
 import "./FileRegister.sol";
 
-
 contract AccessControl {
 
     struct UserHasFile {
@@ -50,7 +49,7 @@ contract AccessControl {
     }
 
     // Returns the encrypted symmetric key of a given user and file 
-    /*function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
+    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 return userHasFile[i].encSymmetricKey;
@@ -67,7 +66,7 @@ contract AccessControl {
             }
         }
         return new string[](0);   
-    }*/
+    }
 
     // Returns the files of a giving user
     function getUserFiles(address account) public view returns (ResultAction memory) {
