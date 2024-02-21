@@ -17,7 +17,7 @@ const Logout = ({selectedUser}) => {
                 <GoPerson className='icon-person'/>
             </div>
             <div className='button-column'>
-                <p className='username-text'>Username: {selectedUser.name}</p>
+                <p className='username-text'>Username: {selectedUser.userName}</p>
                 <button className='app-button app-button__logout' onClick={handleLogout}> Logout </button> 
             </div>
         </div>

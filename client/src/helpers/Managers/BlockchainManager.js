@@ -4,36 +4,25 @@ import FileApp from "../FileApp";
 class BlockchainManager {
 
     // Stores a file in the blockchain
-    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, accessManagerContract) => {
+    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, accessControlContract) => {
         return new Promise(async (resolve, reject) => {
             const encryptedSymmetricKey = EncryptionManager.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             // Verifies if the file is elegible to be stored
             try {
-                const permissionsOwner = ["download", "delete", "share"]; // Who uploads the file is the owner of the file and therefore has all permissions
-
                 // Verifies if the user already has a file with the same name
-                var errorUploadingFile = await BlockchainManager.verifyUserAssociatedWithFile(accessManagerContract, fileUploaded, selectedUser, selectedUser, permissionsOwner);
+                var isUserAsscoiatedFile = await BlockchainManager.verifyUserAssociatedWithFile(accessControlContract, fileUploaded, selectedUser, selectedUser);
                 
-                if (errorUploadingFile.length === 0) { // The file can be uploaded, no error message was sent
-                    const receipt = await accessManagerContract.methods.storeUserHasFile(selectedUser, fileUploaded, encryptedSymmetricKey.toString('base64'), permissionsOwner).send({ from: selectedUser.account });
+                if (isUserAsscoiatedFile) {
+                    console.log("User: ", selectedUser.userName , " already associated with the file: ", fileUploaded.fileName);
+                    return;
+                } 
 
-                    const uploadFileEvent = receipt.events["UploadFileResult"];
-                    if (uploadFileEvent) {
-                        const { success, message } = uploadFileEvent.returnValues;
-                        if (success) {
-                            resolve({ receipt, fileUploaded })
-                        } else {
-                            console.log("message: ", message);
-                        }
-                    } 
-                } else {
-                    console.log("errorUploadingFile: ", errorUploadingFile, " Make sure the there is no already uploaded file with the same name.");
-                }
-
+                const receipt = await accessControlContract.methods.uploadFile(selectedUser, fileUploaded, encryptedSymmetricKey.toString('base64')).send({ from: selectedUser.account });                
+                const status = receipt.status
+                resolve({status});      
             } catch (error) {
                 console.error("Transaction error: ", error.message);
-                console.log("Make sure you haven't uploaded the file before, and that the file name is unique.");
             }
         });
     }
@@ -53,9 +42,9 @@ class BlockchainManager {
     }
 
     // Verifies if a user is already associated with a file 
-    static verifyUserAssociatedWithFile = async (accessManagerContract, fileUploaded, userToVerify, selectedUser, permissionsOwner) => {
-        var fileAssociatedUser = await accessManagerContract.methods.fileExists(userToVerify, fileUploaded, permissionsOwner).call({from: selectedUser.account});
-        return fileAssociatedUser;
+    static verifyUserAssociatedWithFile = async (accessControlContract, fileUploaded, userToVerify, selectedUser) => {
+        var isUserAsscoiatedFile = await accessControlContract.methods.userAssociatedWithFile(userToVerify, fileUploaded).call({from: selectedUser.account});
+        return isUserAsscoiatedFile;
     }
 
     // Gets the permissions a user has over a file

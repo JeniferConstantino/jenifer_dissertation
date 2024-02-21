@@ -50,7 +50,7 @@ class UserApp {
       
       // Stors the user in the blockchain
       const result = await fileManagerFacadeInstance.userRegisterContract.methods.userRegistered(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
-      if (result) {
+      if (result.status) {
         // --------- Registration setup ---------------------
         fileManagerFacadeInstance._selectedUser = userLogged;
         // --------------------------------------------------

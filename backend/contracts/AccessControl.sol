@@ -18,42 +18,39 @@ contract AccessControl {
         FileRegister.File[] files;
     }
 
-    UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could be simultaneously considered keys
+    UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could simultaneously be considered keys
     FileRegister fileRegister;
-    event UploadFileResult(bool success, string message);
 
     constructor(address fileRegisterContract) {
         fileRegister = FileRegister(fileRegisterContract);
     }
-    // Associates a user to a file
-    /*function storeUserHasFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
-        // See if the user is already associated with the file
-        string memory validFileUpload = fileExists(user, file, permissions);
 
-        if (bytes(validFileUpload).length == 0) {
-            // Creates a new row
-            UserHasFile memory userFileData = UserHasFile({
-                userAccount: user.account,
-                ipfsCID: file.ipfsCID,
-                encSymmetricKey: encSymmetricKey,
-                permissions: permissions
-            });
-            userHasFile.push(userFileData);    
+    // Upload a file in the system (associates the file to the user, with the given permissions, and adds to the file map)
+    function uploadFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey) public {
+        bool isUserAssociatedWithFile = userAssociatedWithFile(user, file);
+        if (isUserAssociatedWithFile) {
+            return; // failed in the upload
+        }
 
-            // Adds the file to the fileRegister table
-            fileRegister.uploadFile(file);
+        // Adds the association with the giver permissions
+        string[] memory permissions = new string[](3); // By default these are the permissions of the owner
+        permissions[0] = "download";
+        permissions[1] = "delete";
+        permissions[2] = "share";
+        UserHasFile memory userFileData = UserHasFile({
+            userAccount: user.account,
+            ipfsCID: file.ipfsCID,
+            encSymmetricKey: encSymmetricKey,
+            permissions: permissions
+        });
+        userHasFile.push(userFileData);
 
-            // Emits the message that the file has been uploaded
-            emit UploadFileResult(true, "File uploaded successfully.");
-            return;
-        }    
-
-        emit UploadFileResult(false, validFileUpload);
-        return;
+        // Adds the file to the fileRegister table
+        fileRegister.addFile(file);
     }
 
     // Returns the encrypted symmetric key of a given user and file 
-    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
+    /*function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 return userHasFile[i].encSymmetricKey;
@@ -99,15 +96,13 @@ contract AccessControl {
         }
     }
 
-    // See if a user already has a file with a given name
-    /*function fileExists(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public returns (string memory) {    
+    // Sees if a user is already associated with a file
+    function userAssociatedWithFile(UserRegister.User memory user, FileRegister.File memory file) public view returns (bool) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
-                // Update permissions
-                userHasFile[i].permissions = permissions;
-                return "User already associated with the file";
+                return true;
             }
         }
-        return "";
-    }*/
+        return false;
+    }
 }

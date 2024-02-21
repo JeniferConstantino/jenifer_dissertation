@@ -18,13 +18,12 @@ contract FileRegister {
     mapping(string => File) private files;
 
     // Create a file (Upload)
-    /*function uploadFile(File memory file) public {
-        // Adds the corresponding information to the corresponding structs
-        userFiles.push(file);       
+    function addFile(File memory file) public {
+        files[file.ipfsCID] = file; 
     }
 
     // Returns the users' file
-    function getFiles() public view returns (File[] memory) {
+    /*function getFiles() public view returns (File[] memory) {
         return userFiles;
     }*/
 

@@ -23,11 +23,14 @@ class UploadFileCommand extends Command {
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
 
         // Adds the file to the blockchain
-        this.fileManager.storeFileBlockchain(fileUploaded, symmetricKey, this.fileManager.selectedUser, this.fileManager.accessManagerContract).then(({receipt, fileUploaded}) => {
-        var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUploaded]; // Updates the state with the result
-        console.log('File added to the blockchain');
-
-        this.handleFileUploaded(tempUpdatedUploadedFiles);
+        this.fileManager.storeFileBlockchain(fileUploaded, symmetricKey, this.fileManager.selectedUser, this.fileManager.accessControlContract).then(({ status }) => {
+            if (status) {
+                var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUploaded]; // Updates the state with the result
+                console.log('File added to the blockchain');
+                this.handleFileUploaded(tempUpdatedUploadedFiles);
+            } else {
+                console.log("Something went wrong when trying to upload the file to the blockchain: ", status);       
+            }
         }).catch(err => {
             console.log(err);
         })

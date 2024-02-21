@@ -20,14 +20,12 @@ contract UserRegister {
     event ResultUser(bool success, User user);
 
     // Create a new user by adding him to the blockchain
-    function userRegistered(User memory user) public returns (bool) {
+    function userRegistered(User memory user) public {
         // Checks if the user is elegible to register
         if (canRegister(user)) {
             users[user.account] = User(user.account, user.userName, user.publicKey, user.privateKey);
             userNameExists[user.userName] = true;
-            return true;
         } 
-        return false;
     }
 
     // Gets the information of a given user. If the user doesn't exist it returns an empty user.
