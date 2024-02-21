@@ -10,11 +10,15 @@ contract FileRegister {
         string fileType;           // Image or file
         string iv;                 // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
     }
+    struct ResultAction {
+        bool success;
+        FileRegister.File file;
+    }
 
-    File[] private userFiles;
+    mapping(string => File) private files;
 
     // Create a file (Upload)
-    function uploadFile(File memory file) public {
+    /*function uploadFile(File memory file) public {
         // Adds the corresponding information to the corresponding structs
         userFiles.push(file);       
     }
@@ -22,16 +26,15 @@ contract FileRegister {
     // Returns the users' file
     function getFiles() public view returns (File[] memory) {
         return userFiles;
-    }
+    }*/
 
     // Gets a file having the files' IPFS CID
-    function getFileByIpfsCID(string memory fileIpfsCid) public view returns (FileRegister.File memory) {
-        for (uint256 i=0; i<userFiles.length; i++) {
-            if (keccak256(abi.encodePacked(userFiles[i].ipfsCID)) == keccak256(abi.encodePacked(fileIpfsCid))) {
-                return userFiles[i];
-            }
-        }   
-        return File({ fileName: "", owner: address(0), ipfsCID: "", fileType: "", iv: "" });
+    function getFileByIpfsCID(string memory fileIpfsCid) public view returns (ResultAction memory) {
+        if (bytes(files[fileIpfsCid].fileName).length > 0) {
+            return ResultAction(true, files[fileIpfsCid]);       
+        } else {
+            return ResultAction(false, File("", "", address(0), "", ""));       
+        }
     }
 
 }

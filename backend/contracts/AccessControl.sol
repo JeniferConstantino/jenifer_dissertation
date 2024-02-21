@@ -13,7 +13,12 @@ contract AccessControl {
         string[] permissions;      // It can be: delete, update, share
     }
 
-    UserHasFile[] private userHasFile;
+    struct ResultAction {
+        bool success;
+        FileRegister.File[] files;
+    }
+
+    UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could be simultaneously considered keys
     FileRegister fileRegister;
     event UploadFileResult(bool success, string message);
 
@@ -21,7 +26,7 @@ contract AccessControl {
         fileRegister = FileRegister(fileRegisterContract);
     }
     // Associates a user to a file
-    function storeUserHasFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+    /*function storeUserHasFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
         // See if the user is already associated with the file
         string memory validFileUpload = fileExists(user, file, permissions);
 
@@ -65,33 +70,37 @@ contract AccessControl {
             }
         }
         return new string[](0);   
-    }
+    }*/
 
     // Returns the files of a giving user
-    function getUserFiles(address account) public view returns (FileRegister.File[] memory) {
+    function getUserFiles(address account) public view returns (ResultAction memory) {
         // Stores the users' files
         FileRegister.File[] memory userFilesResult = new FileRegister.File[](userHasFile.length);
         uint resultIndex = 0;
-
         for (uint i=0; i<userHasFile.length; i++) {
-        if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
-            string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
-            FileRegister.File memory fileUser = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
-
-            // Stores the file in the array to be returned
-            userFilesResult[resultIndex] = fileUser;
-            resultIndex++;
-        }
+            if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
+                string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
+                FileRegister.ResultAction memory result = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
+                FileRegister.File memory fileUser = result.file;
+                // Stores the file in the array to be returned
+                userFilesResult[resultIndex] = fileUser;
+                resultIndex++;
+            }
         }
         // Resize the result array to remove unused elements
         assembly {
-        mstore(userFilesResult, resultIndex)
+            mstore(userFilesResult, resultIndex)
         }
-        return userFilesResult;
+        // Returns accordingly
+        if (resultIndex != 0) {
+            return ResultAction(true, userFilesResult);
+        } else {
+            return ResultAction(false, userFilesResult);
+        }
     }
 
     // See if a user already has a file with a given name
-    function fileExists(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public returns (string memory) {    
+    /*function fileExists(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public returns (string memory) {    
         for (uint256 i=0; i<userHasFile.length; i++) {
             if ((userHasFile[i].userAccount == user.account) && (keccak256(abi.encodePacked(userHasFile[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)))) {
                 // Update permissions
@@ -100,5 +109,5 @@ contract AccessControl {
             }
         }
         return "";
-    }
+    }*/
 }

@@ -42,13 +42,13 @@ class BlockchainManager {
     static getFilesUploadedBlockchain = async (accessManagerContract, selectedUser) => {
         var result = await accessManagerContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
         let files = [];
-        if(result.length != null){
-            result.forEach(file => {
+        if (result.success) {
+            result.files.forEach(file => {
                 var fileApp = new FileApp(file.fileName, file.owner, file.ipfsCID, file.iv);
                 fileApp.fileType = file.fileType;
                 files.push(fileApp);
             });
-        }
+        } 
         return files;
     }
 
