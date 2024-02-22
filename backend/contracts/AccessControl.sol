@@ -132,7 +132,7 @@ contract AccessControl {
     }
 
     // Sees if the ipfsCID and the account (primary keys) are the same as the inputs 
-    function isKeyEqual(address accountInput, address accountList, string memory ipfsCIDInput, string memory ipfsCIDList) private pure returns (bool){
+    function isKeyEqual(address accountInput, address accountList, string memory ipfsCIDInput, string memory ipfsCIDList) public pure returns (bool){
         return (accountList == accountInput) && (keccak256(abi.encodePacked(ipfsCIDList)) == keccak256(abi.encodePacked(ipfsCIDInput)));
     }
 }
