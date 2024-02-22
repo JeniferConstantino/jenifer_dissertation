@@ -32,7 +32,7 @@ contract AccessControl {
         fileRegister = FileRegister(fileRegisterContract);
     }
 
-    function addUserHasFile (UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) private {
+    function addUserHasFile (UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
         UserHasFile memory userFileData = UserHasFile({
             userAccount: user.account,
             ipfsCID: file.ipfsCID,
