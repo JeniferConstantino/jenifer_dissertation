@@ -4,7 +4,7 @@ const { expect } = require("chai");
 describe("UserRegister", function () {
 
     // Like a BeforeEach
-    async function deployContractAdSetVariables() {
+    async function deployContractAndSetVariables() {
         const UserRegister = await ethers.getContractFactory("UserRegister");
         const userRegister = await UserRegister.deploy();
 
@@ -20,7 +20,7 @@ describe("UserRegister", function () {
 
     it("Should register a user if username is not in use and not already registered", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);        
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);        
 
         // Act
         const tx = await userRegister.userRegistered(userAnaRita);
@@ -36,7 +36,7 @@ describe("UserRegister", function () {
 
     it("Should NOT register the user if already registered", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);        
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);        
         const tx = await userRegister.userRegistered(userAnaRita);
         await tx.wait();
 
@@ -60,7 +60,7 @@ describe("UserRegister", function () {
 
     it("Should NOT register the user if the userName is already in use", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);        
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);        
         const tx = await userRegister.userRegistered(userAnaRita);
         await tx.wait();
 
@@ -84,7 +84,7 @@ describe("UserRegister", function () {
 
     it("Should get a user if he was already registered", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);        
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);        
         await userRegister.userRegistered(userAnaRita);
 
         // Act
@@ -100,7 +100,7 @@ describe("UserRegister", function () {
 
     it("Should fail to get a user that is not registered ", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
 
         // Act
         const result = await userRegister.getUser(userAnaRita.account);
@@ -115,7 +115,7 @@ describe("UserRegister", function () {
 
     it("Should return false if there is a user with the same address", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.userRegistered(userAnaRita);
 
         // Act
@@ -133,7 +133,7 @@ describe("UserRegister", function () {
 
     it("Should return false if there is a user with the same userName", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.userRegistered(userAnaRita);
 
         // Act
@@ -151,7 +151,7 @@ describe("UserRegister", function () {
 
     it("Should return true if the there is no user with the same address and no user with the same userName", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
 
         // Act
         const result = await userRegister.canRegister(userAnaRita);
@@ -162,7 +162,7 @@ describe("UserRegister", function () {
 
     it("Should return true if the address already exists", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.userRegistered(userAnaRita);
 
         // Act
@@ -174,7 +174,7 @@ describe("UserRegister", function () {
 
     it("Should return false if the address doesn't exists", async function() {
         // Arrange
-        const { userRegister } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister } = await loadFixture(deployContractAndSetVariables);  
 
         // Act
         const result = await userRegister.existingAddress("0x7c852118294e51e653712a81e05800f419141751");
@@ -185,7 +185,7 @@ describe("UserRegister", function () {
 
     it("Should return true if the userName is already in use", async function() {
         // Arrange
-        const { userRegister, userAnaRita } = await loadFixture(deployContractAdSetVariables);  
+        const { userRegister, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.userRegistered(userAnaRita);
 
         // Act
@@ -197,7 +197,7 @@ describe("UserRegister", function () {
 
     it("Should return false if the userName is not in use", async function() {
         // Arrange
-        const { userRegister } = await loadFixture(deployContractAdSetVariables); 
+        const { userRegister } = await loadFixture(deployContractAndSetVariables); 
 
         // Act
         const result = await userRegister.existingUserName("Ana Rita");

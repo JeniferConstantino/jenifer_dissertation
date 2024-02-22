@@ -22,11 +22,6 @@ contract FileRegister {
         files[file.ipfsCID] = file; 
     }
 
-    // Returns the users' file
-    /*function getFiles() public view returns (File[] memory) {
-        return userFiles;
-    }*/
-
     // Gets a file having the files' IPFS CID
     function getFileByIpfsCID(string memory fileIpfsCid) public view returns (ResultAction memory) {
         if (bytes(files[fileIpfsCid].fileName).length > 0) {
