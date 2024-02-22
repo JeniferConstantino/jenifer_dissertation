@@ -54,13 +54,13 @@ class BlockchainManager {
     }
 
     // Gets the user to share the file with
-    static getUserToShareFile = async (nameUserToShare, userManagerContract, selectedUser) => {
+    static getUserToShareFile = async (nameUserToShare, userRegisterContract, selectedUser) => {
         // Verifies if there is a user with the given name
-        var user = await userManagerContract.methods.getUserByName(nameUserToShare).call({from: selectedUser.account});
-        if (user.name.length === 0) {
-            return null;
-        } 
-        return user;
+        var result = await userRegisterContract.methods.getUserByUserName(nameUserToShare).call({from: selectedUser.account});
+        if (result.success) {
+            return result.user;
+        }
+        return null;
     }
 }
 

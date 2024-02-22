@@ -15,7 +15,7 @@ contract FileRegister {
         FileRegister.File file;
     }
 
-    mapping(string => File) private files;
+    mapping(string => File) private files;  // Key: ipfsCID
 
     // Create a file (Upload)
     function addFile(File memory file) public {

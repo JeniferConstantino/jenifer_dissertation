@@ -16,14 +16,15 @@ class ShareFileCommand extends Command {
         const permissionsArray = Object.entries(this.permissions).filter(([key, value]) => value===true).map(([key, value]) => key);
         
         // Decrypts the files' symmetric key using the current logged user private key
-        var encSymmetricKey = await this.fileManager.accessManagerContract.methods.getEncSymmetricKeyFileUser(this.fileManager.selectedUser, this.selectedFile).call({from: this.fileManager.selectedUser.account});
+        var encSymmetricKey = await this.fileManager.accessControlContract.methods.getEncSymmetricKeyFileUser(this.fileManager.selectedUser, this.selectedFile).call({from: this.fileManager.selectedUser.account});
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
         var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
         
         // Encrypts the files' symmetric key using the public key of the user to share the file with
         var encryptedSymmetricKeyShared = this.fileManager.encryptSymmetricKey(decryptedSymmetricKey, this.userToShareFileWith.publicKey);
-        // Stores the share information in the blockchain
-        const receipt = await this.fileManager.accessManagerContract.methods.storeUserHasFile(
+        
+        // Performs the file share
+        const receipt = await this.fileManager.accessControlContract.methods.shareFile(
             this.userToShareFileWith, 
             this.selectedFile, 
             encryptedSymmetricKeyShared.toString('base64'),

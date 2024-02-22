@@ -15,7 +15,8 @@ contract UserRegister {
         User user;
     }
 
-    mapping(address => User) private users;
+    mapping(address => User) private users;                  // Key: account 
+    mapping(string => User) private usersByName;             // Same information as the map "users" but with the name being the key: helps in the method: getUserByUserName 
     mapping(string => bool) private userNameExists;
     event ResultUser(bool success, User user);
 
@@ -24,6 +25,7 @@ contract UserRegister {
         // Checks if the user is elegible to register
         if (canRegister(user)) {
             users[user.account] = User(user.account, user.userName, user.publicKey, user.privateKey);
+            usersByName[user.userName] = User(user.account, user.userName, user.publicKey, user.privateKey);
             userNameExists[user.userName] = true;
         } 
     }
@@ -38,14 +40,14 @@ contract UserRegister {
     }
 
     // Gets a user having the users' userName
-    /*function getUserByUserName(string memory userName) public view returns (User memory) {
-        for (uint256 i=0; i<users.length; i++) {
-            if (keccak256(abi.encodePacked(users[i].userName)) == keccak256(abi.encodePacked(userName))) {
-                return users[i];
+    function getUserByUserName(string memory userName) public view returns (ResultAction memory) {
+        if (bytes(usersByName[userName].userName).length > 0) {
+            return ResultAction(true, usersByName[userName]);       
+        } else {
+            return ResultAction(false, User(address(0), "", "", ""));       
         }
-        }   
-        return User({ userName: "", account: address(0), publicKey: "", privateKey: ""});
-    }*/
+
+    }
 
     // Checks if the user is elegible to register
     function canRegister(User memory user) public view returns (bool) {
