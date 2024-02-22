@@ -269,6 +269,7 @@ h1 {
 .uploaded-docs.selected {
   border-color: #007bff; 
   background-color: rgba(0, 123, 255, 0.1);
+  border-radius: 10px;
 }
 
 .uploaded-files-container {
