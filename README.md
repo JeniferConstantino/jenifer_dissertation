@@ -7,8 +7,9 @@
 ## Not using Docker
 
 (Make sure you have hardhat installed. If not: "npm install --save-dev hardhat")
-1. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_all.js --network localhost
-2. cd client < npm run start
+1. Run IPFS node 
+2. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_all.js --network localhost
+3. cd client < npm run start
 
 # Frequent Problems:
 
