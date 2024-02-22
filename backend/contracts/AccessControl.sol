@@ -16,6 +16,14 @@ contract AccessControl {
         bool success;
         FileRegister.File[] files;
     }
+    struct ResultActionStringArray {
+        bool success;
+        string[] permissions;
+    }
+    struct ResultActionString {
+        bool success;
+        string encSymmetricKey;
+    }
 
     UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could simultaneously be considered keys
     FileRegister fileRegister;
@@ -52,10 +60,10 @@ contract AccessControl {
         fileRegister.addFile(file);
     }
 
+    // Shares the file with the user: 
     function shareFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
         bool isUserAssociatedWithFile = userAssociatedWithFile(user, file);
         if (isUserAssociatedWithFile) {
-            updateUserFilePermissions(user, file, permissions);
             return;
         }
 
@@ -64,10 +72,9 @@ contract AccessControl {
     }
 
     // Updates the permissions a user has over a file
-    function updateUserFilePermissions(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) private {
+    function updateUserFilePermissions(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                // updates permissions
                 userHasFile[i].permissions = permissions;
                 return;
             }
@@ -75,23 +82,23 @@ contract AccessControl {
     }
 
     // Returns the encrypted symmetric key of a given user and file 
-    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (string memory) {
+    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (ResultActionString memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                return userHasFile[i].encSymmetricKey;
+                return ResultActionString(true, userHasFile[i].encSymmetricKey);
             }
         }
-        return "";   
+        return ResultActionString(false, "");
     }
 
     // Returns the permissions of a given user over a given file
-    function getPermissionsOverFile (UserRegister.User memory user, FileRegister.File memory file) public view returns (string[] memory) {
+    function getPermissionsOverFile (UserRegister.User memory user, FileRegister.File memory file) public view returns (ResultActionStringArray memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
             if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                return userHasFile[i].permissions;
+                return ResultActionStringArray(true, userHasFile[i].permissions);
             }
         }
-        return new string[](0);   
+        return ResultActionStringArray(false, new string[](0));
     }
 
     // Returns the files of a giving user

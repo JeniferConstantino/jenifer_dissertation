@@ -74,4 +74,155 @@ describe("AccessControl", function () {
         expect(result).to.equal(false);
     });
 
+    it("Should return true if the user is already associated with the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        userAssociatedWithFile();        
+
+        // Assert
+    });
+
+    it("Should return false if the user is not associated with the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        userAssociatedWithFile();
+
+        // Assert
+    });
+
+    it("Should return success=true and the users' files, if the user has files", async function() {
+        // Arrange        
+        
+
+        // Act
+        getUserFiles();
+
+        // Assert
+    });
+
+    it("Should return success=false and no users' files, if the user doesn't have files", async function() {
+        // Arrange        
+        
+
+        // Act
+        getUserFiles();
+
+        // Assert
+    });
+
+    it("Should get success=true and the users' permission over a file, if the user has the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        getPermissionsOverFile();
+
+        // Assert
+    });
+
+    it("Should get success=false and no users' permission over a file, if the user doesn't have the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        getPermissionsOverFile();
+
+        // Assert
+    });
+
+
+    it("Should get success=true and the users' encrypted symmetric key, if the user has the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        getEncSymmetricKeyFileUser();
+
+        // Assert
+    });
+
+    it("Should get success=false and no users' encrypted symmetric key, if the user doesn't have the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        getEncSymmetricKeyFileUser();
+
+        // Assert
+    });
+
+    it("Should update the users' file permissions if the user has the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        updateUserFilePermissions();
+
+        // Assert
+    });
+
+    it("Shouldn't update the users' file permissions if the user doesn't have the file", async function() {
+        // Arrange        
+        
+
+        // Act
+        updateUserFilePermissions();
+
+        // Assert
+    });
+
+    it("Should associate a user to a file giver certain permissions, if the user is not already associated", async function() {
+        // Arrange        
+        
+
+        // Act
+        shareFile();
+
+        // Assert
+    });
+
+    it("Should not associate a user to a file if the user is already associated to it", async function() {
+        // Arrange        
+        
+
+        // Act
+        shareFile();
+
+        // Assert
+    });
+
+    it("Should associate a file to the user and add the file, if the user is already associated to it.", async function() {
+        // Arrange        
+        
+
+        // Act
+        uploadFile();
+
+        // Assert
+    });
+
+    it("Shouldn't associate a file to the user and add the file, if the user is not already associated to it.", async function() {
+        // Arrange        
+        
+
+        // Act
+        uploadFile();
+
+        // Assert
+    });
+
+    it("Should associate a user with a file", async function() {
+        // Arrange        
+        
+
+        // Act
+        addUserHasFile();
+
+        // Assert
+    });
+
 });
