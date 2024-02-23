@@ -34,6 +34,7 @@ contract UserRegister {
     // Unwanted Usage: incert an existing user and overlap the existing information. 
     // The user to be registered has to have the same address as the one executing the transaction.
     function userRegistered(User memory user) public {
+        // TODO: BEFORE I STORE THE USER I NEED TO VERIFY ALL THE PARAMETERS ARE VALID
         if (isUserTheTrnsctExec(user.account, msg.sender)) {
             if (canRegister(user)) { // Checks if the user is elegible to register
                 users[user.account] = User(user.account, user.userName, user.publicKey, user.privateKey);
@@ -76,7 +77,7 @@ contract UserRegister {
     // The one seeing if the user is elegible to register should be the same one executing the transaction
     function canRegister(User memory user) public view returns (bool) {
         if (isUserTheTrnsctExec(user.account, msg.sender)) { 
-            if (existingAddress(user.account) == existingUserName(user.userName)) {
+            if (existingAddress(user.account) == existingUserName(user.userName) == validUserFields(user)) {
                 return true;
             }
         }
@@ -97,6 +98,18 @@ contract UserRegister {
     // Verifies if the username is taken
     function existingUserName(string memory userName) public view returns (bool) {
         return userNameExists[userName];
+    }
+
+    // Verifies if the fields are valid 
+    // The one seeing if the user has the right fields should be the same one executing the transaction
+    function validUserFields(User memory user) public view returns (bool) {
+        if (isUserTheTrnsctExec(user.account, msg.sender)) {
+            if (user.account != address(0) && bytes(user.userName).length != 0 && bytes(user.publicKey).length != 0 && bytes(user.privateKey).length != 0) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     // Sees if a certain user correspondes to the one trying to execute the method

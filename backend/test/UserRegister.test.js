@@ -205,7 +205,6 @@ describe("UserRegister", function () {
        expect(result.publicKey).to.equal("");
     });
 
-//-------------------------------------
     it("Should return false if there is a user with the same address", async function() {
         // Arrange
         const { userRegister, userAnaRita, invalidAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);  
@@ -299,6 +298,53 @@ describe("UserRegister", function () {
         expect(result).to.equal(true);
     });
 
+    it("Should return true if the users' fields are valid", async function() {
+        // Arrange
+        const { userRegister, signer1, userAnaRita } = await loadFixture(deployContractAndSetVariables); 
+
+        // Act
+        const result = await userRegister.connect(signer1).validUserFields(userAnaRita);
+
+        // Assert
+        expect(result).to.equal(true);
+    });
+
+    it("Should return false if the users' fields are not valid", async function() {
+        // Arrange
+        const { userRegister, signer2 } = await loadFixture(deployContractAndSetVariables); 
+        let invalidUser = {
+            account: await signer2.getAddress(),
+            userName: "", // invalid userName
+            publicKey: "wer",
+            privateKey: "rew"
+        };
+
+        // Act
+        const result = await userRegister.connect(signer2).validUserFields(invalidUser);
+
+        // Assert
+        expect(result).to.equal(false);
+        
+    });
+
+    it("Should return false if the one seeing if the user has the right fields is not the same one executing the transaction", async function() {
+        // Arrange
+        const { userRegister, signer2, signer1 } = await loadFixture(deployContractAndSetVariables); 
+        let invalidUser = {
+            account: await signer2.getAddress(),
+            userName: "", // invalid userName
+            publicKey: "wer",
+            privateKey: "rew"
+        };
+
+        // Act
+        const result = await userRegister.connect(signer1).validUserFields(invalidUser);
+
+        // Assert
+        expect(result).to.equal(false);
+        
+    });
+
     it("Should return false if the userName is not in use", async function() {
         // Arrange
         const { userRegister, signer1 } = await loadFixture(deployContractAndSetVariables); 
@@ -322,7 +368,7 @@ describe("UserRegister", function () {
         expect(result).to.equal(true);
     });
 
-    it("", async function() {
+    it("Should return false if the userAccount is not the same as the senders' account", async function() {
         // Arrange
         const { userRegister, signer1, signer2 } = await loadFixture(deployContractAndSetVariables); 
         var userAccount = signer1.getAddress();

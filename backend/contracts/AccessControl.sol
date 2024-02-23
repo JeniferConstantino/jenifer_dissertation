@@ -33,6 +33,7 @@ contract AccessControl {
     }
 
     function addUserHasFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+        // TODO: Need to verify if the user exist. Need to verify if the file exist        
         UserHasFile memory userFileData = UserHasFile({
             userAccount: userAccount,
             ipfsCID: file.ipfsCID,
@@ -49,15 +50,15 @@ contract AccessControl {
             return; // failed in the upload
         }
 
+        // Adds the file to the fileRegister table
+        fileRegister.addFile(file);
+
         // Adds the association with the given permissions
         string[] memory permissions = new string[](3); // By default these are the permissions of the owner
         permissions[0] = "download";
         permissions[1] = "delete";
         permissions[2] = "share";
         addUserHasFile(userAccount, file, encSymmetricKey, permissions);        
-
-        // Adds the file to the fileRegister table
-        fileRegister.addFile(file);
     }
 
     // Shares the file with the user: 
