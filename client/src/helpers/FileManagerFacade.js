@@ -48,8 +48,8 @@ class FileManagerFacade {
   }
   
   // Shares the file with a given user
-  async shareFile(selectedFile, permissions, userToShareFileWith) {
-    const shareCommand = new ShareFileCommand(this, selectedFile, permissions, userToShareFileWith);
+  async shareFile(selectedFile, permissions, accountUserToShareFileWith) {
+    const shareCommand = new ShareFileCommand(this, selectedFile, permissions, accountUserToShareFileWith);
     shareCommand.execute();
   }
 
@@ -60,15 +60,21 @@ class FileManagerFacade {
   }
 
   // Gets the user, according to a certain username
-  async getUserToShareFile(usernameToShare) {
-    const userToShareFileWith = await BlockchainManager.getUserToShareFile(usernameToShare, this.userRegisterContract, this.selectedUser);
+  async getUserAccount(usernameToShare) {
+    const userToShareFileWith = await BlockchainManager.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser);
     return userToShareFileWith;
   }
 
   // Gets the permissions a given user has over a file
-  async getPermissionsUserOverFile(userToSeePermission, selectedFile){
-    const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.accessControlContract, userToSeePermission, selectedFile, this.selectedUser);
+  async getPermissionsUserOverFile(accountUserToGetPermssion, selectedFile){
+    const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.accessControlContract, accountUserToGetPermssion, selectedFile, this.selectedUser);
     return userPermissions;
+  }
+
+  // Gets the public key of a given user
+  async getPubKeyUser(accountUser){
+    const userPublicKey = await BlockchainManager.getPublicKey(this.userRegisterContract, accountUser, this.selectedUser);
+    return userPublicKey;
   }
 
   // Stores a file in the blockchain

@@ -4,7 +4,7 @@ import FileApp from '../../helpers/FileApp';
 
 const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
-    const [userShareFileWith, setUserShareFileWith] = useState(null);
+    const [accountUserShareFileWith, setAccountUserShareFileWith] = useState("");
     const [showPermissions, setShowPermissions] = useState(false);
     const [permissions, setCheckboxes] = useState({
         download: false,
@@ -20,7 +20,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
         console.log('Share file ...');
         
         // Performs the sharing
-        fileManagerFacadeInstance.shareFile(selectedFile, permissions, userShareFileWith);
+        fileManagerFacadeInstance.shareFile(selectedFile, permissions, accountUserShareFileWith);
         setUsernameToShare('');
         setShowPermissions(false);
     }
@@ -29,11 +29,12 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
-            var userToShareFileWith = await fileManagerFacadeInstance.getUserToShareFile(usernameToShare);
-            if (userToShareFileWith !== null) {  // User exists
+            var accountUserToShareFile = await fileManagerFacadeInstance.getUserAccount(usernameToShare);
+            
+            if (accountUserToShareFile != null) {  // User exists
 
                 // Grabs the permissions that the user to share the file with already has over the current file
-                var userPermissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(userToShareFileWith, selectedFile);
+                var userPermissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(accountUserToShareFile, selectedFile);
                 
                 // Sets the checkboxes to the permissions the user already has
                 userPermissions.forEach(permission => {
@@ -53,7 +54,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
                   });
                 // Displays to the user the checkboxes and make username field readonly 
                 setShowPermissions(true);
-                setUserShareFileWith(userToShareFileWith);
+                setAccountUserShareFileWith(accountUserToShareFile);
             } else {
                 console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
             }

@@ -10,7 +10,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
     useEffect( () => {
         const fetchPermissions = async () => {
             if (selectedFile) {
-                const permissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(fileManagerFacadeInstance.selectedUser, selectedFile);
+                const permissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(fileManagerFacadeInstance.selectedUser.account, selectedFile);
                 setPermissions(permissions);
             } else {
                 setPermissions([]);

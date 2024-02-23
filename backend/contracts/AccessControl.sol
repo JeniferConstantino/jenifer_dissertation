@@ -32,9 +32,9 @@ contract AccessControl {
         fileRegister = FileRegister(fileRegisterContract);
     }
 
-    function addUserHasFile (UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+    function addUserHasFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
         UserHasFile memory userFileData = UserHasFile({
-            userAccount: user.account,
+            userAccount: userAccount,
             ipfsCID: file.ipfsCID,
             encSymmetricKey: encSymmetricKey,
             permissions: permissions
@@ -43,8 +43,8 @@ contract AccessControl {
     }
 
     // Upload a file in the system (associates the file to the user, with the given permissions, and adds to the file map)
-    function uploadFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey) public {
-        bool isUserAssociatedWithFile = userAssociatedWithFile(user, file);
+    function uploadFile(address userAccount, FileRegister.File memory file, string memory encSymmetricKey) public {
+        bool isUserAssociatedWithFile = userAssociatedWithFile(userAccount, file);
         if (isUserAssociatedWithFile) {
             return; // failed in the upload
         }
@@ -54,27 +54,27 @@ contract AccessControl {
         permissions[0] = "download";
         permissions[1] = "delete";
         permissions[2] = "share";
-        addUserHasFile(user, file, encSymmetricKey, permissions);        
+        addUserHasFile(userAccount, file, encSymmetricKey, permissions);        
 
         // Adds the file to the fileRegister table
         fileRegister.addFile(file);
     }
 
     // Shares the file with the user: 
-    function shareFile(UserRegister.User memory user, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
-        bool isUserAssociatedWithFile = userAssociatedWithFile(user, file);
+    function shareFile(address userAccount, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
+        bool isUserAssociatedWithFile = userAssociatedWithFile(userAccount, file);
         if (isUserAssociatedWithFile) {
             return;
         }
 
         // Associates the user with the file given the permissions
-        addUserHasFile(user, file, encSymmetricKey, permissions);        
+        addUserHasFile(userAccount, file, encSymmetricKey, permissions);        
     }
 
     // Updates the permissions a user has over a file
-    function updateUserFilePermissions(UserRegister.User memory user, FileRegister.File memory file, string[] memory permissions) public {
+    function updateUserFilePermissions(address userAccount, FileRegister.File memory file, string[] memory permissions) public {
         for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
+            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
                 userHasFile[i].permissions = permissions;
                 return;
             }
@@ -92,9 +92,9 @@ contract AccessControl {
     }
 
     // Returns the permissions of a given user over a given file
-    function getPermissionsOverFile (UserRegister.User memory user, FileRegister.File memory file) public view returns (ResultActionStringArray memory) {
+    function getPermissionsOverFile (address userAccount, FileRegister.File memory file) public view returns (ResultActionStringArray memory) {
         for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
+            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
                 return ResultActionStringArray(true, userHasFile[i].permissions);
             }
         }
@@ -129,9 +129,9 @@ contract AccessControl {
     }
 
     // Sees if a user is already associated with a file
-    function userAssociatedWithFile(UserRegister.User memory user, FileRegister.File memory file) public view returns (bool) {
+    function userAssociatedWithFile(address userAccount, FileRegister.File memory file) public view returns (bool) {
         for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
+            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
                 return true;
             }
         }

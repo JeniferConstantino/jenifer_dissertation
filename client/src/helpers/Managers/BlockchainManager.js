@@ -11,14 +11,14 @@ class BlockchainManager {
             // Verifies if the file is elegible to be stored
             try {
                 // Verifies if the user already has a file with the same name
-                var isUserAsscoiatedFile = await BlockchainManager.verifyUserAssociatedWithFile(accessControlContract, fileUploaded, selectedUser, selectedUser);
+                var isUserAsscoiatedFile = await BlockchainManager.verifyUserAssociatedWithFile(accessControlContract, fileUploaded, selectedUser.account, selectedUser);
                 
                 if (isUserAsscoiatedFile) {
                     console.log("User: ", selectedUser.userName , " already associated with the file: ", fileUploaded.fileName);
                     return;
                 } 
 
-                const receipt = await accessControlContract.methods.uploadFile(selectedUser, fileUploaded, encryptedSymmetricKey.toString('base64')).send({ from: selectedUser.account });                
+                const receipt = await accessControlContract.methods.uploadFile(selectedUser.account, fileUploaded, encryptedSymmetricKey.toString('base64')).send({ from: selectedUser.account });                
                 const status = receipt.status
                 resolve({status});      
             } catch (error) {
@@ -42,14 +42,14 @@ class BlockchainManager {
     }
 
     // Verifies if a user is already associated with a file 
-    static verifyUserAssociatedWithFile = async (accessControlContract, fileUploaded, userToVerify, selectedUser) => {
-        var isUserAsscoiatedFile = await accessControlContract.methods.userAssociatedWithFile(userToVerify, fileUploaded).call({from: selectedUser.account});
+    static verifyUserAssociatedWithFile = async (accessControlContract, fileUploaded, accountUserToVerify, selectedUser) => {
+        var isUserAsscoiatedFile = await accessControlContract.methods.userAssociatedWithFile(accountUserToVerify, fileUploaded).call({from: selectedUser.account});
         return isUserAsscoiatedFile;
     }
 
     // Gets the permissions a user has over a file
-    static getPermissionsUserOverFile = async (accessControlContract, userToSeePermission, selectedFile, selectedUser) => {
-        var result = await accessControlContract.methods.getPermissionsOverFile(userToSeePermission, selectedFile).call({from: selectedUser.account});
+    static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, selectedFile, selectedUser) => {
+        var result = await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, selectedFile).call({from: selectedUser.account});
         if (result.success) {
             return result.permissions;
         }
@@ -57,12 +57,22 @@ class BlockchainManager {
         return [];
     }
 
-    // Gets the user to share the file with
-    static getUserToShareFile = async (nameUserToShare, userRegisterContract, selectedUser) => {
-        // Verifies if there is a user with the given name
-        var result = await userRegisterContract.methods.getUserByUserName(nameUserToShare).call({from: selectedUser.account});
+    // gets the public key of the given user
+    static getPublicKey = async (userRegisterContract, accountUser, selectedUser) => {
+        var result = await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUser.account});
         if (result.success) {
-            return result.user;
+            return result.publicKey;
+        }
+        console.log("Something went wrong while trying to get the public key of the user.");
+        return "";
+    }
+
+    // Gets the user to share the file with
+    static getUserAccount = async (nameUserToShare, userRegisterContract, selectedUser) => {
+        // Verifies if there is a user with the given name
+        var result = await userRegisterContract.methods.getUserAccount(nameUserToShare).call({from: selectedUser.account});
+        if (result.success) {
+            return result.account;
         }
         return null;
     }
