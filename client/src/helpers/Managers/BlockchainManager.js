@@ -3,31 +3,51 @@ import FileApp from "../FileApp";
 
 class BlockchainManager {
 
-    // Stores a file in the blockchain
-    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, accessControlContract) => {
+    // UPLOAD FILE: Stores a file in the blockchain
+    static storeFileBlockchain = (fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract) => {
         return new Promise(async (resolve, reject) => {
             const encryptedSymmetricKey = EncryptionManager.encryptSymmetricKey(symmetricKey, selectedUser.publicKey); // Encrypt the symmetric key
 
             // Verifies if the file is elegible to be stored
             try {
+                var success = false;
+
                 // Verifies if the user already has a file with the same name
                 var isUserAsscoiatedFile = await BlockchainManager.verifyUserAssociatedWithFile(accessControlContract, fileUploaded, selectedUser.account, selectedUser);
-                
                 if (isUserAsscoiatedFile) {
                     console.log("User: ", selectedUser.userName , " already associated with the file: ", fileUploaded.fileName);
-                    return;
+                    resolve({success});  
                 } 
 
-                const receipt = await accessControlContract.methods.uploadFile(selectedUser.account, fileUploaded, encryptedSymmetricKey.toString('base64')).send({ from: selectedUser.account });                
-                const status = receipt.status
-                resolve({status});      
+                // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Adds the file in the blockchain 
+                await fileRegisterContract.methods.addFile(fileUploaded).send({ from: selectedUser.account });
+
+                // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Sees if the file was correctly added in the blockchain 
+                var result = await fileRegisterContract.methods.getFileByIpfsCID(fileUploaded.ipfsCID).call({from: selectedUser.account});
+                if (!result.success) {
+                    console.log("Upload file error: Something went wrong while trying to store the file in the blockchain.");
+                    resolve({success});  
+                }
+
+                // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Associates the user with the file (because it's upload, the user is the owner and has all permissions) 
+                await accessControlContract.methods.addUserHasFile(selectedUser.account, fileUploaded, encryptedSymmetricKey.toString('base64'), ["download", "delete", "share"]).send({ from: selectedUser.account });
+
+                // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Sees if the file was correctly associated with the user given the permissions set
+                result = await accessControlContract.methods.getPermissionsOverFile(selectedUser.account, fileUploaded).call({ from: selectedUser.account });
+                if (!result.success) {
+                    console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
+                    resolve({success});  
+                }
+                
+                success = true;
+                resolve({success});  
             } catch (error) {
                 console.error("Transaction error: ", error.message);
             }
         });
     }
 
-    // Get files from the Blockchain
+    // Get files from the Blockchain given a user
     static getFilesUploadedBlockchain = async (accessManagerContract, selectedUser) => {
         var result = await accessManagerContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
         let files = [];

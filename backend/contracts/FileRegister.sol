@@ -21,7 +21,7 @@ contract FileRegister {
     function addFile(File memory file) public {
         if (file.owner == msg.sender) { // Only if the one executing the transaction is the file owner
             if (canAddFile(file)) {
-                files[file.ipfsCID] = file; 
+                files[file.ipfsCID] = file;
             }
         }
     }
@@ -50,10 +50,10 @@ contract FileRegister {
     // Verifies if a file is already stored
     // It was planned to validate if the user is the owner or if the file was shared with the user, nevertheless this would originate a dependency with the AccessControl which is already dependent with the FileRegister
     function fileExists(string memory fileIpfsCID) public view returns (bool) {
-        if (bytes(files[fileIpfsCID].ipfsCID).length == 0) {
-            return false;
+        if (bytes(files[fileIpfsCID].ipfsCID).length != 0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
     // Verifies if the file has all parameters valid

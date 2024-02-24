@@ -141,8 +141,8 @@ const Home = () => {
                             <h1 className='auditlog-header'>Audit Log</h1>
                             <AuditLog/>
                         </div>
-                    </div>
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    </div>accessControlContract, selectedUser
+                    <UploadPopup accessControlContract={accessControlContract} selectedUser={selectedUser} fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                 </>
             )}

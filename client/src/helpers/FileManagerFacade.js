@@ -78,8 +78,8 @@ class FileManagerFacade {
   }
 
   // Stores a file in the blockchain
-  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract) {
-    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract);
+  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract) {
+    return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract);
   }
 
   // Gets a key pair: public key and private key

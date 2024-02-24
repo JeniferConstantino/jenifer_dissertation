@@ -32,7 +32,6 @@ class ShareFileCommand extends Command {
         
         // If the user is already associated with the file
         const userIsAssociatedWithFile = await this.fileManager.accessControlContract.methods.userAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile).call({from: this.fileManager.selectedUser.account});
-        
         if (userIsAssociatedWithFile) {
             await this.fileManager.accessControlContract.methods.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile, permissionsArray).send({from: this.fileManager.selectedUser.account});
             console.log("Permissions updated.");
@@ -40,13 +39,21 @@ class ShareFileCommand extends Command {
         }
         
         // Performs the file share
-        await this.fileManager.accessControlContract.methods.shareFile(
+        await this.fileManager.accessControlContract.methods.addUserHasFile(
             this.accountUserToShareFileWith, 
             this.selectedFile, 
             encryptedSymmetricKeyShared.toString('base64'),
             permissionsArray
-        ).send({ from: this.fileManager.selectedUser.account });
-        console.log("File Shared."); 
+        ).send({ from: this.fileManager.selectedUser.account }) ;
+
+        // TODO: Verifies if the file was successfully shared
+
+        result = await this.fileManager.accessControlContract.methods.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile).call({from: this.fileManager.selectedUser.account});
+        if (!result.success) {
+            console.log("Something went wrong while trying to associate the user with the file.");
+        } else {
+            console.log("File Shared."); 
+        }
     }
 
 }
