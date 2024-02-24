@@ -37,13 +37,12 @@ contract AccessControl {
     // File Upload: only if the transaction executer is the same as the userAccount, the transaction executer is the file owner, and the transaction executer is not already associate with the file 
     function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
         // Verifies if the user is elegible to upload the file
-        string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
+        if (elegibleToUpload(userAccount, fileIpfsCID)) {
+            string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
-        if (elegibleToUpload(userAccount, fileIpfsCID)) {
             bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner);
-
             if (validFields){
                 UserHasFile memory userFileData = UserHasFile({
                     userAccount: userAccount,
