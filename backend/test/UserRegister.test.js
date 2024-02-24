@@ -275,17 +275,6 @@ describe("UserRegister", function () {
         expect(result).to.equal(false);
     });
 
-    it("Should return false if the one seeing if the address exists is not the same one executing the transaction", async function() {
-        // Arrange
-        const { userRegister, signer2, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
-
-        // Act
-        const result = await userRegister.connect(signer2).existingAddress(userAnaRita.account);
-
-        // Assert
-        expect(result).to.equal(false);
-    });
-
     it("Should return true if the userName is already in use", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  

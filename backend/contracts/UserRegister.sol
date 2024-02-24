@@ -85,12 +85,11 @@ contract UserRegister {
     }
 
     // Verifies if the address exists (if the user already exists)
-    // The one seeing if the address exists should be the same one executing the transaction
+    // Because no infromarion in particular is disclosed and because it only returns true or false, no validation in the access was made (the one calling this method doesn't need to be the same one of the input)
+    // This method is also used by the AccessControl.sol 
     function existingAddress(address account) public view returns (bool) {
-        if(isUserTheTrnsctExec(account, msg.sender)){
-            if (users[account].account != address(0)) {
-                return true;
-            }
+        if (users[account].account != address(0)) {
+            return true;
         }
         return false;
     }

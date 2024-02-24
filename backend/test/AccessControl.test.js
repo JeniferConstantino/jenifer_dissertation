@@ -1,7 +1,7 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
-/*describe("AccessControl", function () {
+describe("AccessControl", function () {
 
     // Like a BeforeEach
     async function deployContractAndSetVariables() {
@@ -55,7 +55,29 @@ const { expect } = require("chai");
         return { fileRegisterContract, accessControl, file, file2, file3, userAnaRita, userAna};
     }
 
-    it("Should return true when the account input is the same as the list", async function() {
+    it("Should associate a user with a file", async function() {
+        // Arrange        
+        const { accessControl, userAnaRita, file } = await loadFixture(deployContractAndSetVariables);
+
+        // Act
+        const tx = await accessControl.addUserHasFile(userAnaRita, file, "yourEncSymmetricKey3", ["download", "delete"]);        
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        var result = await accessControl.getPermissionsOverFile(userAnaRita, file);
+        expect(result.success).to.equal(true);       
+        expect(result.permissions).to.deep.equal(["download", "delete"]);
+
+        result = await accessControl.getEncSymmetricKeyFileUser(userAnaRita, file);
+        expect(result.success).to.equal(true);
+        expect(result.encSymmetricKey).to.equal("yourEncSymmetricKey3");
+
+    });
+
+    /*it("Should return true when the account input is the same as the list", async function() {
         // Arrange
         const { accessControl, userAnaRita, file } = await loadFixture(deployContractAndSetVariables);
         const userHasFileList = [
@@ -241,28 +263,6 @@ const { expect } = require("chai");
         const result = await accessControl.getPermissionsOverFile(userAnaRita, file);
         expect(result.success).to.equal(false);       
         expect(result.permissions).to.deep.equal([]);
-    });
+    });*/
 
-    it("Should associate a user with a file", async function() {
-        // Arrange        
-        const { accessControl, userAnaRita, file } = await loadFixture(deployContractAndSetVariables);
-
-        // Act
-        const tx = await accessControl.addUserHasFile(userAnaRita, file, "yourEncSymmetricKey3", ["download", "delete"]);        
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-
-        var result = await accessControl.getPermissionsOverFile(userAnaRita, file);
-        expect(result.success).to.equal(true);       
-        expect(result.permissions).to.deep.equal(["download", "delete"]);
-
-        result = await accessControl.getEncSymmetricKeyFileUser(userAnaRita, file);
-        expect(result.success).to.equal(true);
-        expect(result.encSymmetricKey).to.equal("yourEncSymmetricKey3");
-
-    });
-
-});*/
+});

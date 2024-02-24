@@ -27,66 +27,85 @@ contract AccessControl {
 
     UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could simultaneously be considered keys
     FileRegister fileRegister;
+    UserRegister userRegister;
 
-    constructor(address fileRegisterContract) {
+    constructor(address fileRegisterContract, address userRegisterContract) {
         fileRegister = FileRegister(fileRegisterContract);
+        userRegister = UserRegister(userRegisterContract);
     }
 
-    // Adds a user to the list userHasFile
-    function addUserHasFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey, string[] memory permissions) public {
-        // TODO: Need to verify if the user exist. Need to verify if the file exist. (before adding them)
-        // TODO: It's enough to receive the fileIPFS
-        // TODO: Verifies if the one executing this function is the file owner or was someone to whom the file was shared with    
-        // TODO: Verify if fields to be added are valid fields
-        // TODO: Verify if the user is already associated with the file
+    // File Upload: only if the transaction executer is the same as the userAccount, the transaction executer is the file owner, and the transaction executer is not already associate with the file 
+    function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
+        // Verifies if the user is elegible to upload the file
+        string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
+            permissionsOwner[0] = "share";
+            permissionsOwner[1] = "download";
+            permissionsOwner[2] = "delete";
+        if (elegibleToUpload(userAccount, fileIpfsCID)) {
+            bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner);
 
-        /*
-        bool isUserAssociatedWithFile = userAssociatedWithFile(userAccount, file);
-        if (isUserAssociatedWithFile) {
-            return;
-        }*/
+            if (validFields){
+                UserHasFile memory userFileData = UserHasFile({
+                    userAccount: userAccount,
+                    ipfsCID: fileIpfsCID,
+                    encSymmetricKey: encSymmetricKey,
+                    permissions: permissionsOwner 
+                });
+                userHasFile.push(userFileData);
+            }
+        }
+    }  
 
-        UserHasFile memory userFileData = UserHasFile({
-            userAccount: userAccount,
-            ipfsCID: file.ipfsCID,
-            encSymmetricKey: encSymmetricKey,
-            permissions: permissions
-        });
-        userHasFile.push(userFileData);
-    }
+    // File Share: only if the userAccount!=msg.sender (a user cannot change its own permissions), userAccount is not the file owner (file owners' permissions cannot change)
+    function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public {
+        // Verifies if the user is elegible to share the file
+        if (elegibleToShare(userAccount, fileIpfsCID)) {
+            bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions);
+            if (validFields) {
+                UserHasFile memory userFileData = UserHasFile({
+                    userAccount: userAccount,
+                    ipfsCID: fileIpfsCID,
+                    encSymmetricKey: encSymmetricKey,
+                    permissions: permissions 
+                });
+                userHasFile.push(userFileData);
+            }
+        }
+    } 
 
     // Updates the permissions a user has over a file
-    function updateUserFilePermissions(address userAccount, FileRegister.File memory file, string[] memory permissions) public {
-        // Verify if the user is associated with the file
-        // Verify if the one executing this method is associated with the file because it's owner or has permission of share over the file
-        // It's enough to receive the file IPFS
-        for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                userHasFile[i].permissions = permissions;
-                return;
+    function updateUserFilePermissions(address userAccount, string memory fileIpfsCID, string[] memory permissions) public {
+        // Verifies if the user is elegible to update a users' file permissions 
+        if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
+            for (uint256 i=0; i<userHasFile.length; i++) {
+                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+                    userHasFile[i].permissions = permissions;
+                    return;
+                }
             }
         }
     }
 
     // Returns the encrypted symmetric key of a given user and file 
-    function getEncSymmetricKeyFileUser (UserRegister.User memory user, FileRegister.File memory file) public view returns (ResultActionString memory) {
-        // TODO: It's enough to receive the user acount and the file IPFS
-        // TODO: Verify if the user executing this method is the file owner or has access to the file
-        for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(user.account, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                return ResultActionString(true, userHasFile[i].encSymmetricKey);
+    function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (ResultActionString memory) {
+        // The user can only get the symmetric key if he is associated with the file
+        if (userAssociatedWithFile(accountUser, fileIpfsCID)) {
+            for (uint256 i=0; i<userHasFile.length; i++) {
+                if (isKeyEqual(accountUser, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+                    return ResultActionString(true, userHasFile[i].encSymmetricKey);
+                }
             }
-        }
+        } 
         return ResultActionString(false, "");
     }
 
     // Returns the permissions of a given user over a given file
-    function getPermissionsOverFile (address userAccount, FileRegister.File memory file) public view returns (ResultActionStringArray memory) {
-        // TODO: It's enough to receive the user acount and the file IPFS
-        // TODO: Verify if the user executing this method is the file owner or has access to the file
-        for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
-                return ResultActionStringArray(true, userHasFile[i].permissions);
+    function getPermissionsOverFile (address userAccount, string memory fileIpfsCID) public view returns (ResultActionStringArray memory) {
+        if (messageSenderAssociatedToFile(fileIpfsCID)) { // msg.sender has to be associated with the file
+            for (uint256 i=0; i<userHasFile.length; i++) {
+                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+                    return ResultActionStringArray(true, userHasFile[i].permissions);
+                }
             }
         }
         return ResultActionStringArray(false, new string[](0));
@@ -94,38 +113,47 @@ contract AccessControl {
 
     // Returns the files of a giving user
     function getUserFiles(address account) public view returns (ResultAction memory) {
-        // TODO: Verify if the user executing the method is the same as the account
-        // Stores the users' files
-        FileRegister.File[] memory userFilesResult = new FileRegister.File[](userHasFile.length);
-        uint resultIndex = 0;
-        for (uint i=0; i<userHasFile.length; i++) {
-            if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
-                string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
-                FileRegister.ResultAction memory result = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
-                FileRegister.File memory fileUser = result.file;
-                // Stores the file in the array to be returned
-                userFilesResult[resultIndex] = fileUser;
-                resultIndex++;
+        if (msg.sender == account) { // Users cannot not see files of other users
+            FileRegister.File[] memory userFilesResult = new FileRegister.File[](userHasFile.length); // Stores the users' files
+            uint resultIndex = 0;
+            for (uint i=0; i<userHasFile.length; i++) {
+                if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
+                    string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
+                    FileRegister.ResultAction memory result = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
+                    FileRegister.File memory fileUser = result.file;
+                    // Stores the file in the array to be returned
+                    userFilesResult[resultIndex] = fileUser;
+                    resultIndex++;
+                }
             }
+            // Resize the result array to remove unused elements
+            assembly {
+                mstore(userFilesResult, resultIndex)
+            }
+            // Returns accordingly
+            if (resultIndex != 0) {
+                return ResultAction(true, userFilesResult);
+            } 
         }
-        // Resize the result array to remove unused elements
-        assembly {
-            mstore(userFilesResult, resultIndex)
-        }
-        // Returns accordingly
-        if (resultIndex != 0) {
-            return ResultAction(true, userFilesResult);
-        } else {
-            return ResultAction(false, userFilesResult);
-        }
+        return ResultAction(false, new FileRegister.File[](0));
     }
 
     // Sees if a user is already associated with a file
-    function userAssociatedWithFile(address userAccount, FileRegister.File memory file) public view returns (bool) {
-        // TODO: Verify if the user executing the method is the same as the userAccount
-        // TODO: It's enough to receive the fileIPFS
+    function userAssociatedWithFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        if (messageSenderAssociatedToFile(fileIpfsCID)) {
+            for (uint256 i=0; i<userHasFile.length; i++) {
+                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Sees if the message sender is associated with a certain file
+    function messageSenderAssociatedToFile(string memory fileIpfsCID) public view returns (bool) {
         for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(userAccount, userHasFile[i].userAccount, file.ipfsCID, userHasFile[i].ipfsCID)) {
+            if (isKeyEqual(msg.sender, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
                 return true;
             }
         }
@@ -136,4 +164,63 @@ contract AccessControl {
     function isKeyEqual(address accountInput, address accountList, string memory ipfsCIDInput, string memory ipfsCIDList) public pure returns (bool){
         return (accountList == accountInput) && (keccak256(abi.encodePacked(ipfsCIDList)) == keccak256(abi.encodePacked(ipfsCIDInput)));
     }
+
+    // Verifies if the user is elegible to share the file
+    function elegibleToShare(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
+            !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
+            userHasSharePermissionOverFile(msg.sender, fileIpfsCID) && // The transaction executer can only share a file if he has share permissions 
+            !userAssociatedWithFile(userAccount, fileIpfsCID) // The user cannot be already associated with the file, in order to not have duplicated records
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    // Retruns if a user is elegible to update permissions of a user over a file
+    function elegibleToUpdPermissions(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
+            !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
+            userHasSharePermissionOverFile(msg.sender, fileIpfsCID) // The transaction executer can only share a file if he has share permissions 
+        ) {
+            return true;
+        }
+        return false;
+    }
+    
+    // Verifies if the transaction executer is elegible to upload the file
+    function elegibleToUpload (address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        if (msg.sender == userAccount && // if different it means the transaction is executer is trying to upload a file in the name of another user
+            !userAssociatedWithFile(userAccount, fileIpfsCID) &&// if already associated then it should be called the share file()
+            fileRegister.userIsFileOwner(userAccount, fileIpfsCID) // who uploads the file has to be the file owner
+            ) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verify if the fields of userFileData are valid
+    function verifyValidFields (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public view returns (bool) {
+        if (userAccount != address(0) &&
+            userRegister.existingAddress(userAccount) && // verifies if the user exist
+            bytes(fileIpfsCID).length != 0 && 
+            fileRegister.fileExists(fileIpfsCID) &&        // verifies if the file exist
+            bytes(encSymmetricKey).length != 0 && 
+            permissions.length != 0 ) {
+            return true;
+        }
+        return false;
+    }
+
+    // Returns if a user has share Permissions 
+    function userHasSharePermissionOverFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        string[] memory userPermissions = getPermissionsOverFile(userAccount, fileIpfsCID).permissions;
+        for (uint256 i=0; i<userPermissions.length; i++) {
+            if (keccak256(abi.encodePacked(userPermissions[i])) == keccak256(abi.encodePacked("share"))) {
+                return true; // Return true if "share" permission is found
+            }
+        }
+        return false;
+    }
+
 }

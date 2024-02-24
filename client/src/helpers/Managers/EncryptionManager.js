@@ -52,7 +52,7 @@ class EncryptionManager {
     static async decryptFileWithSymmetricKey (accessControlContract, fileEncrypted, selectedUser, fileContent) {
         try {
             // Decrypts the symmetric key
-            const result = await accessControlContract.methods.getEncSymmetricKeyFileUser(selectedUser, fileEncrypted).call({from: selectedUser.account});
+            const result = await accessControlContract.methods.getEncSymmetricKeyFileUser(selectedUser.account, fileEncrypted.ipfsCID).call({from: selectedUser.account});
             if (!result.success) {
                 console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
                 return;

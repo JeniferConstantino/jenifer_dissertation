@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 contract FileRegister {
-
     struct File {
         string ipfsCID;            // CID from IPFS (hash) - Unique
         string fileName;           // File Name - cannot be repeated
@@ -48,7 +47,8 @@ contract FileRegister {
     }
 
     // Verifies if a file is already stored
-    // It was planned to validate if the user is the owner or if the file was shared with the user, nevertheless this would originate a dependency with the AccessControl which is already dependent with the FileRegister
+    // Because no infromarion in particular is disclosed and because it only returns true or false, no validation in the access was made (the one calling this method doesn't need to be the same one of the input)
+    // This method is also used by the AccessControl.sol
     function fileExists(string memory fileIpfsCID) public view returns (bool) {
         if (bytes(files[fileIpfsCID].ipfsCID).length != 0) {
             return true;
@@ -68,6 +68,15 @@ contract FileRegister {
             }
         }
         return false;
-    }
+    } 
 
+    // Returns if the user is the file owner
+    // Because no infromarion in particular is disclosed and because it only returns true or false, no validation in the access was made (the one calling this method doesn't need to be the same one of the input)
+    // This method is also used by the AccessControl.sol 
+    function userIsFileOwner(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        if (files[fileIpfsCID].owner == userAccount) {
+            return true;
+        }
+        return false;
+    }
 }

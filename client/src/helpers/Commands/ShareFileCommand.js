@@ -17,7 +17,7 @@ class ShareFileCommand extends Command {
         const permissionsArray = Object.entries(this.permissions).filter(([key, value]) => value===true).map(([key, value]) => key);
         
         // Decrypts the files' symmetric key using the current logged user private key
-        var result = await this.fileManager.accessControlContract.methods.getEncSymmetricKeyFileUser(this.fileManager.selectedUser, this.selectedFile).call({from: this.fileManager.selectedUser.account});
+        var result = await this.fileManager.accessControlContract.methods.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID).call({from: this.fileManager.selectedUser.account});
         if(!result.success){
             console.log("something went wrong while trying to get the encrypted symmetric key of the user");
             return;
@@ -31,24 +31,24 @@ class ShareFileCommand extends Command {
         var encryptedSymmetricKeyShared = await this.fileManager.encryptSymmetricKey(decryptedSymmetricKey, publicKeyUserToShareFileWith);
         
         // If the user is already associated with the file
-        const userIsAssociatedWithFile = await this.fileManager.accessControlContract.methods.userAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile).call({from: this.fileManager.selectedUser.account});
+        const userIsAssociatedWithFile = await this.fileManager.accessControlContract.methods.userAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID).call({from: this.fileManager.selectedUser.account});
         if (userIsAssociatedWithFile) {
-            await this.fileManager.accessControlContract.methods.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile, permissionsArray).send({from: this.fileManager.selectedUser.account});
+            await this.fileManager.accessControlContract.methods.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, permissionsArray).send({from: this.fileManager.selectedUser.account});
+            // TODO: STILL NEED TO VERIFY IF THE PERMISSIONS WERE SUCCESSFULLY UPDATED
             console.log("Permissions updated.");
             return;
         }
         
         // Performs the file share
-        await this.fileManager.accessControlContract.methods.addUserHasFile(
+        await this.fileManager.accessControlContract.methods.shareFile(
             this.accountUserToShareFileWith, 
-            this.selectedFile, 
+            this.selectedFile.ipfsCID, 
             encryptedSymmetricKeyShared.toString('base64'),
             permissionsArray
         ).send({ from: this.fileManager.selectedUser.account }) ;
-
-        // TODO: Verifies if the file was successfully shared
-
-        result = await this.fileManager.accessControlContract.methods.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile).call({from: this.fileManager.selectedUser.account});
+        
+        // Verifies if the file was successfully shared with the user
+        result = await this.fileManager.accessControlContract.methods.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID).call({from: this.fileManager.selectedUser.account});
         if (!result.success) {
             console.log("Something went wrong while trying to associate the user with the file.");
         } else {

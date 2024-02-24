@@ -30,10 +30,10 @@ class BlockchainManager {
                 }
 
                 // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Associates the user with the file (because it's upload, the user is the owner and has all permissions) 
-                await accessControlContract.methods.addUserHasFile(selectedUser.account, fileUploaded, encryptedSymmetricKey.toString('base64'), ["download", "delete", "share"]).send({ from: selectedUser.account });
+                await accessControlContract.methods.uploadFile(selectedUser.account, fileUploaded.ipfsCID, encryptedSymmetricKey.toString('base64')).send({ from: selectedUser.account });
 
                 // TODO: MAYBE SEPARATE THIS INTO FUNCTIONS Sees if the file was correctly associated with the user given the permissions set
-                result = await accessControlContract.methods.getPermissionsOverFile(selectedUser.account, fileUploaded).call({ from: selectedUser.account });
+                result = await accessControlContract.methods.getPermissionsOverFile(selectedUser.account, fileUploaded.ipfsCID).call({ from: selectedUser.account });
                 if (!result.success) {
                     console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
                     resolve({success});  
@@ -69,7 +69,7 @@ class BlockchainManager {
 
     // Gets the permissions a user has over a file
     static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, selectedFile, selectedUser) => {
-        var result = await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, selectedFile).call({from: selectedUser.account});
+        var result = await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, selectedFile.ipfsCID).call({from: selectedUser.account});
         if (result.success) {
             return result.permissions;
         }
