@@ -44,7 +44,7 @@ contract AccessControl {
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
-            bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner);
+            bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner); // Validates if the file and the user exist
             if (validFields){
                 UserHasFile memory userFileData = UserHasFile({
                     userAccount: userAccount,
@@ -92,9 +92,9 @@ contract AccessControl {
     }
 
     // Returns the encrypted symmetric key of a given user and file
-    // The user can only get the symmetric key if he is associated with the file
+    // The user can only get the symmetric key if he is associated with the file and if the transaction executer is the same as the account user
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (ResultActionString memory) {
-        if (userAssociatedWithFile(accountUser, fileIpfsCID)) {
+        if ((msg.sender == accountUser) && userAssociatedWithFile(accountUser, fileIpfsCID)) {
             for (uint256 i=0; i<userHasFile.length; i++) {
                 if (isKeyEqual(accountUser, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
                     return ResultActionString(true, userHasFile[i].encSymmetricKey);
