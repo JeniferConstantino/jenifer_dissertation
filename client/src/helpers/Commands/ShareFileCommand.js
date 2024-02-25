@@ -22,7 +22,7 @@ class ShareFileCommand extends Command {
             console.log("something went wrong while trying to get the encrypted symmetric key of the user");
             return;
         }
-        var encSymmetricKey = result.encSymmetricKey;
+        var encSymmetricKey = result.resultString;
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
         var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
         

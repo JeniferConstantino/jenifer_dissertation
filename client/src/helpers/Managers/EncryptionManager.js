@@ -57,7 +57,7 @@ class EncryptionManager {
                 console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
                 return;
             }
-            const fileUserEncryptedSymmetricKey = result.encSymmetricKey;
+            const fileUserEncryptedSymmetricKey = result.resultString;
             const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
             const decryptedSymmetricKey = EncryptionManager.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);

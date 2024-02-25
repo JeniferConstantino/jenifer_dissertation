@@ -71,7 +71,7 @@ class BlockchainManager {
     static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, selectedFile, selectedUser) => {
         var result = await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, selectedFile.ipfsCID).call({from: selectedUser.account});
         if (result.success) {
-            return result.permissions;
+            return result.resultStrings;
         }
         console.log("No permissions were found between the user and the file.");
         return [];
@@ -81,7 +81,7 @@ class BlockchainManager {
     static getPublicKey = async (userRegisterContract, accountUser, selectedUser) => {
         var result = await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUser.account});
         if (result.success) {
-            return result.publicKey;
+            return result.resultString;
         }
         console.log("Something went wrong while trying to get the public key of the user.");
         return "";
@@ -92,7 +92,7 @@ class BlockchainManager {
         // Verifies if there is a user with the given name
         var result = await userRegisterContract.methods.getUserAccount(nameUserToShare).call({from: selectedUser.account});
         if (result.success) {
-            return result.account;
+            return result.resultAddress;
         }
         return null;
     }

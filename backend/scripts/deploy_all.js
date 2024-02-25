@@ -26,9 +26,10 @@ async function main() {
         return contractAddress;
     }
 
-    const userRegisterContractAddress = await deployContract("UserRegister"); 
-    const fileRegisterContractAddress = await deployContract("FileRegister"); 
-    await deployContract("AccessControl", [fileRegisterContractAddress, userRegisterContractAddress]);
+    const helperContractAddress = await deployContract("Helper"); 
+    const userRegisterContractAddress = await deployContract("UserRegister", [helperContractAddress]); 
+    const fileRegisterContractAddress = await deployContract("FileRegister", [helperContractAddress]); 
+    await deployContract("AccessControl", [fileRegisterContractAddress, userRegisterContractAddress, helperContractAddress]);
 }
 
 main()
