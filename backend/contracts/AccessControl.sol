@@ -34,7 +34,9 @@ contract AccessControl {
         userRegister = UserRegister(userRegisterContract);
     }
 
-    // File Upload: only if the transaction executer is the same as the userAccount, the transaction executer is the file owner, and the transaction executer is not already associate with the file 
+    // File Upload: only if the transaction executer is the same as the userAccount, 
+    //              the transaction executer is the file owner
+    //              the transaction executer is not already associate with the file 
     function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
         // Verifies if the user is elegible to upload the file
         if (elegibleToUpload(userAccount, fileIpfsCID)) {
@@ -55,9 +57,11 @@ contract AccessControl {
         }
     }  
 
-    // File Share: only if the userAccount!=msg.sender (a user cannot change its own permissions), userAccount is not the file owner (file owners' permissions cannot change)
+    // File Share: only if the userAccount!=msg.sender (a user cannot change its own permissions), 
+    //             userAccount is not the file owner (file owners' permissions cannot change)
+    //             msg.sender has "share" permissions over the file
+    //             userAccount is not already associated with the file
     function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public {
-        // Verifies if the user is elegible to share the file
         if (elegibleToShare(userAccount, fileIpfsCID)) {
             bool validFields = verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions);
             if (validFields) {
@@ -73,8 +77,10 @@ contract AccessControl {
     } 
 
     // Updates the permissions a user has over a file
+    // Executer has to be different from the user account - userAccount should not be able to give permissions to himself
+    // userAccound cannot be the file owner account: the file owner permissions cannot change - should always be all permissions
+    // the transaction executer has to have share permissions over the file
     function updateUserFilePermissions(address userAccount, string memory fileIpfsCID, string[] memory permissions) public {
-        // Verifies if the user is elegible to update a users' file permissions 
         if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
             for (uint256 i=0; i<userHasFile.length; i++) {
                 if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
@@ -85,9 +91,9 @@ contract AccessControl {
         }
     }
 
-    // Returns the encrypted symmetric key of a given user and file 
+    // Returns the encrypted symmetric key of a given user and file
+    // The user can only get the symmetric key if he is associated with the file
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (ResultActionString memory) {
-        // The user can only get the symmetric key if he is associated with the file
         if (userAssociatedWithFile(accountUser, fileIpfsCID)) {
             for (uint256 i=0; i<userHasFile.length; i++) {
                 if (isKeyEqual(accountUser, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
@@ -169,7 +175,7 @@ contract AccessControl {
         if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
             !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
             userHasSharePermissionOverFile(msg.sender, fileIpfsCID) && // The transaction executer can only share a file if he has share permissions 
-            !userAssociatedWithFile(userAccount, fileIpfsCID) // The user cannot be already associated with the file, in order to not have duplicated records
+            !userAssociatedWithFile(userAccount, fileIpfsCID) // The user cannot be already be associated with the file, in order to not have duplicated records
         ) {
             return true;
         }
