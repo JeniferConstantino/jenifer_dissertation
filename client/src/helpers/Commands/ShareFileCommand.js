@@ -1,7 +1,6 @@
 import Command from "./Command";
 import {Buffer} from 'buffer';
 
-
 class ShareFileCommand extends Command {
     constructor(fileManager, selectedFile, permissions, accountUserToShareFileWith){
         super();
