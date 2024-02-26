@@ -27,7 +27,10 @@ contract UserRegister {
 
     // Create a new user by adding him to the blockchain
     // Unwanted Usage: incert an existing user and overlap the existing information. 
-    // The user to be registered has to have the same address as the one executing the transaction.
+    // To be able to register: userName has to be unique
+    //                         address has to be unique
+    //                         the transaction executer has to have the same address as the user
+    //                         user fields have to be valid
     function userRegistered(User memory user) public {
         if (user.account == msg.sender) {
             if (canRegister(user)) { // Checks if the user is elegible to register (including validating fields)
@@ -71,7 +74,7 @@ contract UserRegister {
     // The one seeing if the user is elegible to register should be the same one executing the transaction
     function canRegister(User memory user) public view returns (bool) {
         if (user.account == msg.sender) { 
-            if (existingAddress(user.account) == existingUserName(user.userName) == helper.validUserFields(user)) {
+            if (!existingAddress(user.account) && !existingUserName(user.userName) && helper.validUserFields(user)) {
                 return true;
             }
         }

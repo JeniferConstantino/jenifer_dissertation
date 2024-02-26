@@ -27,6 +27,8 @@ contract AccessControl {
     // File Upload: only if the transaction executer is the same as the userAccount, 
     //              the transaction executer is the file owner
     //              the transaction executer is not already associate with the file 
+    //              the file and the user exist
+    //              fields are valid
     function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
         // Verifies if the user is elegible to upload the file
         if (elegibleToUpload(userAccount, fileIpfsCID)) {
@@ -51,6 +53,8 @@ contract AccessControl {
     //             userAccount is not the file owner (file owners' permissions cannot change)
     //             msg.sender has "share" permissions over the file
     //             userAccount is not already associated with the file
+    //             file exists
+    //             user exists
     function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public {
         if (elegibleToShare(userAccount, fileIpfsCID)) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions);

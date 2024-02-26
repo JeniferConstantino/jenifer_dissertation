@@ -28,6 +28,9 @@ contract FileRegister {
     }
 
     // Create a file (Upload)
+    // Should add file if: the owner is the same as the transaction executer 
+    //                     the file exists
+    //                     file parameter inputs are valid
     function addFile(File memory file) public {
         if (file.owner == msg.sender) { // Only if the one executing the transaction is the file owner
             if (canAddFile(file)) {

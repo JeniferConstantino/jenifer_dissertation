@@ -1,12 +1,18 @@
-/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("UserRegister", function () {
 
     // Like a BeforeEach
     async function deployContractAndSetVariables() {
+        const Helper = await ethers.getContractFactory("Helper");
+        let helperContract = await Helper.deploy().catch(error => {
+            console.error("Error deploying FileRegister: ", error);
+            process.exit(1);
+        });  
+
         const UserRegister = await ethers.getContractFactory("UserRegister");
-        const userRegister = await UserRegister.deploy();
+        const userRegister = await UserRegister.deploy(helperContract.target);
         
         const [signer1, signer2] = await ethers.getSigners(); // Get the first signer 
 
@@ -34,7 +40,7 @@ describe("UserRegister", function () {
         return { userRegister, userAnaRita, invalidAnaPaula, invalidAnaRita, signer1, signer2 };
     }
 
-    it("Should register a user if: username and address is not in use, and user executing the transaction is the user trying to register", async function() {
+    it("Should register a user if: username and address are unique, and user executing the transaction is the user trying to register", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
 
@@ -105,7 +111,7 @@ describe("UserRegister", function () {
         expect(result.user.account).to.equal("0x0000000000000000000000000000000000000000");  // User not stored
     });
 
-    it("Should get a user if he was already registered", async function() {
+    it("Should get a user if he was already registered, and the transaction executer is the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
         await userRegister.connect(signer1).userRegistered(userAnaRita);
@@ -121,7 +127,7 @@ describe("UserRegister", function () {
         expect(result.user.privateKey).to.equal(userAnaRita.privateKey);
     });
 
-    it("Should fail to get a user that is not registered", async function() {
+    it("Should fail to get a user that is not registered, and the transaction executer is the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
 
@@ -136,7 +142,7 @@ describe("UserRegister", function () {
         expect(result.user.privateKey).to.equal('');
     });
 
-    it("Should fail to get the user if the one asking for the users' information is not the same one executing the transaction", async function() {
+    it("Should fail to get the user if the transaction executer is not the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
         const txRegister = await userRegister.connect(signer1).userRegistered(userAnaRita);
@@ -164,7 +170,7 @@ describe("UserRegister", function () {
 
         // Assert
         expect(result.success).to.equal(true);
-        expect(result.account).to.equal(userAnaRita.account);
+        expect(result.resultAddress).to.equal(userAnaRita.account);
     });
 
     it("Shouldn't return the users' accout if a user with the given name doesn't exist (no matter who is executing the transaction)", async function(){
@@ -176,7 +182,7 @@ describe("UserRegister", function () {
 
         // Assert
         expect(result.success).to.equal(false);
-        expect(result.account).to.equal("0x0000000000000000000000000000000000000000");
+        expect(result.resultAddress).to.equal("0x0000000000000000000000000000000000000000");
     });
 
     it("Should return the public key if the user exist (no matter who is executing the transaction)", async function(){
@@ -190,7 +196,7 @@ describe("UserRegister", function () {
 
        // Assert
        expect(result.success).to.equal(true);
-       expect(result.publicKey).to.equal(userAnaRita.publicKey);
+       expect(result.resultString).to.equal(userAnaRita.publicKey);
     });
     
     it("Shouldn't return the public key if the user doesn't exist (no matter who is executing the transaction)", async function(){
@@ -202,10 +208,10 @@ describe("UserRegister", function () {
 
        // Assert
        expect(result.success).to.equal(false);
-       expect(result.publicKey).to.equal("");
+       expect(result.resultString).to.equal("");
     });
 
-    it("Should return false if there is a user with the same address", async function() {
+    it("Should return false if there is a user with the same address, and the transaction executer is the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, invalidAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.connect(signer1).userRegistered(userAnaRita);
@@ -217,7 +223,7 @@ describe("UserRegister", function () {
         expect(result).to.equal(false);
     });
 
-    it("Should return false if there is a user with the same userName", async function() {
+    it("Should return false if there is a user with the same userName, and the transaction executer is the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, invalidAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.connect(signer1).userRegistered(userAnaRita);
@@ -229,7 +235,7 @@ describe("UserRegister", function () {
         expect(result).to.equal(false);
     });
 
-    it("Should return true if there is no user with the same address and no user with the same userName", async function() {
+    it("Should return true if there is no user with the same address and no user with the same userName, and the transaction executerr is the same as the user", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
 
@@ -252,7 +258,7 @@ describe("UserRegister", function () {
     });
 
 
-    it("Should return true if the address already exists", async function() {
+    it("Should return true if the address already exists (no matter the transaction executer)", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
         await userRegister.connect(signer1).userRegistered(userAnaRita);
@@ -264,7 +270,7 @@ describe("UserRegister", function () {
         expect(result).to.equal(true);
     });
 
-    it("Should return false if the address doesn't exists", async function() {
+    it("Should return false if the address doesn't exists (no matter the transaction executer)", async function() {
         // Arrange
         const { userRegister, signer1, userAnaRita } = await loadFixture(deployContractAndSetVariables);  
 
@@ -281,92 +287,20 @@ describe("UserRegister", function () {
         await userRegister.connect(signer1).userRegistered(userAnaRita);
 
         // Act
-        const result = await userRegister.connect(signer1).existingUserName("Ana Rita");
+        const result = await userRegister.connect(signer1).existingUserName(userAnaRita.userName);
 
         // Assert
         expect(result).to.equal(true);
-    });
-
-    it("Should return true if the users' fields are valid", async function() {
-        // Arrange
-        const { userRegister, signer1, userAnaRita } = await loadFixture(deployContractAndSetVariables); 
-
-        // Act
-        const result = await userRegister.connect(signer1).validUserFields(userAnaRita);
-
-        // Assert
-        expect(result).to.equal(true);
-    });
-
-    it("Should return false if the users' fields are not valid", async function() {
-        // Arrange
-        const { userRegister, signer2 } = await loadFixture(deployContractAndSetVariables); 
-        let invalidUser = {
-            account: await signer2.getAddress(),
-            userName: "", // invalid userName
-            publicKey: "wer",
-            privateKey: "rew"
-        };
-
-        // Act
-        const result = await userRegister.connect(signer2).validUserFields(invalidUser);
-
-        // Assert
-        expect(result).to.equal(false);
-        
-    });
-
-    it("Should return false if the one seeing if the user has the right fields is not the same one executing the transaction", async function() {
-        // Arrange
-        const { userRegister, signer2, signer1 } = await loadFixture(deployContractAndSetVariables); 
-        let invalidUser = {
-            account: await signer2.getAddress(),
-            userName: "", // invalid userName
-            publicKey: "wer",
-            privateKey: "rew"
-        };
-
-        // Act
-        const result = await userRegister.connect(signer1).validUserFields(invalidUser);
-
-        // Assert
-        expect(result).to.equal(false);
-        
     });
 
     it("Should return false if the userName is not in use", async function() {
         // Arrange
-        const { userRegister, signer1 } = await loadFixture(deployContractAndSetVariables); 
+        const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables); 
 
         // Act
-        const result = await userRegister.connect(signer1).existingUserName("Ana Rita");
+        const result = await userRegister.connect(signer1).existingUserName(userAnaRita.userName);
 
         // Assert
         expect(result).to.equal(false);
     });
-
-    it("Should return true if the userAccount is the same as the senders' account", async function() {
-        // Arrange
-        const { userRegister, signer1 } = await loadFixture(deployContractAndSetVariables); 
-        var userAccount = signer1.getAddress();
-        var senderAccount = signer1.getAddress();
-        // Act
-        const result = await userRegister.connect(signer1).isUserTheTrnsctExec(userAccount, senderAccount);
-
-        // Assert
-        expect(result).to.equal(true);
-    });
-
-    it("Should return false if the userAccount is not the same as the senders' account", async function() {
-        // Arrange
-        const { userRegister, signer1, signer2 } = await loadFixture(deployContractAndSetVariables); 
-        var userAccount = signer1.getAddress();
-        var senderAccount = signer2.getAddress();
-        // Act
-        const result = await userRegister.connect(signer1).isUserTheTrnsctExec(userAccount, senderAccount);
-
-        // Assert
-        expect(result).to.equal(false);
-    });
-
-});*/
+});

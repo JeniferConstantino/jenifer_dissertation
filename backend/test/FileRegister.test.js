@@ -1,27 +1,41 @@
-/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("FileRegister", function () {
 
     // Like a BeforeEach
     async function deployContractAndSetVariables() {
+        const Helper = await ethers.getContractFactory("Helper");
+        let helperContract = await Helper.deploy().catch(error => {
+            console.error("Error deploying FileRegister: ", error);
+            process.exit(1);
+        });  
+
         const FileRegister = await ethers.getContractFactory("FileRegister");
-        const fileRegister = await FileRegister.deploy();
+        const fileRegister = await FileRegister.deploy(helperContract.target);
 
         const [signer1, signer2] = await ethers.getSigners(); // Get the first signer 
 
         let file = {
-            ipfsCID: "youripfscid",        
-            fileName: "nameFile.jpg",          
+            ipfsCID: "file1CID",        
+            fileName: "file1.jpg",          
             owner: await signer1.getAddress(),             
             fileType: "image",           
-            iv: "yourIv_1",  
+            iv: "file1_iv",  
         };
 
-        return { fileRegister, file, signer1, signer2 };
+        let file1Wrong = {
+            ipfsCID: "file1CID",        
+            fileName: "file1Wrong.jpg",          
+            owner: await signer1.getAddress(),             
+            fileType: "image",           
+            iv: "file1Wrong_iv",  
+        };
+
+        return { fileRegister, file, file1Wrong, signer1, signer2 };
     }
 
-    it("Should add a file", async function() {
+    it("Should add a file if the transaction executer is the file owner, the file doesn't exist, and the file inputs are valid", async function() {
         // Arrange
         const { fileRegister, file, signer1 } = await loadFixture(deployContractAndSetVariables);        
 
@@ -40,6 +54,56 @@ describe("FileRegister", function () {
         expect(result.file.owner).to.equal(file.owner);    
         expect(result.file.fileType).to.equal(file.fileType);    
         expect(result.file.iv).to.equal(file.iv);    
+    });
+
+    it("Shouldn't add a file if the transaction executer is the file owner but the file already exists", async function() {
+        // Arrange
+        const { fileRegister, file, file1Wrong, signer1 } = await loadFixture(deployContractAndSetVariables);        
+        await fileRegister.connect(signer1).addFile(file);
+
+        // Act
+        const tx = await fileRegister.connect(signer1).addFile(file1Wrong);
+        await tx.wait();
+        
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const result = await fileRegister.connect(signer1).getFileByIpfsCID(file1Wrong.ipfsCID);
+        expect(result.success).to.equal(true);      
+        expect(result.file.ipfsCID).to.equal(file.ipfsCID);     // Keeps the data of the first upload and not the second 
+        expect(result.file.fileName).to.equal(file.fileName);    
+        expect(result.file.owner).to.equal(file.owner);    
+        expect(result.file.fileType).to.equal(file.fileType);    
+        expect(result.file.iv).to.equal(file.iv);  
+    });
+
+    it("Shouldn't add a file if the transaction executer is the file owner, and the file inputs are invalid", async function() {
+        // Arrange
+        const { fileRegister, signer1 } = await loadFixture(deployContractAndSetVariables);        
+        let invalidFile = {
+            ipfsCID: "",    // invalid ipfsCID    
+            fileName: "nameFile.jpg",          
+            owner: await signer1.getAddress(),             
+            fileType: "image",           
+            iv: "yourIv_1",  
+        };
+
+        // Act
+        const tx = await fileRegister.connect(signer1).addFile(invalidFile);
+        await tx.wait();
+        
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const result = await fileRegister.connect(signer1).getFileByIpfsCID(invalidFile.ipfsCID);
+        expect(result.success).to.equal(false);      
+        expect(result.file.ipfsCID).to.equal("");    
+        expect(result.file.fileName).to.equal("");    
+        expect(result.file.owner).to.equal("0x0000000000000000000000000000000000000000");    
+        expect(result.file.fileType).to.equal("");    
+        expect(result.file.iv).to.equal("");      
     });
 
     it("Shouldn't add a file if the transaction executer is not the file owner", async function(){
@@ -74,7 +138,7 @@ describe("FileRegister", function () {
         
         // Assert
         expect(result.success).to.equal(true);
-        expect(result.file.ipfsCID.toLowerCase()).to.equal(file.ipfsCID);
+        expect(result.file.ipfsCID).to.equal(file.ipfsCID);
         expect(result.file.fileName).to.equal(file.fileName);
         expect(result.file.owner.toLowerCase()).to.equal(file.owner.toLowerCase());
         expect(result.file.fileType).to.equal(file.fileType);
@@ -172,44 +236,39 @@ describe("FileRegister", function () {
         expect(result).to.equal(false);
     });
 
-    it("Should return true if the file parameters are valid", async function() {
+    it("Should return true if the user is the file owner", async function() {
         // Arrange
-        const { fileRegister, signer1, file } = await loadFixture(deployContractAndSetVariables); 
+        const { fileRegister, file, signer1 } = await loadFixture(deployContractAndSetVariables);   
+        await fileRegister.connect(signer1).addFile(file);
+        let userAnaRita = {
+            account: file.owner, // address of the one executing the transaction
+            userName: "Ana Rita",
+            publicKey: "asd",
+            privateKey: "qwe"
+        };
 
         // Act
-        const result = await fileRegister.connect(signer1).canAddFile(file);
+        const result = await fileRegister.connect(signer1).userIsFileOwner(userAnaRita.account, file.ipfsCID);
 
         // Assert
         expect(result).to.equal(true);
     });
 
-    it("Should return false if the file parameters are invalid", async function() {
+    it("Should return false if the user isn't the file owner", async function() {
         // Arrange
-        const { fileRegister, signer1 } = await loadFixture(deployContractAndSetVariables); 
-        let invalidFile = {
-            ipfsCID: "",    // invalid ipfsCID    
-            fileName: "nameFile.jpg",          
-            owner: await signer1.getAddress(),             
-            fileType: "image",           
-            iv: "yourIv_1",  
+        const { fileRegister, file, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);   
+        await fileRegister.connect(signer1).addFile(file);
+        let userAnaRita = {
+            account: await signer2.getAddress(), // address of the one executing the transaction
+            userName: "Ana Rita",
+            publicKey: "asd",
+            privateKey: "qwe"
         };
 
         // Act
-        const result = await fileRegister.connect(signer1).fileParamValid(invalidFile);
+        const result = await fileRegister.connect(signer1).userIsFileOwner(userAnaRita.account, file.ipfsCID);
 
         // Assert
         expect(result).to.equal(false);
     });
-
-    it("Should return false if the transaction executer is not the same as the file owner", async function() {
-        // Arrange
-        const { fileRegister, signer2, file } = await loadFixture(deployContractAndSetVariables); 
-
-        // Act
-        const result = await fileRegister.connect(signer2).canAddFile(file);
-
-        // Assert
-        expect(result).to.equal(false);
-    });
-
-});*/
+});
