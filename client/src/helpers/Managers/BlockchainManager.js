@@ -118,6 +118,7 @@ class BlockchainManager {
         });
     }
 
+    // Share File: associates a file with a user given certain permissions
     static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, selectedUserAccount) => {
         await accessControlContract.methods.shareFile(
             userAccount, 
