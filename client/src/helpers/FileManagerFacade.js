@@ -65,6 +65,12 @@ class FileManagerFacade {
     return userToShareFileWith;
   }
 
+  // Gets the encrypted symmetric key of a given file and associated with a given user
+  async getEncSymmetricKeyFileUser(userAccound, fileIpfcid){
+    const encSymmetricKey = await BlockchainManager.getEncSymmetricKeyFileUser(this.accessControlContract, userAccound, fileIpfcid);
+    return encSymmetricKey;
+  }
+
   // Gets the permissions a given user has over a file
   async getPermissionsUserOverFile(accountUserToGetPermssion, selectedFile){
     const userPermissions = await BlockchainManager.getPermissionsUserOverFile(this.accessControlContract, accountUserToGetPermssion, selectedFile, this.selectedUser);
@@ -77,9 +83,19 @@ class FileManagerFacade {
     return userPublicKey;
   }
 
+  // Updates the users' permissions over a file
+  updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray) {
+    return BlockchainManager.updateUserFilePermissions(this.accessControlContract, userAccount, fileIpfsCid, permissionsArray, this.selectedUser.account);
+  }
+
   // Stores a file in the blockchain
   storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract) {
     return BlockchainManager.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract);
+  }
+
+  // Associates a user with a file, given certain permissions
+  fileShare(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray) {
+    return BlockchainManager.fileShare(this.accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, this.selectedUser.account);
   }
 
   // Gets a key pair: public key and private key

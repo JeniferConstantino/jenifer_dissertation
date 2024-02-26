@@ -22,9 +22,9 @@ export const useWeb3 = () => {
 
 const Web3Provider = ({children}) => {
 
-    let selectedAccount = useRef();     // Keeps track of wallet account change
-    let fileRegisterContract = useRef();   // keeps the File Register Contract so its functions can be executed
-    let userRegisterContract = useRef();   // keeps the User Register Contract so its functions can be executed
+    let selectedAccount = useRef();         // keeps track of wallet account change
+    let fileRegisterContract = useRef();    // keeps the File Register Contract so its functions can be executed
+    let userRegisterContract = useRef();    // keeps the User Register Contract so its functions can be executed
     let accessControlContract = useRef();   // keeps the Access Control Contract so its functions can be executed
     let provider = useRef();
     let fileManagerFacadeInstance = useRef(null);
