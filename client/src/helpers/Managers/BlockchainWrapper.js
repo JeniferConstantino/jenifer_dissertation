@@ -1,7 +1,6 @@
 import FileApp from "../FileApp";
 
 class BlockchainWrapper {
-
     // Gets the public key of the given user
     static getPublicKey = async (userRegisterContract, accountUser, selectedUserAccount) => {
         return await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUserAccount});
@@ -25,6 +24,16 @@ class BlockchainWrapper {
     // Stores the user in the blockchain
     static userRegistered = async (userRegisterContract, user, selectedAccount) => {
         return userRegisterContract.methods.userRegistered(user).send({from: selectedAccount});
+    }
+
+    // Adds the file in the blockchain
+    static addFile = (fileRegisterContract, file, selectedAccount) => {
+        return fileRegisterContract.methods.addFile(file).send({from: selectedAccount});
+    }
+
+    // Returns the file with the corresponding file IPFS CID
+    static getFileByIpfsCID = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
+        return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid).call({from: selectedUserAccount});
     }
 
     // Get the encrypted symmetric key of a file associated with a given user
@@ -59,16 +68,6 @@ class BlockchainWrapper {
     // Updates the users' permissions over a file
     static updateUserFilePermissions = async (accessControlContract, userAccount, fileIpfsCid, permissionsArray, selectedUserAccount) => {
         return await accessControlContract.methods.updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray).send({from: selectedUserAccount});
-    }
-
-    // Adds the file in the blockchain
-    static addFile = (fileRegisterContract, file, selectedAccount) => {
-        return fileRegisterContract.methods.addFile(file).send({from: selectedAccount});
-    }
-
-    // Returns the file with the corresponding file IPFS CID
-    static getFileByIpfsCID = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
-        return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid).call({from: selectedUserAccount});
     }
 
     // Returns the permissions of a user over a file
