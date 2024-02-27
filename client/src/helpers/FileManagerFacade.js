@@ -83,8 +83,8 @@ class FileManagerFacade {
   }
 
   // Gets the encrypted symmetric key of a given file and associated with a given user
-  async getEncSymmetricKeyFileUser(userAccound, fileIpfcid){
-    return await BlockchainWrapper.getEncSymmetricKeyFileUser(this.accessControlContract, userAccound, fileIpfcid);
+  async getEncSymmetricKeyFileUser(userAccount, fileIpfscid){
+    return await BlockchainWrapper.getEncSymmetricKeyFileUser(this.accessControlContract, userAccount, fileIpfscid);
   }
 
   // Gets the permissions a given user has over a file
