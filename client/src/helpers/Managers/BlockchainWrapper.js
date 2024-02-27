@@ -58,13 +58,7 @@ class BlockchainWrapper {
 
     // Updates the users' permissions over a file
     static updateUserFilePermissions = async (accessControlContract, userAccount, fileIpfsCid, permissionsArray, selectedUserAccount) => {
-        try {
-            // TODO: SEE IF THERE ARE ANY CONDITIONS THAT NEED TO BE FIRST MET
-            await accessControlContract.methods.updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray).send({from: selectedUserAccount});
-            // TODO: GET THE PERMISSIOS OVER THE FILE TO SEE IF IT WAS WELL EXECUTED
-        } catch (error) {
-            console.error("Transaction error: ", error.message);
-        }
+        return await accessControlContract.methods.updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray).send({from: selectedUserAccount});
     }
 
     // Adds the file in the blockchain
