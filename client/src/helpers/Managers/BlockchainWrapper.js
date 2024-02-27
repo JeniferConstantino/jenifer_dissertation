@@ -4,21 +4,12 @@ class BlockchainWrapper {
 
     // Gets the public key of the given user
     static getPublicKey = async (userRegisterContract, accountUser, selectedUserAccount) => {
-        var result = await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUserAccount});
-        if (result.success) {
-            return result.resultString;
-        }
-        console.log("Something went wrong while trying to get the public key of the user.");
-        return "";
+        return await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUserAccount});
     }
 
     // Gets the user to share the file with
-    static getUserAccount = async (nameUserToShare, userRegisterContract, selectedUser) => {
-        var result = await userRegisterContract.methods.getUserAccount(nameUserToShare).call({from: selectedUser.account});
-        if (result.success) {
-            return result.resultAddress;
-        }
-        return null;
+    static getUserAccount = async (nameUserToShare, userRegisterContract, selectedUserAccount) => {
+        return await userRegisterContract.methods.getUserAccount(nameUserToShare).call({from: selectedUserAccount});
     }
 
     // Verifies if an address exists
@@ -38,16 +29,12 @@ class BlockchainWrapper {
 
     // Get the encrypted symmetric key of a file associated with a given user
     static getEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
-        var result = await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
-        if(!result.success){
-            return null;
-        }
-        return result.resultString;
+        return await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
     }
 
     // Get files from the Blockchain given a user
-    static getFilesUploadedBlockchain = async (accessControlContract, selectedUser) => {
-        var result = await accessControlContract.methods.getUserFiles(selectedUser.account).call({from: selectedUser.account});
+    static getFilesUploadedBlockchain = async (accessControlContract, userAccount, selectedUserAccount) => {
+        var result = await accessControlContract.methods.getUserFiles(userAccount).call({from: selectedUserAccount});
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
@@ -59,20 +46,14 @@ class BlockchainWrapper {
         return files;
     }
 
-    // Verifies if a user is already associated with a file 
+    // Returns true or false, according to if a user is already associated with a file or not
     static verifyUserAssociatedWithFile = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
-        var isUserAsscoiatedFile = await accessControlContract.methods.userAssociatedWithFile(userAccount, fileIpfsCid).call({from: selectedUserAccount});
-        return isUserAsscoiatedFile;
+        return await accessControlContract.methods.userAssociatedWithFile(userAccount, fileIpfsCid).call({from: selectedUserAccount});
     }
 
     // Gets the permissions a user has over a file
-    static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, selectedFile, selectedUser) => {
-        var result = await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, selectedFile.ipfsCID).call({from: selectedUser.account});
-        if (result.success) {
-            return result.resultStrings;
-        }
-        console.log("No permissions were found between the user and the file.");
-        return [];
+    static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, fileIpfsCid, selectedUserAccount) => {
+        return await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, fileIpfsCid).call({from: selectedUserAccount}); 
     }
 
     // Updates the users' permissions over a file

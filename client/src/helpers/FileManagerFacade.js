@@ -72,33 +72,29 @@ class FileManagerFacade {
   }
 
   // Get all files that were uploaded too the blockchain
-  async getFilesUploadedBlockchain(accessControlContract, selectedUser) {
-    const files = await BlockchainWrapper.getFilesUploadedBlockchain(accessControlContract, selectedUser);
+  async getFilesUploadedBlockchain(selectedUser) {
+    const files = await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, selectedUser.account);
     return files;
   }
 
   // Gets the user, according to a certain username
   async getUserAccount(usernameToShare) {
-    const userToShareFileWith = await BlockchainWrapper.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser);
-    return userToShareFileWith;
+    return await BlockchainWrapper.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser.account);
   }
 
   // Gets the encrypted symmetric key of a given file and associated with a given user
   async getEncSymmetricKeyFileUser(userAccound, fileIpfcid){
-    const encSymmetricKey = await BlockchainWrapper.getEncSymmetricKeyFileUser(this.accessControlContract, userAccound, fileIpfcid);
-    return encSymmetricKey;
+    return await BlockchainWrapper.getEncSymmetricKeyFileUser(this.accessControlContract, userAccound, fileIpfcid);
   }
 
   // Gets the permissions a given user has over a file
-  async getPermissionsUserOverFile(accountUserToGetPermssion, selectedFile){
-    const userPermissions = await BlockchainWrapper.getPermissionsUserOverFile(this.accessControlContract, accountUserToGetPermssion, selectedFile, this.selectedUser);
-    return userPermissions;
+  async getPermissionsUserOverFile(accountUserToGetPermssion, selectedFileIpfsCid){
+    return await BlockchainWrapper.getPermissionsUserOverFile(this.accessControlContract, accountUserToGetPermssion, selectedFileIpfsCid, this.selectedUser.account); 
   }
 
   // Gets the public key of a given user
   async getPubKeyUser(accountUser){
-    const userPublicKey = await BlockchainWrapper.getPublicKey(this.userRegisterContract, accountUser, this.selectedUser.account);
-    return userPublicKey;
+    return await BlockchainWrapper.getPublicKey(this.userRegisterContract, accountUser, this.selectedUser.account);
   }
 
   // Get file IPFS CID
@@ -124,11 +120,6 @@ class FileManagerFacade {
   // Updates the users' permissions over a file
   updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray) {
     return BlockchainWrapper.updateUserFilePermissions(this.accessControlContract, userAccount, fileIpfsCid, permissionsArray, this.selectedUser.account);
-  }
-
-  // Stores a file in the blockchain
-  storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract) {
-    return BlockchainWrapper.storeFileBlockchain(fileUploaded, symmetricKey, selectedUser, accessControlContract, fileRegisterContract);
   }
 
   // Associates a user with a file, given certain permissions

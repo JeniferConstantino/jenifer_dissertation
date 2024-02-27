@@ -10,15 +10,15 @@ class UpdatePermissionsCommand extends Command {
     }
 
     arraysHaveSameContent(arr1, arr2) {
-        if (arr1.length !== arr2.length) {
-            return false;
-        }
+        const copyArr1 = arr1.slice();
+        const copyArr2 = arr2.slice();
+
         // Sort the arrays to ensure elements are in the same order
-        arr1.sort();
-        arr2.sort();
+        copyArr1.sort();
+        copyArr2.sort();
         // Check if each element in arr1 exists in arr2
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] !== arr2[i]) {
+        for (let i = 0; i < copyArr1.length; i++) {
+            if (copyArr1[i] !== copyArr2[i]) {
                 return false;
             }
         }

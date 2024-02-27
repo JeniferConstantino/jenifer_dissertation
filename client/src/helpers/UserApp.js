@@ -41,7 +41,7 @@ class UserApp {
       var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, publicKey, privateKey);
       // Verifies if the user is elegible to register
       var existingAddress = await fileManagerFacadeInstance.existingAddress(userLogged.account);
-      var existingUserName = await fileManagerFacadeInstance.existingUserName(userLogged.userName);      
+      var existingUserName = await fileManagerFacadeInstance.existingUserName(userLogged.userName);     
       if (existingAddress || existingUserName) {
         console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
         return;

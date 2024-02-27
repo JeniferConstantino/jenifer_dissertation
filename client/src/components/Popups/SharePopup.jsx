@@ -29,35 +29,43 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
     const handleNext = async (e) => {
         e.preventDefault()
         if (usernameToShare !== "") {
-            var accountUserToShareFile = await fileManagerFacadeInstance.getUserAccount(usernameToShare);
-            
-            if (accountUserToShareFile != null) {  // User exists
+            var result = await fileManagerFacadeInstance.getUserAccount(usernameToShare);
+            if (!result.success) { // User doesn't exist
+                console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
+                return;
+            }
+            var accountUserToShareFile = result.resultAddress;
 
-                // Grabs the permissions that the user to share the file with already has over the current file
-                var userPermissions = await fileManagerFacadeInstance.getPermissionsUserOverFile(accountUserToShareFile, selectedFile);
-                
-                // Sets the checkboxes to the permissions the user already has
-                userPermissions.forEach(permission => {
-                    switch (permission) {
-                      case FileApp.FilePermissions.Download:
-                        permissions.download = true;
-                        break;
-                      case FileApp.FilePermissions.Delete:
-                        permissions.delete = true;
-                        break;
-                      case FileApp.FilePermissions.Share:
-                        permissions.share = true;
-                        break;
-                      default:
-                        console.log("UNEXPECTED PERMISSION");
-                    }
-                  });
+            // Grabs the permissions that the user to share the file with already has over the current file
+            result = await fileManagerFacadeInstance.getPermissionsUserOverFile(accountUserToShareFile, selectedFile.ipfsCID);
+            if (!result.success) {
+                console.log("No permissions were found between the user and the file.");
                 // Displays to the user the checkboxes and make username field readonly 
                 setShowPermissions(true);
                 setAccountUserShareFileWith(accountUserToShareFile);
-            } else {
-                console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
+                return;
             }
+            const userPermissions = result.resultStrings;
+            
+            // Sets the checkboxes to the permissions the user already has
+            userPermissions.forEach(permission => {
+                switch (permission) {
+                    case FileApp.FilePermissions.Download:
+                    permissions.download = true;
+                    break;
+                    case FileApp.FilePermissions.Delete:
+                    permissions.delete = true;
+                    break;
+                    case FileApp.FilePermissions.Share:
+                    permissions.share = true;
+                    break;
+                    default:
+                    console.log("UNEXPECTED PERMISSION");
+                }
+                });
+            // Displays to the user the checkboxes and make username field readonly 
+            setShowPermissions(true);
+            setAccountUserShareFileWith(accountUserToShareFile);
         } else {
             console.log("No name was inputed.");
         } 

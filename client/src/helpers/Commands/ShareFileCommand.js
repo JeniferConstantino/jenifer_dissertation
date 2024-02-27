@@ -22,17 +22,25 @@ class ShareFileCommand extends Command {
         }
 
         // Get the encrypted symmetric key that a user has over a file
-        var encSymmetricKey = await this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);
-        if (encSymmetricKey == null) {
+        var result = await this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);
+        if(!result.success){
             console.log("something went wrong while trying to get the encrypted symmetric key of the user");
             return;
         }
+        var encSymmetricKey = result.resultString;
+
         // Decrypts symmetric key using the users' private key
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
         var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
         
         // Get the public key of the user to share file with
-        var publicKeyUserToShareFileWith = await this.fileManager.getPubKeyUser(this.accountUserToShareFileWith);
+        result = await this.fileManager.getPubKeyUser(this.accountUserToShareFileWith);
+        if (!result.success) {
+            console.log("Something went wrong while trying to get the public key of the user.");
+            return;
+        }        
+
+        var publicKeyUserToShareFileWith = result.resultString;
         // Encrypts the symmetric key with the users' public key
         var encryptedSymmetricKeyShared = await this.fileManager.encryptSymmetricKey(decryptedSymmetricKey, publicKeyUserToShareFileWith);
 

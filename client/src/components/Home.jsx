@@ -18,8 +18,6 @@ const Home = () => {
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [accessControlContract, setAccessControlContract] = useState(null);
-
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -29,9 +27,8 @@ const Home = () => {
     // Get Files
     const fetchFiles = useCallback(async () => {
         setSelectedUser(fileManagerFacadeInstance.current.selectedUser);
-        setAccessControlContract(fileManagerFacadeInstance.current.accessControlContract);
-        if (accessControlContract!=null && selectedUser!=null) {
-            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(accessControlContract, selectedUser).then((files) => {
+        if (selectedUser!=null) {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(selectedUser).then((files) => {
                 if(files.length !== 0){
                     setUploadedFiles(files);
                 }
@@ -43,7 +40,7 @@ const Home = () => {
             });
         }
         
-    }, [fileManagerFacadeInstance, selectedUser, accessControlContract]);
+    }, [fileManagerFacadeInstance, selectedUser]);
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -120,7 +117,7 @@ const Home = () => {
 
     return (
         <>
-            {accessControlContract && selectedUser && (
+            {selectedUser && (
                 <> 
                     <div className='content-container'>
                     <Logout selectedUser={selectedUser}/>
@@ -141,8 +138,8 @@ const Home = () => {
                             <h1 className='auditlog-header'>Audit Log</h1>
                             <AuditLog/>
                         </div>
-                    </div>accessControlContract, selectedUser
-                    <UploadPopup accessControlContract={accessControlContract} selectedUser={selectedUser} fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    </div>
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} show={showSharePopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                 </>
             )}
