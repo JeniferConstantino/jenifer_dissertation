@@ -14,7 +14,7 @@ class DownloadFileCommand extends Command {
             console.log("Accessed file in IPFS.");
         
             // Decrypts the file
-            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.fileManager.accessManagerContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
+            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.fileManager.accessControlContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
             

@@ -1,7 +1,7 @@
 const crypto = require('crypto-browserify');
 const forge = require('node-forge');
 
-class EncryptionManager {
+class EncryptionWrapper {
 
     // Generate a random symmetric key (for each file)
     static generateSymmetricKey() {
@@ -49,13 +49,18 @@ class EncryptionManager {
     }
 
     // Decrypts a given file using a given symmetric key
-    static async decryptFileWithSymmetricKey (accessManagerContract, fileEncrypted, selectedUser, fileContent) {
+    static async decryptFileWithSymmetricKey (accessControlContract, fileEncrypted, selectedUser, fileContent) {
         try {
             // Decrypts the symmetric key
-            const fileUserEncryptedSymmetricKey = await accessManagerContract.methods.getEncSymmetricKeyFileUser(selectedUser, fileEncrypted).call({from: selectedUser.account});
+            const result = await accessControlContract.methods.getEncSymmetricKeyFileUser(selectedUser.account, fileEncrypted.ipfsCID).call({from: selectedUser.account});
+            if (!result.success) {
+                console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
+                return;
+            }
+            const fileUserEncryptedSymmetricKey = result.resultString;
             const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
-            const decryptedSymmetricKey = EncryptionManager.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);
+            const decryptedSymmetricKey = EncryptionWrapper.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);
 
             // Decrypt the file content using the decrypted symmetric key
             const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
@@ -69,4 +74,4 @@ class EncryptionManager {
     }
 }
 
-export default EncryptionManager;
+export default EncryptionWrapper;
