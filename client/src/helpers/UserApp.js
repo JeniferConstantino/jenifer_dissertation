@@ -40,16 +40,15 @@ class UserApp {
     try {
       var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, publicKey, privateKey);
       // Verifies if the user is elegible to register
-      var existingAddress = await fileManagerFacadeInstance.userRegisterContract.methods.existingAddress(userLogged.account).call({from: fileManagerFacadeInstance._selectedAccount.current});
-      var existingUserName = await fileManagerFacadeInstance.userRegisterContract.methods.existingUserName(userLogged.userName).call({from: fileManagerFacadeInstance._selectedAccount.current})
-      
+      var existingAddress = await fileManagerFacadeInstance.existingAddress(userLogged.account);
+      var existingUserName = await fileManagerFacadeInstance.existingUserName(userLogged.userName);      
       if (existingAddress || existingUserName) {
         console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
         return;
       }
       
       // Stors the user in the blockchain
-      const result = await fileManagerFacadeInstance.userRegisterContract.methods.userRegistered(userLogged).send({ from: fileManagerFacadeInstance._selectedAccount.current }); // from indicates the account that will be actually sending the transaction
+      const result = await fileManagerFacadeInstance.userRegistered(userLogged);
       if (result.status) {
         // --------- Registration setup ---------------------
         fileManagerFacadeInstance._selectedUser = userLogged;

@@ -1,7 +1,7 @@
 const crypto = require('crypto-browserify');
 const forge = require('node-forge');
 
-class EncryptionManager {
+class EncryptionWrapper {
 
     // Generate a random symmetric key (for each file)
     static generateSymmetricKey() {
@@ -60,7 +60,7 @@ class EncryptionManager {
             const fileUserEncryptedSymmetricKey = result.resultString;
             const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
-            const decryptedSymmetricKey = EncryptionManager.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);
+            const decryptedSymmetricKey = EncryptionWrapper.decryptSymmetricKey(encryptedSymmetricKeyBuffer, selectedUser.privateKey);
 
             // Decrypt the file content using the decrypted symmetric key
             const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
@@ -74,4 +74,4 @@ class EncryptionManager {
     }
 }
 
-export default EncryptionManager;
+export default EncryptionWrapper;

@@ -19,8 +19,8 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
         e.preventDefault()
         console.log('Share file ...');
         
-        // Performs the sharing
-        fileManagerFacadeInstance.shareFile(selectedFile, permissions, accountUserShareFileWith);
+        // Performs the association of a user with a file given certain permissions
+        fileManagerFacadeInstance.associateUserFilePermissions(selectedFile, permissions, accountUserShareFileWith);
         setUsernameToShare('');
         setShowPermissions(false);
     }

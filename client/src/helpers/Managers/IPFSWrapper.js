@@ -1,19 +1,14 @@
 import {ipfs} from '../../../ipfs';
-import EncryptionManager from './EncryptionManager';
 import axios from 'axios';
 import { IPFS_BASE_URL } from '../../../ipfs';
 
-class IPFSManager {
+class IPFSWrapper {
 
     // Uploads the file to IPFS 
-    static async addFileToIPFS (fileAsBuffer) {
-        // Encrypts uploaded file using symmetric encryption
-        const symmetricKey = EncryptionManager.generateSymmetricKey(); 
-        const {encryptedFile, iv} = await EncryptionManager.encryptFileWithSymmetricKey(fileAsBuffer, symmetricKey);
-        // Adds to IPFS
+    static async addFileToIPFS (encryptedFile) {
         const addedFile = await ipfs.add({ content: encryptedFile});
         const fileCID = addedFile.cid.toString();
-        return {fileCID, symmetricKey, iv};
+        return fileCID;
     }
 
     // Gets a file from IPFS
@@ -22,8 +17,7 @@ class IPFSManager {
             responseType: 'arraybuffer',
         });
         return Buffer.from(response.data);
-    }
-    
+    }   
 }
 
-export default IPFSManager;
+export default IPFSWrapper;
