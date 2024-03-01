@@ -6,9 +6,14 @@ class BlockchainWrapper {
         return await userRegisterContract.methods.getPublicKey(accountUser).call({from: selectedUserAccount});
     }
 
-    // Gets the user to share the file with
+    // Gets the user based on the user name
     static getUserAccount = async (nameUserToShare, userRegisterContract, selectedUserAccount) => {
         return await userRegisterContract.methods.getUserAccount(nameUserToShare).call({from: selectedUserAccount});
+    }
+
+    // Get the user name based on a user account 
+    static getUserUserName = async (userRegisterContract, userAccount, selectedUserAccount) => {
+        return await userRegisterContract.methods.getUserUserName(userAccount).call({from: selectedUserAccount});
     }
 
     // Verifies if an address exists
@@ -55,6 +60,11 @@ class BlockchainWrapper {
         return files;
     }
 
+    // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
+    static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
+        return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
+    }
+
     // Returns true or false, according to if a user is already associated with a file or not
     static verifyUserAssociatedWithFile = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
         return await accessControlContract.methods.userAssociatedWithFile(userAccount, fileIpfsCid).call({from: selectedUserAccount});
@@ -89,6 +99,12 @@ class BlockchainWrapper {
             permissionsArray
         ).send({ from: selectedUserAccount }) ;
     }
+
+    // Downloads the file
+    static downloadFileAudit = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
+        return await accessControlContract.methods.downloadFileAudit(fileIpfsCid, userAccount).send({ from: selectedUserAccount });
+    }
+    
 }
 
 export default BlockchainWrapper;

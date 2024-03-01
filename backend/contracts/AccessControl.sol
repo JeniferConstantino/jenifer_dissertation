@@ -2,26 +2,30 @@
 pragma solidity ^0.8.0;
 import "./UserRegister.sol";
 import "./FileRegister.sol";
+import "./AuditLogControl.sol";
 import "./Helper.sol";
 
 contract AccessControl {
 
-    struct UserHasFile {
+    struct User_Has_File {
         address userAccount;       // User account
         string ipfsCID;            // ipfsCID 
         string encSymmetricKey;    // Key used for the file encryption
         string[] permissions;      // It can be: delete, update, share
     }
 
-    UserHasFile[] private userHasFile;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could simultaneously be considered keys
+    User_Has_File[] private user_Has_File;  // Not using map because solity doesn't accept structs in keys and a map of this would only make sense if userAccound and ipfsCID could simultaneously be considered keys
     FileRegister fileRegister;
     UserRegister userRegister;
+    AuditLogControl auditLogControl;
     Helper helper;
+    event FileActionLog(address indexed userAccount, string fileIpfsCID, string permissionsOwner, string action);
 
     constructor(address fileRegisterContract, address userRegisterContract, address helperContract) {
         fileRegister = FileRegister(fileRegisterContract);
         userRegister = UserRegister(userRegisterContract);
         helper = Helper(helperContract);
+        auditLogControl = new AuditLogControl();
     }
 
     // File Upload: only if the transaction executer is the same as the userAccount, 
@@ -30,7 +34,6 @@ contract AccessControl {
     //              the file and the user exist
     //              fields are valid
     function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
-        // Verifies if the user is elegible to upload the file
         if (elegibleToUpload(userAccount, fileIpfsCID)) {
             string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
             permissionsOwner[0] = "share";
@@ -38,13 +41,14 @@ contract AccessControl {
             permissionsOwner[2] = "delete";
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner); // Validates if the file and the user exist
             if (validFields){
-                UserHasFile memory userFileData = UserHasFile({
+                User_Has_File memory userFileData = User_Has_File({
                     userAccount: userAccount,
                     ipfsCID: fileIpfsCID,
                     encSymmetricKey: encSymmetricKey,
                     permissions: permissionsOwner 
                 });
-                userHasFile.push(userFileData);
+                user_Has_File.push(userFileData);
+                auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissionsOwner), "upload");
             }
         }
     }  
@@ -59,13 +63,14 @@ contract AccessControl {
         if (elegibleToShare(userAccount, fileIpfsCID)) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions);
             if (validFields) {
-                UserHasFile memory userFileData = UserHasFile({
+                User_Has_File memory userFileData = User_Has_File({
                     userAccount: userAccount,
                     ipfsCID: fileIpfsCID,
                     encSymmetricKey: encSymmetricKey,
                     permissions: permissions 
                 });
-                userHasFile.push(userFileData);
+                user_Has_File.push(userFileData);
+                auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissions), "share");
             }
         }
     } 
@@ -76,12 +81,24 @@ contract AccessControl {
     //              the transaction executer has to have share permissions over the file
     function updateUserFilePermissions(address userAccount, string memory fileIpfsCID, string[] memory permissions) public {
         if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
-            for (uint256 i=0; i<userHasFile.length; i++) {
-                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
-                    userHasFile[i].permissions = permissions;
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
+                    user_Has_File[i].permissions = permissions;
+                    auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissions), "update permissions");
                     return;
                 }
             }
+        }
+    }
+
+    // Downloads the file, if: the transaction executer is the same as the user
+    //                         the user has download permissions over the file
+    function downloadFileAudit(string memory fileIpfsCid, address userAccount) public {
+        if (msg.sender == userAccount &&
+            userHasDownloadPermissionOverFile(userAccount, fileIpfsCid)
+        ) {
+            // No precessing is done (as it happens with updateUserFilePermissions or shareFile or updateFile)
+            auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCid, userAccount, "-", "download");
         }
     }
 
@@ -89,9 +106,9 @@ contract AccessControl {
     // The user can only get the symmetric key if he is associated with the file and if the transaction executer is the same as the account user
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if ((msg.sender == accountUser) && userAssociatedWithFile(accountUser, fileIpfsCID)) {
-            for (uint256 i=0; i<userHasFile.length; i++) {
-                if (isKeyEqual(accountUser, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
-                    return Helper.ResultString(true, userHasFile[i].encSymmetricKey);
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (isKeyEqual(accountUser, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
+                    return Helper.ResultString(true, user_Has_File[i].encSymmetricKey);
                 }
             }
         } 
@@ -101,9 +118,9 @@ contract AccessControl {
     // Returns the permissions of a given user over a given file
     function getPermissionsOverFile (address userAccount, string memory fileIpfsCID) public view returns (Helper.ResultStringArray memory) {
         if (messageSenderAssociatedToFile(fileIpfsCID)) { // msg.sender has to be associated with the file
-            for (uint256 i=0; i<userHasFile.length; i++) {
-                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
-                    return Helper.ResultStringArray(true, userHasFile[i].permissions);
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
+                    return Helper.ResultStringArray(true, user_Has_File[i].permissions);
                 }
             }
         }
@@ -113,11 +130,11 @@ contract AccessControl {
     // Returns the files of a giving user
     function getUserFiles(address account) public view returns (FileRegister.ResultFiles memory) {
         if (msg.sender == account) { // Users cannot not see files of other users
-            FileRegister.File[] memory userFilesResult = new FileRegister.File[](userHasFile.length); // Stores the users' files
+            FileRegister.File[] memory userFilesResult = new FileRegister.File[](user_Has_File.length); // Stores the users' files
             uint resultIndex = 0;
-            for (uint i=0; i<userHasFile.length; i++) {
-                if (userHasFile[i].userAccount == account) { // Looks for the files the user is associated with 
-                    string memory fileIpfsCIDUser = userHasFile[i].ipfsCID;
+            for (uint i=0; i<user_Has_File.length; i++) {
+                if (user_Has_File[i].userAccount == account) { // Looks for the files the user is associated with 
+                    string memory fileIpfsCIDUser = user_Has_File[i].ipfsCID;
                     FileRegister.ResultFile memory result = fileRegister.getFileByIpfsCID(fileIpfsCIDUser); // Gets the file having the IPFS CID
                     FileRegister.File memory fileUser = result.file;
                     // Stores the file in the array to be returned
@@ -148,11 +165,24 @@ contract AccessControl {
         return false;
     }
 
+    // Returns if a user has download Permissions
+    function userHasDownloadPermissionOverFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
+        string[] memory userPermissions = getPermissionsOverFile(userAccount, fileIpfsCID).resultStrings;
+        for (uint256 i=0; i<userPermissions.length; i++) {
+            if (keccak256(abi.encodePacked(userPermissions[i])) == keccak256(abi.encodePacked("download"))) {
+                return true; // Return true if "download" permission is found
+            }
+        }
+        return false;
+    }
+
     // Sees if a user is already associated with a file
     function userAssociatedWithFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
-        if (messageSenderAssociatedToFile(fileIpfsCID)) {
-            for (uint256 i=0; i<userHasFile.length; i++) {
-                if (isKeyEqual(userAccount, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+        if (messageSenderAssociatedToFile(fileIpfsCID) ||
+            msg.sender == address(auditLogControl) // AuditLogControl also calls this method for the validation of one of his methods
+        ) {
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
                     return true;
                 }
             }
@@ -162,8 +192,8 @@ contract AccessControl {
 
     // Sees if the message sender is associated with a certain file
     function messageSenderAssociatedToFile(string memory fileIpfsCID) public view returns (bool) {
-        for (uint256 i=0; i<userHasFile.length; i++) {
-            if (isKeyEqual(msg.sender, userHasFile[i].userAccount, fileIpfsCID, userHasFile[i].ipfsCID)) {
+        for (uint256 i=0; i<user_Has_File.length; i++) {
+            if (isKeyEqual(msg.sender, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
                 return true;
             }
         }
@@ -212,4 +242,10 @@ contract AccessControl {
     function isKeyEqual(address accountInput, address accountList, string memory ipfsCIDInput, string memory ipfsCIDList) public pure returns (bool){
         return (accountList == accountInput) && (keccak256(abi.encodePacked(ipfsCIDList)) == keccak256(abi.encodePacked(ipfsCIDInput)));
     }
+
+    // Getter function for auditLogControl address
+    function getAuditLogControlAddress() public view returns (address) {
+        return address(auditLogControl);
+    }
+
 }

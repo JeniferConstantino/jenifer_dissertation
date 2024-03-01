@@ -37,7 +37,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
             if (selectedFile === null) {
                 console.log("Please select a file");
             } else {
-                fileManagerFacadeInstance.downloadFile(selectedFile);
+                handleOpenPopup(FileApp.FilePermissions.Download); 
             }
         } else {
             console.log("User does't have permissions to download the file.");

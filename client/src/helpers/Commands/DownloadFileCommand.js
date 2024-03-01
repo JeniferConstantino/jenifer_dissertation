@@ -17,6 +17,9 @@ class DownloadFileCommand extends Command {
             const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.fileManager.accessControlContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
+
+            // Makes the treatment of the download in the backend and stores on the audit log
+            await this.fileManager.downloadFileAudit(this.selectedFile.ipfsCID, this.fileManager.selectedUser.account);
             
             // Creates a downloaded link 
             const downloadLink = document.createElement("a");

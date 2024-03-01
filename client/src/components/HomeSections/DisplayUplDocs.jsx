@@ -50,16 +50,19 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
 
     return (
         <>
-            <div className="uploaded-files-container">
-                <div className="uploaded-files">
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : uploadedFiles.length > 0 ? (
-                        renderFiles()
-                    ) : (
-                        <p>No documents uploaded</p>
-                    )}
+            <div className="content-home-wrapper">
+                <div className="uploaded-files-container">
+                    <div className="uploaded-files">
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : uploadedFiles.length > 0 ? (
+                            renderFiles()
+                        ) : (
+                            <p>No documents uploaded</p>
+                        )}
+                    </div>
                 </div>
+                <div className='background'></div>                
             </div>
         </>
     );
