@@ -111,4 +111,28 @@ describe("Helper", function () {
         expect(result).to.equal(false);
     });
 
+    it("Should convert a string array into a string with comma-separated values", async function(){
+        // Arrange
+        const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+        const permissions = ["read", "write", "execute"];
+    
+        // Call the function
+        const result = await helperContract.stringArrayToString(permissions);
+    
+        // Assert
+        expect(result).to.equal("read, write, execute");
+    });
+
+    it("Should handle empty input array", async function(){
+        // Arrange
+        const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+        const permissions = [];
+
+        // Call the function
+        const result = await helperContract.stringArrayToString(permissions);
+
+        // Assert
+        expect(result).to.equal("");
+    });
+
 });
