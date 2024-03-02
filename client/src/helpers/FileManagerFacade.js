@@ -8,10 +8,11 @@ import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand';
 
 class FileManagerFacade {
 
-  constructor(fileRegisterContract, userRegisterContract, accessControlContract) {
+  constructor(fileRegisterContract, userRegisterContract, accessControlContract, auditLogControlContract) {
       this.fileRegisterContract = fileRegisterContract;
       this.userRegisterContract = userRegisterContract;
       this.accessControlContract = accessControlContract;
+      this.auditLogControlContract = auditLogControlContract;
       this._selectedAccount = "";
       this._selectedUser = null;
   }
@@ -39,16 +40,16 @@ class FileManagerFacade {
   // Uploads File into the system
   async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles) {
     const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);
-    uploadCommand.execute();
+    await uploadCommand.execute();
   }
   
   // Gets the file from IPFS, decryts and downloads
   async downloadFile(selectedFile) {
     const downloadCommand = new DownloadFileCommand(this, selectedFile);
-    downloadCommand.execute(); 
+    await downloadCommand.execute(); 
   }
 
-  // Associates a user with a file giver certain permissions 
+  // Associates a user with a file given certain permissions 
   async associateUserFilePermissions (selectedFile, permissions, accountUserShareFileWith) {
     // Verifies if the user is already associated with the file
     const userAssociatedWithFile = await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, selectedFile.ipfsCID, accountUserShareFileWith, this.selectedUser.account);
@@ -62,24 +63,34 @@ class FileManagerFacade {
   // Shares the file with a given user that was not already associated with a file
   async shareFileCommand(selectedFile, permissions, accountUserShareFileWith) {
     const shareCommand = new ShareFileCommand(this, selectedFile, permissions, accountUserShareFileWith);
-    shareCommand.execute();
+    await shareCommand.execute();
   }
 
   // Updates permissions of a given user over a file
   async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith) {
     const updatePermissionsCommand = new UpdatePermissionsCommand(this, selectedFile, permissions, accountUserShareFileWith);
-    updatePermissionsCommand.execute();
+    await updatePermissionsCommand.execute();
   }
 
   // Get all files that were uploaded too the blockchain
   async getFilesUploadedBlockchain(selectedUser) {
-    const files = await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, selectedUser.account);
-    return files;
+    return await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, this.selectedUser.account);
+  }
+
+  // Get all logs that were stored in the blockchain
+  async getLogsUserFilesBlockchain(uploadedFiles) {
+    var filesIpfsCid = uploadedFiles.map(file => file.ipfsCID);
+    return await BlockchainWrapper.getLogsUserFilesBlockchain(this.auditLogControlContract, filesIpfsCid, this.selectedUser.account);
   }
 
   // Gets the user, according to a certain username
   async getUserAccount(usernameToShare) {
     return await BlockchainWrapper.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser.account);
+  }
+
+  // Get the user, according to the account
+  async getUserUserName(userAccount) {
+    return await BlockchainWrapper.getUserUserName(this.userRegisterContract, userAccount, this.selectedUser.account);
   }
 
   // Gets the encrypted symmetric key of a given file and associated with a given user
@@ -125,6 +136,11 @@ class FileManagerFacade {
   // Associates a user with a file, given certain permissions
   fileShare(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray) {
     return BlockchainWrapper.fileShare(this.accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, this.selectedUser.account);
+  }
+
+  // Downloads the users' file
+  downloadFileAudit(fileIpfsCid, userAccount) {
+    return BlockchainWrapper.downloadFileAudit(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
   }
 
   // Verifies if a user address exist
@@ -186,6 +202,19 @@ class FileManagerFacade {
   // Adds a file to IPFS
   async addFileToIPFS(file) {
     return await IPFSWrapper.addFileToIPFS(file);
+  }
+
+  // Helper function to format timestamp to "dd/mm/yyyy hh:mm:ss"
+  static formatTimestamp(timestamp) {
+    const date = new Date(timestamp * 1000);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
   // TODO: get CID from the blockchain, delete file from IPFS, delete CID from the blockchain

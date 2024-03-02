@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
 import FileApp from '../../helpers/FileApp';
 
-const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selectedFile, children}) => {
+const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
     const [accountUserShareFileWith, setAccountUserShareFileWith] = useState("");
     const [showPermissions, setShowPermissions] = useState(false);
@@ -20,9 +20,8 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
         console.log('Share file ...');
         
         // Performs the association of a user with a file given certain permissions
-        fileManagerFacadeInstance.associateUserFilePermissions(selectedFile, permissions, accountUserShareFileWith);
-        setUsernameToShare('');
-        setShowPermissions(false);
+        await fileManagerFacadeInstance.associateUserFilePermissions(selectedFile, permissions, accountUserShareFileWith);
+        handleShare();
     }
 
     // Verifies if the user exists. If so, it displays the permissions of that user, so they can be edited
@@ -84,7 +83,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleClosePopup, show, selected
     const handleCloseShareNamePopup = () => {
         setUsernameToShare('');
         setShowPermissions(false);
-        handleClosePopup(FileApp.FilePermissions.Share); 
+        handleShare();
     }
 
     // Hides the permissions from the popup

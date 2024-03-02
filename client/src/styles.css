@@ -163,7 +163,6 @@ h1 {
   height: 50%;
   padding-left: 40px;
   flex-direction: column; /* Stack the child components vertically */
-  align-items: center;    /* Center the child components horizontally */
 }
 
 .shadow-overlay-home {
@@ -223,10 +222,15 @@ h1 {
   color: #4B4B4B;
 }
 
-.uplBackground {
-  background-color: #C0C0C0; 
+.background {
+  background-color: #C0C0C0;
   padding: 20px; 
   border-radius: 10px;
+  position: absolute; /* Position the background div relative to the content-home-wrapper */
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0;
 }
 
 .file-actions-wrapper {
@@ -239,8 +243,6 @@ h1 {
 .uploaded-files{
   display: flex;
   justify-content: space-around;
-  height: 100%;
-  width: 100%;
 }
 
 .file-actions-wrapper button {
@@ -263,35 +265,48 @@ h1 {
   flex-direction: column; 
   align-items: center; 
   text-align: center;
-  height: 100%;
 }
 
 .uploaded-docs.selected {
   border-color: #007bff; 
   background-color: rgba(0, 123, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 10%;
 }
 
 .uploaded-files-container {
-  max-height: 240px; /* Adjust this value as needed */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  z-index: 1;
+  width: 100%; /* full with of the parent */
+  max-height: 250px; 
   overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #555555 #DFDFDF; /* Firefox */
+  scrollbar-width: thin; 
+  scrollbar-color: transparent; 
 
   /* WebKit (Chrome, Safari) */
   &::-webkit-scrollbar {
-    width: 10px;
+    width: 10px
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: #555555;
     border-radius: 6px;
+    height: 0px;
   }
 
   &::-webkit-scrollbar-track {
     background-color: #DFDFDF;
     border-radius: 6px;
   }
+}
+
+.content-home-wrapper {
+  display: flex;
+  flex-direction: row;
+  position: relative; /* Ensure relative positioning for absolute positioning of children */
+  padding: 3vh;
 }
 
 .file-column {
@@ -304,10 +319,23 @@ h1 {
 
 .auditlog-header {
   margin-right: auto; 
+  padding-bottom: 4vh;
 }
 
-.auditLog-container{
-  margin-top: 10%;
+.log-entry {
+  display: flex;
+  align-items: center;
+}
+
+.log-column {
+  display: flex;
+  align-items: center;
+  flex: 1; /* Each column takes equal space */
+  min-width: 0; /* Allow content to wrap */
+}
+
+.log-column > * {
+  margin-right: 5px; /* Adjust spacing between icon and text */
 }
 
 /*----------- Home Page // POPUP Upload Document -----------*/

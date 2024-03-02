@@ -52,6 +52,14 @@ contract UserRegister {
         return ResultUser(false, User(address(0), "", "", ""));
     }
 
+    // Returns the user nome of a user
+    function getUserUserName(address account) public view returns (Helper.ResultString memory) {
+        if (users[account].account != address(0)) {
+            return Helper.ResultString(true, users[account].userName);
+        }
+        return Helper.ResultString(false, "");
+    } 
+
     // Given a name, returns the user account, if the user exists
     function getUserAccount(string memory userName) public view returns (Helper.ResultAddress memory) {
         if (bytes(usersByName[userName].userName).length > 0) {

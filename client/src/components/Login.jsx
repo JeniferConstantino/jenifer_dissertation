@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useWeb3 } from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp'
 
-
 const Login = () => {
     const navigate = useNavigate();
     const {setup, fileManagerFacadeInstance } = useWeb3();

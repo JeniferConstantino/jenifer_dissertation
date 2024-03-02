@@ -30,7 +30,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedFil
 
         if(fileAsBuffer){
             try{
-                fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);       
+                await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);
             } catch (error) {
                 console.error("Error uploading file to IPFS:", error);
             }

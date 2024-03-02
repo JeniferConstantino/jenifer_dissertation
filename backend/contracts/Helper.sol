@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 import "./UserRegister.sol";
 import "./FileRegister.sol";
+import "./AuditLogControl.sol";
 
 contract Helper {
     
@@ -48,6 +49,18 @@ contract Helper {
             return true;
         }
         return false;
+    }
+
+    // Converts a string array into a string
+    function stringArrayToString(string[] memory permissions) public pure returns (string memory) {
+        string memory permissionsString;
+        for (uint i = 0; i<permissions.length; i++) {
+            permissionsString = string(abi.encodePacked(permissionsString, permissions[i]));
+            if (i < permissions.length -1) {
+                permissionsString = string(abi.encodePacked(permissionsString, ", "));
+            }
+        }
+        return permissionsString;
     }
 
 }
