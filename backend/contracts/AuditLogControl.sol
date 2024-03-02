@@ -43,7 +43,7 @@ contract AuditLogControl {
         }
     }
 
-    // Returns the logs of a given file only if: transaction executer is associated with the file         
+    // Returns the logs of a given set of files only if: transaction executer is associated with the file         
     function getLogs(string[] memory filesIpfsCid) public view returns (ResultAuditLogs memory){ 
         AuditLog[] memory auditLogFile = new AuditLog[](logs.length); // Stores the logs of the files
         uint resultIndex = 0;

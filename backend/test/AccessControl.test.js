@@ -468,6 +468,79 @@ describe("AccessControl", function () {
         expect(resPermissions.resultStrings).to.deep.equal(["share", "download", "delete"]); // Permission delete was not added
     });
 
+
+    it("It should add the auditlog of download if the transaction executer is the same as the user and the user has download permissions over the file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+
+        // Act
+        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+        
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+        
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(true);
+        expect(result.logs.length).to.equal(2); // It has the upload and download in the log
+    });
+
+    it("Shouldn't store the download in the audit log if the transaction executer is different from the user and the user has download permissions over the file", async function() {
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+
+        // Act
+        const tx = await accessControl.connect(signer2).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(true);
+        expect(result.logs.length).to.equal(1); // Already has the upload on the audit log, but doesn't have the download 
+    });
+
+    it("Shouldn't store the download in the audit log if the transaction executer is the same as the  user and the user doesn't have permissions over the file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        // Act
+        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(false);
+        expect(result.logs.length).to.equal(0); 
+    });
+
     it("Should get success=true and the users' encrypted symmetric key, if the user is associated with the file and the transaction executer is the same as the user", async function() {
         // Arrange        
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
@@ -659,6 +732,41 @@ describe("AccessControl", function () {
         
         // Act 
         const result = await accessControl.connect(signer1).userHasSharePermissionOverFile(userAnaPaula.account, fileAnaRita.ipfsCID);
+
+        // Assert 
+        expect(result).to.equal(false);
+    });
+
+    it("Should return true if a user has download permissions over a file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);   
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+        
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+
+        // Act
+        const result = await accessControl.connect(signer1).userHasDownloadPermissionOverFile(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(result).to.equal(true);
+    });
+
+    it("Should return false if a user doesn't have download permissions over a file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, userAnaLuisa, signer1, signer2, signer3 } = await loadFixture(deployContractAndSetVariables);   
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await userRegisterContract.connect(signer3).userRegistered(userAnaLuisa); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"]);
+        
+        // Act 
+        const result = await accessControl.connect(signer1).userHasDownloadPermissionOverFile(userAnaPaula.account, fileAnaRita.ipfsCID);
 
         // Assert 
         expect(result).to.equal(false);
@@ -1081,4 +1189,12 @@ describe("AccessControl", function () {
         // Assert
         expect(result).to.equal(false);
     });
+
+    it("Should return the address of the AuditLogControl contract", async function(){
+        const { accessControl } = await loadFixture(deployContractAndSetVariables);   
+        
+        const auditLogControlAddress  = await accessControl.getAuditLogControlAddress();
+        expect(auditLogControlAddress).to.not.equal("0x0000000000000000000000000000000000000000");
+    });
+
 });
