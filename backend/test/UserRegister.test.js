@@ -159,6 +159,31 @@ describe("UserRegister", function () {
         expect(result.user.privateKey).to.equal("");
     });
 
+    it("Should get the user name if the user account exists", async function(){
+        // Arrange
+        const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
+        await userRegister.connect(signer1).userRegistered(userAnaRita);
+
+        // Act
+        const result = await userRegister.connect(signer1).getUserUserName(userAnaRita.account);
+
+        // Assert
+        expect(result.success).to.equal(true);
+        expect(result.resultString).to.equal(userAnaRita.userName);
+    });
+
+    it("Shouldn't get the user name if the user account doesn't exist", async function(){
+        // Arrange
+        const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
+        
+        // Act
+        const result = await userRegister.connect(signer1).getUserUserName(userAnaRita.account);
+
+        // Assert
+        expect(result.success).to.equal(false);
+        expect(result.resultString).to.equal("");
+    });
+
     it("Should return the users' account if a user with the given name exists (no matter who is executing the transaction)", async function() {
         // Arrange
         const { userRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
