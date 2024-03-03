@@ -5,6 +5,7 @@ import UploadFileCommand from './Commands/UploadFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
 import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand';
+import DeleteFileCommand from './Commands/DeleteFileCommand';
 
 class FileManagerFacade {
 
@@ -38,8 +39,8 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);
+  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
   
@@ -47,6 +48,12 @@ class FileManagerFacade {
   async downloadFile(selectedFile) {
     const downloadCommand = new DownloadFileCommand(this, selectedFile);
     await downloadCommand.execute(); 
+  }
+
+  // Deletes the file from IPFS and the association between the user and the file
+  async deleteFile(selectedFile, handleFileDeleted, uploadedFiles) {
+    const deleteCommand = new DeleteFileCommand(this, selectedFile, handleFileDeleted, uploadedFiles);
+    await deleteCommand.execute(); 
   }
 
   // Associates a user with a file given certain permissions 
@@ -72,9 +79,9 @@ class FileManagerFacade {
     await updatePermissionsCommand.execute();
   }
 
-  // Get all files that were uploaded too the blockchain
-  async getFilesUploadedBlockchain(selectedUser) {
-    return await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, this.selectedUser.account);
+  // Get all active files that were uploaded too the blockchain
+  async getFilesUploadedBlockchain(selectedUser, state) {
+    return await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, state, this.selectedUser.account);
   }
 
   // Get all logs that were stored in the blockchain
@@ -119,18 +126,28 @@ class FileManagerFacade {
   }
 
   // Adds the file in the blockchain
-  addFile(file) {
-    return BlockchainWrapper.addFile(this.fileRegisterContract, file, this.selectedUser.account);
+  async addFile(file) {
+    return await BlockchainWrapper.addFile(this.fileRegisterContract, file, this.selectedUser.account);
   }
 
   // Associates a user with a file
-  associatedUserFile(userAccount, fileIpfsCid, encSymmetricKey) {
-    return BlockchainWrapper.associatedUserFile(this.accessControlContract, userAccount, fileIpfsCid, encSymmetricKey, this.selectedUser.account);
+  async associatedUserFile(userAccount, fileIpfsCid, encSymmetricKey) {
+    return await BlockchainWrapper.associatedUserFile(this.accessControlContract, userAccount, fileIpfsCid, encSymmetricKey, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file
   updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray) {
     return BlockchainWrapper.updateUserFilePermissions(this.accessControlContract, userAccount, fileIpfsCid, permissionsArray, this.selectedUser.account);
+  }
+
+  // Deletes the files' association with the users, and deletes the file
+  async deactivateFileUserAssociation(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.deactivateFileUserAssociation(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  }
+
+  // Deletes permanently the file
+  deleteFilePermanently(fileIpfsCid) {
+    return BlockchainWrapper.deleteFilePermanently(this.fileRegisterContract, fileIpfsCid, this.selectedUser.account);
   }
 
   // Associates a user with a file, given certain permissions
@@ -159,8 +176,8 @@ class FileManagerFacade {
   }
 
   // Returns if a user is associated with a file
-  verifyUserAssociatedWithFile(userAccount, fileIpfsCid) {
-    return BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
+  async verifyUserAssociatedWithFile(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
   }
 
   // Generates a symmetric key
@@ -217,8 +234,6 @@ class FileManagerFacade {
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  // TODO: get CID from the blockchain, delete file from IPFS, delete CID from the blockchain
-  deleteFile() {}
   // TODO
   verifyFile() {}
 

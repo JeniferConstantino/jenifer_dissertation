@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from "react";
 import FileManagerFacade from "../../../helpers/FileManagerFacade";
-import { FcExternal, FcClock, FcReadingEbook, FcDocument} from 'react-icons/fc';
 import AuditLogHeader from './AuditLogHeader';
 
 const AuditLog = ({logs, fileManagerFacadeInstance}) => {
