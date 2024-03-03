@@ -6,10 +6,11 @@
 
 ## Not using Docker
 
-(Make sure you have hardhat installed. If not: "npm install --save-dev hardhat")
+(Make sure you have hardhat installed. If not: cd backend < "npm install --save-dev hardhat")
 1. Run IPFS node 
 2. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_all.js --network localhost
 3. cd client < npm run start
+4. cd backend < npx hardhat test => to run the tests
 
 # Frequent Problems:
 

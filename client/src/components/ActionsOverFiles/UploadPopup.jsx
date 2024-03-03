@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 
-const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedFiles, handleClosePopup, show, children}) => {
+const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'modal display-block' : 'modal display-none';
     const [isDragOver, setIsDragOver] = useState(false);
@@ -30,7 +30,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedFil
 
         if(fileAsBuffer){
             try{
-                await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedFiles);
+                await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
             } catch (error) {
                 console.error("Error uploading file to IPFS:", error);
             }

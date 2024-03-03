@@ -2,7 +2,7 @@ import React from "react";
 import { FcDocument , FcImageFile} from "react-icons/fc";
 import FileApp from "../../helpers/FileApp";
 
-const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, maxFilesPerColumn}) => {
+const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loading, maxFilesPerColumn}) => {
 
     // Sends the file to be decrypt
     const decryptAndDownload = async (file) => {
@@ -16,7 +16,7 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
     const renderFiles = () => {
         const rows = [];
         for (let i=0; i<maxFilesPerColumn; i++) {
-            const row = uploadedFiles
+            const row = uploadedActiveFiles
                 .filter((file, index) => index % maxFilesPerColumn === i)
                 .map((file, index) => (
                     <div 
@@ -55,7 +55,7 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedFiles, loading, 
                     <div className="uploaded-files">
                         {loading ? (
                             <p>Loading...</p>
-                        ) : uploadedFiles.length > 0 ? (
+                        ) : uploadedActiveFiles.length > 0 ? (
                             renderFiles()
                         ) : (
                             <p>No documents uploaded</p>

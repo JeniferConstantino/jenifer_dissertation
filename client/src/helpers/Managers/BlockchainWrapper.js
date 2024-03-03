@@ -46,9 +46,10 @@ class BlockchainWrapper {
         return await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
     }
 
-    // Get files from the Blockchain given a user
-    static getFilesUploadedBlockchain = async (accessControlContract, userAccount, selectedUserAccount) => {
-        var result = await accessControlContract.methods.getUserFiles(userAccount).call({from: selectedUserAccount});
+    // Get active files from the Blockchain given a user
+    static getFilesUploadedBlockchain = async (accessControlContract, userAccount, state, selectedUserAccount) => {
+        var result = await accessControlContract.methods.getUserFiles(userAccount, state).call({from: selectedUserAccount});
+        console.log("result: ", result.success, " state: ", state);
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
@@ -78,6 +79,11 @@ class BlockchainWrapper {
     // Updates the users' permissions over a file
     static updateUserFilePermissions = async (accessControlContract, userAccount, fileIpfsCid, permissionsArray, selectedUserAccount) => {
         return await accessControlContract.methods.updateUserFilePermissions(userAccount, fileIpfsCid, permissionsArray).send({from: selectedUserAccount});
+    }
+
+    // Delete the association of the file with the users and deletes the file
+    static deactivateFileUserAssociation = async (accessControlContract, userAccount, fileIpfsCid, selectedUserAccount) => {
+        return await accessControlContract.methods.deactivateFileUserAssociation(userAccount, fileIpfsCid).send({from: selectedUserAccount});
     }
 
     // Returns the permissions of a user over a file

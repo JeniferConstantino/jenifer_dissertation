@@ -5,13 +5,15 @@ import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
 import Download from './ActionsOverFiles/Download'
+import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
 import SharePopup from './ActionsOverFiles/SharePopup';
 import FileApp from '../helpers/FileApp';
 
 const Home = () => {
 
-    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [uploadedActiveFiles, setUploadedActiveFiles] = useState([]);
+    const [uploadedFiles, setUploadedFiles ] = useState([]);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -27,11 +29,28 @@ const Home = () => {
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const { fileManagerFacadeInstance } = useWeb3();
 
-    // Get Files
-    const fetchFiles = useCallback(async () => {
+    // Get Active Files
+    const fetchActiveFiles = useCallback(async () => {
         setSelectedUser(fileManagerFacadeInstance.current.selectedUser);
         if (selectedUser!=null) {
-            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(selectedUser).then((files) => {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(selectedUser, "active").then((files) => {
+                if(files.length !== 0){
+                    setUploadedActiveFiles(files);
+                }
+            }).catch(err => {
+                console.log(err);
+            })
+            .finally( () => {
+                setLoading(false);   
+            });
+        }
+        
+    }, [fileManagerFacadeInstance, selectedUser]);
+
+    // Get all files (be them active or deactive)
+    const fetchFiles = useCallback(async () => {
+        if (selectedUser!=null) {
+            await fileManagerFacadeInstance.current.getFilesUploadedBlockchain(selectedUser, "").then((files) => {
                 if(files.length !== 0){
                     setUploadedFiles(files);
                 }
@@ -47,7 +66,7 @@ const Home = () => {
 
     // Get Logs
     const fetchLogs = useCallback(async () => {
-        if (uploadedFiles!=null && selectedUser!=null) {
+        if (uploadedActiveFiles!=null && selectedUser!=null) {
             await fileManagerFacadeInstance.current.getLogsUserFilesBlockchain(uploadedFiles, selectedUser).then((result) => {
                 if (result.success) {
                     setLogs(result.logs);
@@ -60,11 +79,11 @@ const Home = () => {
                 setLoading(false);   
             });
         }
-    }, [fileManagerFacadeInstance, uploadedFiles, selectedUser]);
+    }, [uploadedActiveFiles, selectedUser, fileManagerFacadeInstance, uploadedFiles]);
 
     // This component runs after the component has mounted
     useEffect(() => {
-        fetchFiles();
+        fetchActiveFiles();
         handleWindowResize();
         // Add event listener for window resize
         window.addEventListener('resize', handleWindowResize);
@@ -73,12 +92,15 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    }, [fetchFiles]);
+    }, [fetchActiveFiles]);
 
     useEffect(() => {
         fetchLogs();
     }, [fetchLogs]);
     
+    useEffect(() => {
+        fetchFiles();
+    }, [fetchFiles]);
 
     // Get the logs
     const getLogs = async () => {
@@ -108,9 +130,12 @@ const Home = () => {
     }
 
     // Closes popup and updates uploaded files
-    const handleUpload = async (tempUpdatedUploadedFiles) => {
+    const handleUpload = async (tempUpdatedUploadedActiveFiles, tempUpdatedUploadedFiles) => {
         try {
-            setUploadedFiles(tempUpdatedUploadedFiles);   
+            console.log("getting logs");
+            await getLogs();
+            setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
+            setUploadedFiles(tempUpdatedUploadedFiles);
             handleClosePopup("upload");
         } catch (error) {
             console.log("error: ", error);
@@ -121,6 +146,13 @@ const Home = () => {
     const handleDownloaded = async () => {
         await getLogs();
         handleClosePopup(FileApp.FilePermissions.Download);
+    }
+
+    // Coses popup and delets file
+    const handleFileDeleted = async (tempUpdatedUploadedActiveFiles) => {
+        await getLogs();
+        setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
+        handleClosePopup(FileApp.FilePermissions.Delete);
     }
 
     // Closes popup and updates logs
@@ -185,7 +217,7 @@ const Home = () => {
                         <Logout selectedUser={selectedUser}/>
                         <div className='home-wrapper content-wrapper'>
                             <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
-                            <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedFiles={uploadedFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
+                            <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedActiveFiles={uploadedActiveFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
                     </div>
@@ -196,9 +228,10 @@ const Home = () => {
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
                     </div>
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
+                    <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
                 </>
             )}
         </>

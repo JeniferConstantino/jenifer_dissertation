@@ -188,7 +188,7 @@ describe("AccessControl", function () {
         expect(userAssociatedWithFile).to.equal(true);
     });
 
-    it ("Should share if: user to share != transaction executer, user != file owner, user not associated with the file, transaction executer has share permissions over the file, file and user exist, and valid fields", async function(){
+    it ("Should share if: user to share != transaction executer, user != file owner, user not associated with the file, transaction executer has share permissions over the file, file and user exist, file is in active, and valid fields", async function(){
         // Arrange
         const { fileRegisterContract, userRegisterContract, accessControl, userAnaPaula, userAnaRita, fileAnaPaula, signer2, signer1 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKey = "encSymmetricKeyFileAnaPaula";
@@ -357,6 +357,28 @@ describe("AccessControl", function () {
         expect(isUserAssociatedAfterUpload).to.equal(false);
     });
 
+    it("Shouldn't share if the file is not in the state 'active'", async function(){
+        // Arrange
+        const { fileRegisterContract, userRegisterContract, accessControl, userAnaPaula, userAnaRita, fileAnaPaula, signer2, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaPaula";
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer2).addFile(fileAnaPaula); // Add the file
+        await accessControl.connect(signer2).uploadFile(userAnaPaula.account, fileAnaPaula.ipfsCID, encSymmetricKey); // uploads the file so the signe2 has "share" permissions
+
+        await accessControl.connect(signer2).deactivateFileUserAssociation(userAnaPaula.account, fileAnaPaula.ipfsCID); // deactivate the file - deletes the file
+
+        // Act
+        const tx = await accessControl.connect(signer2).shareFile(userAnaRita.account, fileAnaPaula.ipfsCID, encSymmetricKey, ["download", "delete"]);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const isUserAssociatedAfterUpload = await accessControl.connect(signer1).userAssociatedWithFile(userAnaRita.account, fileAnaPaula.ipfsCID);
+        expect(isUserAssociatedAfterUpload).to.equal(false);
+    });
 
     it("Should update the users' permissions if the transaction executer is not the user, has share permissions and the user is not the file owner", async function() {
         // Arrange
@@ -441,7 +463,7 @@ describe("AccessControl", function () {
         expect(resPermissions.resultStrings).to.deep.equal(["download", "share"]); // Permission share was not excahnged for the delete
     });
 
-    it("Should update the users' permissions if the user is the file owner", async function() {
+    it("Shouldn't update the users' permissions if the user is the file owner", async function() {
         // Arrange
         const { fileRegisterContract, userRegisterContract, accessControl, userAnaPaula, userAnaRita, fileAnaRita, signer2, signer1 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -468,6 +490,33 @@ describe("AccessControl", function () {
         expect(resPermissions.resultStrings).to.deep.equal(["share", "download", "delete"]); // Permission delete was not added
     });
 
+    it("Shouldn't update the users' permissions if the file is in the state deactive", async function(){
+        // Arrange
+        const { fileRegisterContract, userRegisterContract, accessControl, userAnaPaula, userAnaRita, fileAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["download", "delete"]); // Ana Rita shares the fie with Ana Paula
+
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const tx = await accessControl.connect(signer1).updateUserFilePermissions(userAnaPaula.account, fileAnaRita.ipfsCID, ["download"]);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const isUserAssociatedAfterUpload = await accessControl.connect(signer2).userAssociatedWithFile(userAnaPaula.account, fileAnaRita.ipfsCID);
+        expect(isUserAssociatedAfterUpload).to.equal(true);
+
+        const resPermissions = await accessControl.connect(signer2).getPermissionsOverFile(userAnaPaula.account, fileAnaRita.ipfsCID);
+        expect(resPermissions.success).to.equal(false); // We cannot get the permissions of files that are now deactivated
+    });
 
     it("It should add the auditlog of download if the transaction executer is the same as the user and the user has download permissions over the file", async function(){
         // Arrange
@@ -541,7 +590,134 @@ describe("AccessControl", function () {
         expect(result.logs.length).to.equal(0); 
     });
 
-    it("Should get success=true and the users' encrypted symmetric key, if the user is associated with the file and the transaction executer is the same as the user", async function() {
+    it("Shouldn't store the download in the audit log if the file is not in the active state", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID); // Eliminates the file by deactivating it
+
+        // Act
+        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(true);
+        expect(result.logs.length).to.equal(2); // It has the upload and delete in the log, it didn't store the download
+    });
+
+    it("Should deactivate a file if the transaction executer has delete permitions over a file, if the file exists, and the file is in the state active", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+        
+        // Act
+        const tx = await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+        expect(res.success).to.equal(true);
+        expect(res.resultString).to.equal("deactive");
+
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(true);
+        expect(result.logs.length).to.equal(2); // It has the upload and the file deactivated
+    });
+
+    it("Shouldn't deactivate a file if the transaction executer doesn't have delele permitions over a file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, userAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+        await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["download"]); // Ana Rita shares the fie with Ana Paula
+
+        // Act
+        const tx = await accessControl.connect(signer2).deactivateFileUserAssociation(userAnaPaula.account, fileAnaRita.ipfsCID);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+        expect(res.success).to.equal(true);
+        expect(res.resultString).to.equal("active");
+
+        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+        
+        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+        expect(result.success).to.equal(true);
+        expect(result.logs.length).to.equal(2); // It has the upload and the file share
+    });
+
+    it("Shouldn't deactivate a file if the file doesn't exist", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, userAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+
+        // Act
+        const tx = await accessControl.connect(signer2).deactivateFileUserAssociation(userAnaPaula.account, fileAnaRita.ipfsCID);
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+        expect(res.success).to.equal(false);
+        expect(res.resultString).to.equal("");
+    });
+
+    it("Shouldn't deactivate a file if the file is in the state deactive", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // gives the download permissions
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);  // deactivates the file
+
+        // Act
+        const tx = await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID); // tries to deactivate the file which was already deactivated
+        await tx.wait();
+
+        // Assert
+        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+        expect(receipt.status).to.equal(1); // 1 = success
+
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+        expect(res.success).to.equal(true);
+        expect(res.resultString).to.equal("deactive");
+    });
+
+    it("Should get success=true and the users' encrypted symmetric key, if the user is associated with the file, the transaction executer is the same as the user, and the file is in the active satate", async function() {
         // Arrange        
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -558,7 +734,7 @@ describe("AccessControl", function () {
         expect(result.resultString).to.equal(encSymmetricKey);
     });
 
-    it("Should get success=false and no users' encrypted symmetric key, if the user is associated with the file but the transaction executer is not the same as the user", async function() {
+    it("Should get success=false and no users' encrypted symmetric key, if the user is associated with the file, the file is in the active state, but the transaction executer is not the same as the user", async function() {
         // Arrange        
         const { accessControl, userRegisterContract, fileRegisterContract, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -576,7 +752,7 @@ describe("AccessControl", function () {
         expect(result.resultString).to.equal("");
     });
 
-    it("Should get success=false and no users' encrypted symmetric key, if the user is not associated with the file but the transaction executer is the same as the user", async function() {
+    it("Should get success=false and no users' encrypted symmetric key, if the user is not associated with the file, and the file is in the active state but the transaction executer is the same as the user", async function() {
         // Arrange        
         const { accessControl, userRegisterContract, fileRegisterContract, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -588,6 +764,24 @@ describe("AccessControl", function () {
 
         // Act
         const result = await accessControl.connect(signer2).getEncSymmetricKeyFileUser(userAnaPaula.account, fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(result.success).to.equal(false);
+        expect(result.resultString).to.equal("");
+    });
+
+    it("Should get success=false and no users' encrypted symmetric key, if the user is not associated with the file, and the transaction executer is different from the user but the file is in the deactive state", async function(){
+        // Arrange        
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const result = await accessControl.connect(signer1).getEncSymmetricKeyFileUser(userAnaRita.account, fileAnaRita.ipfsCID);
 
         // Assert
         expect(result.success).to.equal(false);
@@ -647,7 +841,25 @@ describe("AccessControl", function () {
         expect(result.resultStrings).to.deep.equal([]);
     })
 
-    it("Should return success=true and the users' files, if the transaction executer is the same as the user", async function() {
+    it("Should get success=false and no users' permission over a file, if the user is associated with the file and the transaction executer is the same as the user, but the file is in the deactive state", async function() {
+        // Arrange        
+        const { accessControl, userRegisterContract, fileRegisterContract, userAnaRita, fileAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const result = await accessControl.connect(signer1).getPermissionsOverFile(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(result.success).to.equal(false);
+        expect(result.resultStrings).to.deep.equal([]);
+    });
+
+    it("Should return success=true and the users' files in the active state, if the transaction executer is the same as the user", async function() {
         // Arrange        
         const { fileRegisterContract, userRegisterContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, fileAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
         const encSymmetricKeyAnaRita = "encSymmetricKeyFileAnaRita";
@@ -667,12 +879,74 @@ describe("AccessControl", function () {
         await accessControl.connect(signer2).uploadFile(userAnaPaula.account, fileAnaPaula.ipfsCID, encSymmetricKeyAnaPaula); // Ana Rita owner of the file
 
         // Act
-        const result = await accessControl.connect(signer1).getUserFiles(userAnaRita.account);
+        const result = await accessControl.connect(signer1).getUserFiles(userAnaRita.account, "active");
         
         // Assert
         expect(result.success).to.equal(true);
         expect(result.files[0].ipfsCID).to.equal(fileAnaRita.ipfsCID);
         expect(result.files.length).to.equal(1);
+    });
+
+    it("Should return success=true and the users' files in the deactive state, if the transaction executer is the same as the user", async function() {
+        // Arrange        
+        const { fileRegisterContract, userRegisterContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, fileAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKeyAnaRita = "encSymmetricKeyFileAnaRita";
+        const encSymmetricKeyAnaPaula = "encSymmetricKeyFileAnaPaula";
+            
+            // Adiciona os files à lista de files
+        fileRegisterContract.connect(signer1).addFile(fileAnaRita);
+        fileRegisterContract.connect(signer2).addFile(fileAnaPaula);
+
+            // Adiona users à lista de users
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+    
+
+            // User uploads files
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKeyAnaRita); // Ana Rita owner of the file
+        await accessControl.connect(signer2).uploadFile(userAnaPaula.account, fileAnaPaula.ipfsCID, encSymmetricKeyAnaPaula); // Ana Rita owner of the file
+
+            // User deactivates files
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const result = await accessControl.connect(signer1).getUserFiles(userAnaRita.account, "deactive");
+        
+        // Assert
+        expect(result.success).to.equal(true);
+        expect(result.files[0].ipfsCID).to.equal(fileAnaRita.ipfsCID);
+        expect(result.files.length).to.equal(1);
+    });
+
+    it("Should return success=true and the users' files in the active and deactive state, if the transaction executer is the same as the user", async function() {
+        // Arrange        
+        const { fileRegisterContract, userRegisterContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, fileAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+        const encSymmetricKeyAnaRita = "encSymmetricKeyFileAnaRita";
+        const encSymmetricKeyAnaPaula = "encSymmetricKeyFileAnaPaula";
+            
+            // Adiciona os files à lista de files
+        fileRegisterContract.connect(signer1).addFile(fileAnaRita);
+        fileRegisterContract.connect(signer2).addFile(fileAnaPaula);
+
+            // Adiona users à lista de users
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+    
+
+            // User uploads files
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKeyAnaRita); // Ana Rita owner of the file
+        await accessControl.connect(signer2).uploadFile(userAnaPaula.account, fileAnaPaula.ipfsCID, encSymmetricKeyAnaPaula); // Ana Rita owner of the file
+    
+            // User deactivates files
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const result = await accessControl.connect(signer1).getUserFiles(userAnaRita.account, "");
+        
+        // Assert
+        expect(result.success).to.equal(true);
+        expect(result.files[0].ipfsCID).to.equal(fileAnaRita.ipfsCID);
+        expect(result.files.length).to.equal(1); // It only updated the field
     });
 
     it("Should return success=false and no users' files, if the transaction executer is different from the user", async function() {
@@ -695,14 +969,14 @@ describe("AccessControl", function () {
         await accessControl.connect(signer2).uploadFile(userAnaPaula.account, fileAnaPaula.ipfsCID, encSymmetricKeyAnaPaula); // Ana Rita owner of the file
 
         // Act - trying to get the userAnaPaula files
-        const result = await accessControl.connect(signer1).getUserFiles(userAnaPaula.account);
+        const result = await accessControl.connect(signer1).getUserFiles(userAnaPaula.account, "");
         
         // Assert
         expect(result.success).to.equal(false);
         expect(result.files.length).to.equal(0);
     });
 
-    it("Should return true if a user has permissions over a file", async function () {
+    it("Should return true if a user has a certain permission over a file and the file is in the active state", async function () {
         // Arrange
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);   
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -712,13 +986,13 @@ describe("AccessControl", function () {
         await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
                 
         // Act 
-        const result = await accessControl.connect(signer1).userHasSharePermissionOverFile(userAnaRita.account, fileAnaRita.ipfsCID);
+        const result = await accessControl.connect(signer1).userHasPermissionOverFile(userAnaRita.account, fileAnaRita.ipfsCID, "delete");
 
         // Assert 
         expect(result).to.equal(true);
     });
     
-    it("Should return false if a user doesn't have permissions over a file", async function () {
+    it("Should return false if a user doesn't have a certain permissions over a file and the file is in the active state", async function () {
         // Arrange
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, userAnaLuisa, signer1, signer2, signer3 } = await loadFixture(deployContractAndSetVariables);   
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
@@ -731,42 +1005,24 @@ describe("AccessControl", function () {
         await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"]);
         
         // Act 
-        const result = await accessControl.connect(signer1).userHasSharePermissionOverFile(userAnaPaula.account, fileAnaRita.ipfsCID);
+        const result = await accessControl.connect(signer1).userHasPermissionOverFile(userAnaPaula.account, fileAnaRita.ipfsCID, "share");
 
         // Assert 
         expect(result).to.equal(false);
     });
 
-    it("Should return true if a user has download permissions over a file", async function(){
+    if("Should return false if the file is in the deactive state", async function(){
         // Arrange
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);   
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
         await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
         await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
-        
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
-
-        // Act
-        const result = await accessControl.connect(signer1).userHasDownloadPermissionOverFile(userAnaRita.account, fileAnaRita.ipfsCID);
-
-        // Assert
-        expect(result).to.equal(true);
-    });
-
-    it("Should return false if a user doesn't have download permissions over a file", async function(){
-        // Arrange
-        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, userAnaLuisa, signer1, signer2, signer3 } = await loadFixture(deployContractAndSetVariables);   
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
-        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
-        await userRegisterContract.connect(signer3).userRegistered(userAnaLuisa); // Register the user
-        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
 
         await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
-        await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"]);
-        
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);        
+
         // Act 
-        const result = await accessControl.connect(signer1).userHasDownloadPermissionOverFile(userAnaPaula.account, fileAnaRita.ipfsCID);
+        const result = await accessControl.connect(signer1).userHasPermissionOverFile(userAnaRita.account, fileAnaRita.ipfsCID, "delete");
 
         // Assert 
         expect(result).to.equal(false);
@@ -974,6 +1230,24 @@ describe("AccessControl", function () {
         expect(result).to.equal(false);
     });
 
+    it("SHould return false if the file is in the deactive state", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);   
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act
+        const result = await accessControl.connect(signer1).elegibleToShare(userAnaPaula.account, fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(result).to.equal(false);
+    });
+
     it("Should return true if the transaction executer is different from the user and has share permissions, and if the user is not the file owner", async function() {
         // Arrange
         const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);   
@@ -1041,6 +1315,24 @@ describe("AccessControl", function () {
         
         // Act 
         const result = await accessControl.connect(signer2).elegibleToUpdPermissions(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Assert 
+        expect(result).to.equal(false);
+    });
+
+    it("Should return false if the file is in the deactive state", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, fileAnaRita, userAnaPaula, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);   
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID);
+
+        // Act 
+        const result = await accessControl.connect(signer1).elegibleToUpdPermissions(userAnaPaula.account, fileAnaRita.ipfsCID);
 
         // Assert 
         expect(result).to.equal(false);
@@ -1191,10 +1483,45 @@ describe("AccessControl", function () {
     });
 
     it("Should return the address of the AuditLogControl contract", async function(){
+        // Arrange
         const { accessControl } = await loadFixture(deployContractAndSetVariables);   
         
+        // Act
         const auditLogControlAddress  = await accessControl.getAuditLogControlAddress();
+
+        // Assert
         expect(auditLogControlAddress).to.not.equal("0x0000000000000000000000000000000000000000");
     });
 
+
+    it("Should return true and the file state if the transactione executer is associated with the file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, userAnaRita, fileAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);   
+        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey); // Ana Rita owner of the file
+        
+        // Act
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(res.success).to.equal(true);
+        expect(res.resultString).to.equal("active");
+    });
+
+    it("Should return false and empty file state if the transactione executer is not associated with the file", async function(){
+        // Arrange
+        const { accessControl, userRegisterContract, fileRegisterContract, userAnaRita, fileAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);   
+        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+        await fileRegisterContract.connect(signer1).addFile(fileAnaRita);        // Add Ana Rita File
+
+        // Act
+        const res = await accessControl.connect(signer1).getFileState(fileAnaRita.ipfsCID);
+
+        // Assert
+        expect(res.success).to.equal(false);
+        expect(res.resultString).to.equal("");
+    });
 });
