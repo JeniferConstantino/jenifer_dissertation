@@ -1,29 +1,24 @@
 import React from "react";
-import { FcExternal, FcClock, FcReadingEbook, FcDocument} from 'react-icons/fc';
+import { FcExternal, FcClock, FcReadingEbook, FcDocument, FcKey} from 'react-icons/fc';
 
 const AuditLog = () => {
     return (
-        <>
+        <>  
             <div className="log-entry header">
-                <div className="log-column">
-                    <FcReadingEbook size={20} />
-                    <span>User(s)</span>
+                <div className="log-column content-padding">
+                    <span><FcReadingEbook className="icon" size={25}/><strong>User(s)</strong></span>
                 </div>
-                <div className="log-column">
-                    <FcDocument />
-                    <span>File Name</span>
+                <div className="log-column content-padding">
+                    <span><FcDocument className="icon" size={25}/><strong>File Name</strong></span>
                 </div>
-                <div className="log-column">
-                    <FcExternal size={20} />
-                    <span>Action</span>
+                <div className="log-column content-padding">
+                    <span><FcExternal className="icon" size={25}/><strong>Action</strong></span>
                 </div>
-                <div className="log-column">
-                    <FcExternal size={20} />
-                    <span>Permissions</span>
+                <div className="log-column content-padding">
+                    <span><FcKey className="icon" size={25}/><strong>Permissions</strong></span>
                 </div>
-                <div className="log-column">
-                    <FcClock size={20} />
-                    <span>Date</span>
+                <div className="log-column content-padding">
+                    <span><FcClock className="icon" size={23}/><strong>Date</strong></span>
                 </div>
             </div>
         </>

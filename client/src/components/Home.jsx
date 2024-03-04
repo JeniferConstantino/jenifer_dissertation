@@ -214,7 +214,9 @@ const Home = () => {
             {selectedUser && (
                 <> 
                     <div className='content-container'>
-                        <Logout selectedUser={selectedUser}/>
+                        <div className='menu-wrapper'>
+                            <Logout selectedUser={selectedUser}/>
+                        </div>
                         <div className='home-wrapper content-wrapper'>
                             <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
                             <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedActiveFiles={uploadedActiveFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 

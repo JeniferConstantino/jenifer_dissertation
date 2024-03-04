@@ -44,23 +44,23 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
                     <AuditLogHeader/>
                     {logs.slice().reverse().map((log, index) => (
                         <div key={index} className="log-entry">
-                            <div className="log-column">
+                            <div className="log-column content-padding">
                                 {log.action === 'share' || log.action === 'update permissions' ? (
                                     <span>{userNamesFrom[log.executer]} -&gt; {userNamesTo[log.userAccount]}</span>
                                 ) : (
                                     <span>{userNamesTo[log.userAccount]}</span>
                                 )}
                             </div>
-                            <div className="log-column">
+                            <div className="log-column content-padding">
                                 <span>{fileNames[log.fileIpfsCid]}</span>
                             </div>
-                            <div className="log-column">
+                            <div className="log-column content-padding">
                                 <span>{log.action}</span>
                             </div>
-                            <div className="log-column">
+                            <div className="log-column content-padding">
                                 <span>{log.permissions}</span>
                             </div>
-                            <div className="log-column">
+                            <div className="log-column content-padding">
                                 <span>{FileManagerFacade.formatTimestamp(log.timestamp)}</span>
                             </div>
                         </div>

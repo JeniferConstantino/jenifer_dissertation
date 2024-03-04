@@ -51,10 +51,10 @@ h1 {
 
 .content-container{
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   height: 100vh; /* Set the height to 100% of the viewport height */
-  width: 100vw;  /* Set the height to 100% of the viewport width */
+  width: 99vw;  /* Set the height to 100% of the viewport width */
 }
 
 .content-wrapper{
@@ -64,6 +64,7 @@ h1 {
   border-radius: 20px;
   padding: 5%; /* Add horizontal padding */
   padding-top: 2%;
+  margin-top: 175px;
 }
 
 .shadow-overlay {
@@ -96,6 +97,7 @@ h1 {
 
 .login-wrapper {
   width: 50%; 
+  margin-top: 240px;
 }
 
 .shadow-overlay-login {
@@ -123,10 +125,10 @@ h1 {
 }
 
 .nearsoftLogo {
-  position: absolute;
-  top: 3%;
-  left: 4%;
-  width: 130px; 
+  position: fixed;
+  top: 4vh;
+  left: 2vh;
+  width: 127px; 
   height: 38px; 
   z-index: 1; 
 }
@@ -159,7 +161,7 @@ h1 {
 /*----------- Home Page -----------*/
 
 .home-wrapper {
-  width: 85%;
+  width: 60%;
   height: 50%;
   padding-left: 40px;
   flex-direction: column; /* Stack the child components vertically */
@@ -195,8 +197,8 @@ h1 {
 
 .logout-section {
   position: absolute;
-  top: 3%;
-  right: 5%;
+  top: 4vh;
+  right: 1%;
   display: flex;
 }
 
@@ -204,6 +206,13 @@ h1 {
   width: 80px; 
   height: 25px; 
   z-index: 1; 
+}
+
+.menu-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
 }
 
 /*----------- Home Page // File Actions section -----------*/
@@ -324,18 +333,30 @@ h1 {
 
 .log-entry {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .log-column {
   display: flex;
-  align-items: center;
-  flex: 1; /* Each column takes equal space */
+  flex-direction: column;
+  flex: 2; /* Each column takes equal space */
   min-width: 0; /* Allow content to wrap */
 }
 
 .log-column > * {
-  margin-right: 5px; /* Adjust spacing between icon and text */
+  margin-bottom: 5px;
+}
+
+.content-padding {
+  padding-left: 5px;
+  padding-right: 95px;
+}
+
+.log-column .icon {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  margin-bottom: 5px;
 }
 
 /*----------- Home Page // POPUP Upload Document -----------*/
