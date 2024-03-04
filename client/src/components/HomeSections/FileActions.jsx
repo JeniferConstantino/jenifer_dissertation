@@ -89,19 +89,19 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
     return (
         <div className="file-actions-wrapper">
             <h1 className='files-header'>Files</h1>
-            <button onClick={handlePopupOpenUpload}>
+            <button onClick={handlePopupOpenUpload} title="upload">
                 <FcExternal size={25} />
             </button>
-            <button onClick={handleDownload}>
+            <button onClick={handleDownload} title="download">
                 <FcInternal className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Download)) ? "faded" : "not-faded"} size={25}/>
             </button>
-            <button onClick={handlePopupOpenDelete}>
+            <button onClick={handlePopupOpenDelete} title="delete">
                 <FcFullTrash  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Delete)) ? "faded" : "not-faded"} size={25} />
             </button>
-            <button onClick={handlePopupOpenShare}>
+            <button onClick={handlePopupOpenShare} title="share">
                 <FcShare className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Share)) ? "faded" : "not-faded"} size={25} />
             </button>
-            <button onClick={handlePopupOpenVerify}>
+            <button onClick={handlePopupOpenVerify} title="verify">
                 <FcOk  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Verify)) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>

@@ -38,18 +38,21 @@ const Welcome = () => {
                         <p>Good to see you arrive here! Set a unique name to use in the app.</p>
                     </div>
                     <div className='login-column'>
-                        <input
-                            type="text"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder='username'
-                            className='input-username input-usernameWelcome'
-                        />
-                            <div className='button-container'>
-                                <button className='app-button app-button__welcome' onClick={handleBack}>Back</button>
-                                <button className='app-button app-button__welcome' onClick={onNext}>Next</button>
-                            </div>
+                        <div className='input-button-container'>
+                            <input
+                                type="text"
+                                id="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder='username'
+                                className='input-username input-usernameWelcome'
+                            />
+                        </div>
+                        
+                        <div className='button-container'>
+                            <button className='app-button app-button__welcome' onClick={handleBack}>Back</button>
+                            <button className='app-button app-button__welcome' onClick={onNext}>Next</button>
+                        </div>
                     </div>
                 </div>
             </div>
