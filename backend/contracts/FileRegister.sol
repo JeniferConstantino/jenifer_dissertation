@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "./Helper.sol";
+import "./AccessControl.sol";
 
 contract FileRegister {
 
@@ -13,68 +14,74 @@ contract FileRegister {
     }
     struct ResultFile {
         bool success;
-        FileRegister.File file;
+        File file;
     }
     struct ResultFiles {
         bool success;
-        FileRegister.File[] files;
+        File[] files;
     }
 
     mapping(string => File) private files;  // Key: ipfsCID
     Helper helper;
+    address accessControlAddress;
 
     constructor(address helperContract) {
         helper = Helper(helperContract);
     }
 
+    // Sets the file register contract interface to be used if: the fileRegisterContract was deployes (is different than 0)
+    //                                                          the fileRegisterContract is not already initialized
+    function setAccessControlAddress(address accessControlContractAddress) external {
+        if (accessControlContractAddress != address(0) && accessControlAddress == address(0)) {
+            accessControlAddress = accessControlContractAddress;
+        }
+    }
+
     // Create a file (Upload)
-    // Should add file if: the owner is the same as the transaction executer 
+    // Should add file if: the transaction executer is the AccessControl.sol
     //                     the file exists
     //                     file parameter inputs are valid
     function addFile(File memory file) public {
-        if (file.owner == msg.sender) { // Only if the one executing the transaction is the file owner
+        if (msg.sender == accessControlAddress) { 
             if (canAddFile(file)) {
                 files[file.ipfsCID] = file;
             }
         }
     }
 
-    // Gets a file having the files' IPFS CID
-    // No restrictions to execute this function: the content is encrypted
-    // It was planned to validate if the user is the owner or if the file was shared with the user, nevertheless this would originate a dependency with the AccessControl which is already dependent with the FileRegister
+    // Gets a file having the files' IPFS CID. 
+    // Doesn't need validations since files are encrypted
     function getFileByIpfsCID(string memory fileIpfsCid) public view returns (ResultFile memory) {
         if (bytes(files[fileIpfsCid].fileName).length > 0) {
             return ResultFile(true, files[fileIpfsCid]);       
-        } else {
-            return ResultFile(false, File("", "", address(0), "", ""));       
         }
+        return ResultFile(false, File("", "", address(0), "", ""));       
     }
 
-    // Verifies if a file can be added
+    // Verifies if a file can be added if: the transaction executer is the AccessControl.sol
+    //                                     file is not already stored => avoid overlay of information
+    //                                     file parameters are valid
     function canAddFile(File memory file) public view returns (bool) {
-        if (file.owner == msg.sender) {
-            if (!fileExists(file.ipfsCID) && helper.fileParamValid(file)) { // stores only if the file is not already soted => avoid overlay of information
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Verifies if a file is already stored
-    // Because no infromarion in particular is disclosed and because it only returns true or false, no validation in the access was made (the one calling this method doesn't need to be the same one of the input)
-    // This method is also used by the AccessControl.sol
-    function fileExists(string memory fileIpfsCID) public view returns (bool) {
-        if (bytes(files[fileIpfsCID].ipfsCID).length != 0) {
+        if (!fileExists(file.ipfsCID) && 
+            helper.fileParamValid(file) && 
+            msg.sender == accessControlAddress
+        ) {
             return true;
         }
         return false;
     }
 
-    // Returns if the user is the file owner
-    // Because no infromarion in particular is disclosed and because it only returns true or false, no validation in the access was made (the one calling this method doesn't need to be the same one of the input)
-    // This method is also used by the AccessControl.sol 
+    // Verifies if a file is already stored if: the transaction executer is the AccessControl.sol
+    function fileExists(string memory fileIpfsCID) public view returns (bool) {
+        if (bytes(files[fileIpfsCID].ipfsCID).length != 0 && msg.sender == accessControlAddress) {
+            return true;
+        }
+        return false;
+    }
+
+    // Returns if the user is the file owner if: the transaction executer is the AccessControl.sol
     function userIsFileOwner(address userAccount, string memory fileIpfsCID) public view returns (bool) {
-        if (files[fileIpfsCID].owner == userAccount) {
+        if (files[fileIpfsCID].owner == userAccount && msg.sender == accessControlAddress) {
             return true;
         }
         return false;

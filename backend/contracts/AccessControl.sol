@@ -20,13 +20,15 @@ contract AccessControl {
     UserRegister userRegister;
     AuditLogControl auditLogControl;
     Helper helper;
+    bool private fileRegisterInitialized; // Solidity initializes contract state variables to their default values, which for complex types like contract instances, is an empty or zero-intiialized state. So one common approach is to use a boolean flag.
     event FileActionLog(address indexed userAccount, string fileIpfsCID, string permissionsOwner, string action);
 
-    constructor(address fileRegisterContract, address userRegisterContract, address helperContract) {
-        fileRegister = FileRegister(fileRegisterContract);
-        userRegister = UserRegister(userRegisterContract);
+    constructor(address helperContract) {
         helper = Helper(helperContract);
+        fileRegister = new FileRegister(helperContract);
+        userRegister = new UserRegister(helperContract);
         auditLogControl = new AuditLogControl();
+        fileRegisterInitialized = false;
     }
 
     // File Upload: only if the transaction executer is the same as the userAccount, 
@@ -34,23 +36,29 @@ contract AccessControl {
     //              the transaction executer is not already associate with the file 
     //              the file and the user exist
     //              fields are valid
-    function uploadFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey) public {  
-        if (elegibleToUpload(userAccount, fileIpfsCID)) {
+    function uploadFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey) public {  
+        if (elegibleToUpload(userAccount, file.ipfsCID)) {
             string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
-            bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissionsOwner); // Validates if the file and the user exist
+            bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, encSymmetricKey, permissionsOwner); // Validates if the file and the user exist
             if (validFields){
+                // Adds the file
+                fileRegister.addFile(file);
+
+                // Performs the association between the user and the file
                 User_Has_File memory userFileData = User_Has_File({
                     userAccount: userAccount,
-                    ipfsCID: fileIpfsCID,
+                    ipfsCID: file.ipfsCID,
                     encSymmetricKey: encSymmetricKey,
                     permissions: permissionsOwner,
                     state: "active"
                 });
                 user_Has_File.push(userFileData);
-                auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissionsOwner), "upload");
+
+                // Writes the audit log
+                auditLogControl.recordLogFromAccessControl(msg.sender, file.ipfsCID, userAccount, helper.stringArrayToString(permissionsOwner), "upload");
             }
         }
     }  
@@ -65,6 +73,7 @@ contract AccessControl {
         if (elegibleToShare(userAccount, fileIpfsCID)) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions);
             if (validFields) {
+                // Associates the given user with the file
                 User_Has_File memory userFileData = User_Has_File({
                     userAccount: userAccount,
                     ipfsCID: fileIpfsCID,
@@ -73,6 +82,8 @@ contract AccessControl {
                     state: "active"
                 });
                 user_Has_File.push(userFileData);
+
+                // Writes the audit log
                 auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissions), "share");
             }
         }
@@ -87,7 +98,10 @@ contract AccessControl {
         if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
+                    // Updates the users' permissions
                     user_Has_File[i].permissions = permissions;
+
+                    // Writes the audit log
                     auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissions), "update permissions");
                     return;
                 }
@@ -104,6 +118,8 @@ contract AccessControl {
             keccak256(abi.encodePacked(getFileState(fileIpfsCid).resultString)) == keccak256(abi.encodePacked("active"))
         ) {
             // No precessing is done (as it happens with updateUserFilePermissions or shareFile or updateFile)
+
+            // Writes to the Audit Log
             auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCid, userAccount, "-", "download");
         }
     }
@@ -123,7 +139,7 @@ contract AccessControl {
                 }
             }
 
-            // Audit Log
+            // Writes to the Audit Log
             auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCid, userAccount, "-", "deleted");
         }
     }
@@ -257,8 +273,6 @@ contract AccessControl {
     function elegibleToUpload (address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if (msg.sender == userAccount && // if different it means the transaction is executer is trying to upload a file in the name of another user
             !userAssociatedWithFile(userAccount, fileIpfsCID) &&// if already associated then it should be called the share file()
-            fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // who uploads the file has to be the file owner
-            fileRegister.fileExists(fileIpfsCID) &&        // verifies if the file exist
             userRegister.existingAddress(userAccount)   // verifies if the user exist
             ) {
             return true;
@@ -272,8 +286,18 @@ contract AccessControl {
     }
 
     // Getter function for auditLogControl address
-    function getAuditLogControlAddress() public view returns (address) {
+    function getAuditLogControlAddress() public  view returns (address) {
         return address(auditLogControl);
+    }
+
+    // Getter function for fileRegister address
+    function getFileRegisterAddress() public  view returns (address) {
+        return address(fileRegister);
+    }
+
+    // Getter function for userRegister address
+    function getUserRegisterAddress() public  view returns (address) {
+        return address(userRegister);
     }
 
     // Get the file state if: the transaction executer is associated with the file

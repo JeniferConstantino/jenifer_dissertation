@@ -131,8 +131,8 @@ class FileManagerFacade {
   }
 
   // Associates a user with a file
-  async associatedUserFile(userAccount, fileIpfsCid, encSymmetricKey) {
-    return await BlockchainWrapper.associatedUserFile(this.accessControlContract, userAccount, fileIpfsCid, encSymmetricKey, this.selectedUser.account);
+  async uploadFileUser(userAccount, file, encSymmetricKey) {
+    return await BlockchainWrapper.uploadFileUser(this.accessControlContract, userAccount, file, encSymmetricKey, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file

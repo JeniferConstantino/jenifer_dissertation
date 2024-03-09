@@ -92,8 +92,8 @@ class BlockchainWrapper {
     }
 
     // Associates a user with a file
-    static associatedUserFile = async (accessControlContract, userAccount, fileIpfsCid, encSymmetricKey, selectedUserAccount) => {
-        return await accessControlContract.methods.uploadFile(userAccount, fileIpfsCid, encSymmetricKey).send({ from: selectedUserAccount });
+    static uploadFileUser = async (accessControlContract, userAccount, file, encSymmetricKey, selectedUserAccount) => {
+        return await accessControlContract.methods.uploadFile(userAccount, file, encSymmetricKey).send({ from: selectedUserAccount });
     }
 
     // Share File: associates a file with a user given certain permissions

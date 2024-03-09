@@ -36,17 +36,15 @@ class UploadFileCommand extends Command {
             return;
         }
 
-        // Adds the file to the blockchain
-        await this.fileManager.addFile(fileUploaded);
+        // Associates the current user with the uploaded file 
+        await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
+
         // Verifies file correctly added
         var result = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID);
         if (!result.success) {
-            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain.");
+            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", result);
             return; 
         }
-
-        // Associates the current user with the uploaded file 
-        await this.fileManager.associatedUserFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID, encryptedSymmetricKey);
         // Verifies if the file is uploaded correctly
         result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID);
         if (!result.success) {
