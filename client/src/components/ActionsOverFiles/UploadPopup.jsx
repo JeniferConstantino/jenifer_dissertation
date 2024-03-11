@@ -100,32 +100,32 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
                     <div className="modal-background"></div>
                     { showDragDrop && (
                         <div className="modal">
-                        <section>
-                            {children}
-                            <div className='popup-section section-title-upload-popup'>
-                                <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
-                                <h2 className='upload-file-header'>Upload File</h2>
-                            </div>
-                            <div 
-                                className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleFileDrop}
-                            >
-                                {droppedFile ? (
-                                    <>
-                                        <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                        <button className="app-button__upload app-button" onClick={handleCloseUploadPopup}> Cancel </button>
-                                    </>
-                                ) : (
-                                    <p> <FcPlus/> Drop your file</p>  
-                                )}
-                            </div>
-                            <div className='popup-section'>
-                                <button className="app-button__upload app-button" onClick={handleFileUpload}>Upload</button>
-                            </div>
-                        </section>
-                    </div>
+                            <section>
+                                {children}
+                                <div className='popup-section section-title-upload-popup'>
+                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
+                                    <h2 className='upload-file-header'>Upload File</h2>
+                                </div>
+                                <div 
+                                    className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleFileDrop}
+                                >
+                                    {droppedFile ? (
+                                        <>
+                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <button className="app-button__upload app-button" onClick={handleCloseUploadPopup}> Cancel </button>
+                                        </>
+                                    ) : (
+                                        <p> <FcPlus/> Drop your file</p>  
+                                    )}
+                                </div>
+                                <div className='popup-section'>
+                                    <button className="app-button__upload app-button" onClick={handleFileUpload}>Upload</button>
+                                </div>
+                            </section>
+                        </div>
                     )}
                     {showWarning && droppedFile!=null && (
                         <WarningPopup handleContinue={handleContinue} cleanFields={cleanFields} message={"A new version of the file will be uploaded. Do you want to continue?"} showWarning = {showWarning}/>
