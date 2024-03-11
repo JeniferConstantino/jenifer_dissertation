@@ -14,13 +14,14 @@ class FileApp {
       Verify: 'verify'
   }
 
-  constructor(fileName, version, owner, ipfsCID, iv) {
+  constructor(fileName, version, owner, ipfsCID, iv, state) {
     this.ipfsCID = ipfsCID;               // CID from IPFS (hash) Unique
     this.fileName = fileName;             // File Name
     this.version = version;               // File Version
     this.owner = owner;                   // The owner - who uploaded the file
     this._fileType = "";                  // image or file
     this.iv = iv;                         // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
+    this.state = state;                   // Indicates if the file is in the state active or deactive
   }
 
   // returns the fileType

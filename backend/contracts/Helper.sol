@@ -41,11 +41,13 @@ contract Helper {
     } 
 
     // Verify if the fields of userFileData are valid
-    function verifyValidFields (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public pure returns (bool) {
+    function verifyValidFields (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions, string memory state) public pure returns (bool) {
         if (userAccount != address(0) &&
             bytes(fileIpfsCID).length != 0 && 
             bytes(encSymmetricKey).length != 0 && 
-            permissions.length != 0 ) {
+            permissions.length != 0 &&
+            bytes(state).length == 0
+            ) {
             return true;
         }
         return false;

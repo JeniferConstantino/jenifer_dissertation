@@ -37,8 +37,8 @@ class BlockchainWrapper {
     }
 
     // Returns the file with the corresponding file IPFS CID
-    static getFileByIpfsCID = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
-        return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid).call({from: selectedUserAccount});
+    static getFileByIpfsCID = async (fileRegisterContract, fileIpfsCid, state, selectedUserAccount) => {
+        return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid, state).call({from: selectedUserAccount});
     }
 
     // Returns true if the user is already associated with a file with the given name
@@ -91,8 +91,8 @@ class BlockchainWrapper {
     }
 
     // Delete the association of the file with the users and deletes the file
-    static deactivateFileUserAssociation = async (accessControlContract, userAccount, fileIpfsCid, selectedUserAccount) => {
-        return await accessControlContract.methods.deactivateFileUserAssociation(userAccount, fileIpfsCid).send({from: selectedUserAccount});
+    static deactivateFile = async (accessControlContract, userAccount, fileIpfsCid, selectedUserAccount) => {
+        return await accessControlContract.methods.deactivateFile(userAccount, fileIpfsCid).send({from: selectedUserAccount});
     }
 
     // Returns the permissions of a user over a file

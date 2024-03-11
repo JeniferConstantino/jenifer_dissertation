@@ -12,6 +12,7 @@ contract FileRegister {
         address owner;             // The owner - who uploaded the file
         string fileType;           // Image or file
         string iv;                 // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
+        string state;              // active and deactive
     }
     struct ResultFile {
         bool success;
@@ -46,19 +47,29 @@ contract FileRegister {
     function addFile(File memory file) public {
         if (msg.sender == accessControlAddress) { 
             if (canAddFile(file)) {
+                file.state = "active";
                 files[file.ipfsCID] = file;
                 ipfsCids.push(file.ipfsCID);
             }
         }
     }
 
-    // Gets a file having the files' IPFS CID. 
-    // Doesn't need validations since files are encrypted
-    function getFileByIpfsCID(string memory fileIpfsCid) public view returns (ResultFile memory) {
-        if (bytes(files[fileIpfsCid].fileName).length > 0) {
+    // Deletes a file if: the transaction executer is the accessControl address
+    function deactivateFile(string memory fileIpfsCid) public {
+        if(msg.sender == accessControlAddress) {
+            files[fileIpfsCid].state = "deactive";
+        }
+    }
+
+    // Gets a file having the files' IPFS CID: doesn't need validations since files are already encrypted
+    //                                         only returns if the file is in the state "active"
+    function getFileByIpfsCID(string memory fileIpfsCid, string memory state) public view returns (ResultFile memory) {
+        if (bytes(files[fileIpfsCid].fileName).length > 0 &&
+            (keccak256(abi.encodePacked(files[fileIpfsCid].state)) == keccak256(abi.encodePacked(state)) || keccak256(abi.encodePacked(state))==keccak256(abi.encodePacked("")))
+        ) {
             return ResultFile(true, files[fileIpfsCid]);       
         }
-        return ResultFile(false, File("", "", 0, address(0), "", ""));       
+        return ResultFile(false, File("", "", 0, address(0), "", "", ""));       
     }
 
     // Verifies if a file can be added if: the transaction executer is the AccessControl.sol
@@ -90,12 +101,15 @@ contract FileRegister {
         return false;
     }
 
-    // Function to return all IPFS CIDs associated with a given file name no matter the version
+    // Function to return all IPFS CIDs associated with a given file name: no matter the version
+    //                                                                     in the state active 
     function getIpfsCIDsForName(string memory name) public view returns (string[] memory) {
         string[] memory ipfsCIDs = new string[](ipfsCids.length);
         uint256 count = 0;
         for (uint256 i=0; i<ipfsCids.length; i++) {
-            if (keccak256(abi.encodePacked(files[ipfsCids[i]].fileName)) == keccak256(abi.encodePacked(name))) {
+            if (keccak256(abi.encodePacked(files[ipfsCids[i]].fileName)) == keccak256(abi.encodePacked(name)) &&
+                keccak256(abi.encodePacked(files[ipfsCids[i]].state)) == keccak256(abi.encodePacked("active"))
+            ) {
                 ipfsCIDs[count] = files[ipfsCids[i]].ipfsCID;
                 count++;
             }
@@ -106,7 +120,7 @@ contract FileRegister {
         return ipfsCIDs;
     }
 
-    // Returns the latest version of a file by its name
+    // Returns the latest version of a file by its name. No metter if the file is in the active or deactive state
     function getLatestVersionOfFile(string memory fileName) public view returns (int) {
         int latestVersion = -1; 
         for (uint256 i = 0; i < ipfsCids.length; i++) {
@@ -114,7 +128,15 @@ contract FileRegister {
                 latestVersion = files[ipfsCids[i]].version;  // Update the latest version
             }
         }
-        
         return latestVersion;  // Return the latest file with the desired fileName
     }
+
+    // Returns the state of a file if: the transaction executer is the AccessControl contract
+    function getFileState(string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
+        if(msg.sender == accessControlAddress) {
+            return Helper.ResultString(true, files[fileIpfsCID].state);
+        }
+        return Helper.ResultString(false, "");
+    }
+
 }

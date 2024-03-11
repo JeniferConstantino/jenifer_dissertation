@@ -16,7 +16,7 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
                 try {
                     const nameResultTo = await fileManagerFacadeInstance.getUserUserName(log.userAccount);
                     const nameResultFrom = await fileManagerFacadeInstance.getUserUserName(log.executer);
-                    const fileResult = await fileManagerFacadeInstance.getFileByIpfsCID(log.fileIpfsCid);
+                    const fileResult = await fileManagerFacadeInstance.getFileByIpfsCID(log.fileIpfsCid, "");
                     if (nameResultTo.success && nameResultFrom.success && fileResult.success) {
                         namesTo[log.userAccount] = nameResultTo.resultString;
                         namesFrom[log.executer] = nameResultFrom.resultString;

@@ -25,9 +25,9 @@ class UploadFileCommand extends Command {
         const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
         console.log('File encrypted and added to IPFS', fileCID);
 
-        // Grabs the version
+        // Grabs the latest version of the file, no matter if the file is in the active or deactive state
         if(this.fileVersion !== 0){
-            // get the latest version of a file
+            // get the latest version of a file based on its name
             const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(this.fileUpl.name.toLowerCase().toString());
             const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer
 
@@ -36,15 +36,15 @@ class UploadFileCommand extends Command {
         }
 
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion, this.fileManager.selectedUser.account, fileCID, iv.toString('base64'));
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion, this.fileManager.selectedUser.account, fileCID, iv.toString('base64'), "");
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, this.fileManager.selectedUser.publicKey).toString('base64');
 
         // Associates the current user with the uploaded file 
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
-
+        
         // Verifies file correctly added
-        var result = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID);
+        var result = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID, "active");
         console.log("result in upload: ", result);
         if (!result.success) {
             console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", result);

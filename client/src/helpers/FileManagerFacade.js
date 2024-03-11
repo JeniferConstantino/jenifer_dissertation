@@ -121,8 +121,8 @@ class FileManagerFacade {
   }
 
   // Get file IPFS CID
-  async getFileByIpfsCID(fileIpfsCid) {
-      return await BlockchainWrapper.getFileByIpfsCID(this.fileRegisterContract, fileIpfsCid, this.selectedUser.account);
+  async getFileByIpfsCID(fileIpfsCid, state) {
+      return await BlockchainWrapper.getFileByIpfsCID(this.fileRegisterContract, fileIpfsCid, state, this.selectedUser.account);
   }
 
   // Get users' permissions over a file
@@ -146,8 +146,8 @@ class FileManagerFacade {
   }
 
   // Deletes the files' association with the users, and deletes the file
-  async deactivateFileUserAssociation(userAccount, fileIpfsCid) {
-    return await BlockchainWrapper.deactivateFileUserAssociation(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  async deactivateFile(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.deactivateFile(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
   }
 
   // Deletes permanently the file

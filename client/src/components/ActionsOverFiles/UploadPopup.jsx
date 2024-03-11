@@ -41,13 +41,12 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
                     setShowWarning(true); // Sends Warning saying that a new version will be added => file editing
                     setShowDragDrop(false);
                 } else {
-                    // Proceeds with the file upload
-                    // File version is 0, indicating that is the first time the file is being uploaded
+                    // Proceeds with the file upload - File version is 0, indicating that is the first time the file is being uploaded
                     await fileManagerFacadeInstance.uploadFile(0, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                     cleanFields();
                 }
             } catch (error) {
-                console.error("Error uploading file to IPFS:", error);
+                console.error("Error uploading file:", error);
             }
         }
     }
