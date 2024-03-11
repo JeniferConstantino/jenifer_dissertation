@@ -136,21 +136,19 @@ h1 {
 }
 
 /*----------- Welcome Page -----------*/
+.button-container-welcome {
+  width: 100%;
+  gap: 10px; 
+}
 
 .app-button__welcome {
-  padding: 10% 16%;
-  margin-top: 10%;
+  padding: 3% 10%;
+  margin-top: 5%;
+  margin-right: 10px;
 }
 
 .app-button__welcome:focus {
   outline: 2px solid #FF812C; /* Adjust the width and color as needed */
-}
-
-.button-container {
-  display: flex;
-  gap: 10px; 
-  align-items: center;
-  margin-right: 20%;
 }
 
 .input-username {
@@ -165,6 +163,58 @@ h1 {
 
 .input-usernameWelcome {
   width: 80%;
+}
+
+.input-button-container-welcome {
+  width: 100%;
+}
+/*----------- Warning Popup -----------*/
+.warning-content {
+  display: flex;
+  flex-direction: row;
+  font-size: 15px;
+  color: #2E231D;
+  padding-top: 10px;
+}
+
+.textWarning{
+  font-weight: bold;
+  padding-left: 9px;
+}
+.messageWarning{
+  margin-top: 18px;
+}
+
+.warning{
+  padding-right: 20px;
+  padding-left: 10px;
+}
+.buttonsContent {
+  padding-right: 10px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-button__warning {
+  padding: 2%;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.modalWarning {
+  position: relative;
+  z-index: 2; /* Ensure the modal appears above the background */
+  background-color: white;
+  border-radius: 10px;
+}
+
+.display-block-warning {
+  display: block;
+  width: 400px;
+  padding: 10px;
 }
 
 /*----------- Home Page -----------*/
@@ -186,6 +236,11 @@ h1 {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 150px;
+}
+
+.blurred {
+  filter: blur(1px); /* Apply blur effect to the Home component */
+  pointer-events: none; /* Disable interactions with elements in the Home component */
 }
 
 /*----------- Home Page // Logout section -----------*/
@@ -401,15 +456,34 @@ h1 {
   flex-direction: row;
 }
 
-.modal {
+.modal-wrapper {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #DFDFDF;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(48, 48, 48, 0.2); /* Semi-transparent black background */
+  z-index: 1; /* Ensure the background appears behind the modal */
+}
+
+.modal {
+  position: relative;
+  z-index: 2; /* Ensure the modal appears above the background */
+  background-color: white;
+  width: 300px;
   padding: 20px;
   border-radius: 10px;
-  z-index: 1000;
 }
 
 .display-block {
@@ -419,7 +493,6 @@ h1 {
 
 .display-none {
   display: none;
-  background-color: brown;
 }
 
 .popup-section {
@@ -427,10 +500,12 @@ h1 {
 }
 
 .drag-drop-section {
-  border: 2px dashed #2E231D;
+  border: 2px dashed #555555;
   padding: 20px;
+  background-color: #DADADA;
   cursor: pointer;
   border-radius: 10px;
+  font-size: 14px;
 }
 
 /* Add additional styles for visual feedback when dragging over the drop area */

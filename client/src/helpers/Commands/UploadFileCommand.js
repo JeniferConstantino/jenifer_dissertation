@@ -4,10 +4,11 @@ import FileApp from './../FileApp';
 // Concrete command for uploading a file
 class UploadFileCommand extends Command {
 
-    constructor(fileManager, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    constructor(fileManager, fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
         this.fileManager = fileManager;
         this.fileUpl = fileUpl;
+        this.fileVersion = fileVersion;
         this.fileAsBuffer = fileAsBuffer;
         this.handleFileUploaded = handleFileUploaded;
         this.uploadedActiveFiles = uploadedActiveFiles;
@@ -24,23 +25,27 @@ class UploadFileCommand extends Command {
         const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
         console.log('File encrypted and added to IPFS', fileCID);
 
+        // Grabs the version
+        if(this.fileVersion !== 0){
+            // get the latest version of a file
+            const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(this.fileUpl.name.toLowerCase().toString());
+            const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer
+
+            // updates the version of the current file by incrementing 1
+            this.fileVersion = latestVersion + 1;
+        }
+
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileManager.selectedUser.account, fileCID, iv.toString('base64'));
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion, this.fileManager.selectedUser.account, fileCID, iv.toString('base64'));
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, this.fileManager.selectedUser.publicKey).toString('base64');
-        
-        // Verifies if the user already has a file with the same name
-        var isUserAsscoiatedFile = await this.fileManager.verifyUserAssociatedWithFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID);
-        if (isUserAsscoiatedFile) {
-            console.log("User: ", this.fileManager.selectedUser.userName , " already associated with the file: ", fileUploaded.fileName);
-            return;
-        }
 
         // Associates the current user with the uploaded file 
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
 
         // Verifies file correctly added
         var result = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID);
+        console.log("result in upload: ", result);
         if (!result.success) {
             console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", result);
             return; 

@@ -232,6 +232,21 @@ contract AccessControl {
         return false;
     }
 
+    // See if a user is already associated with a file with the given name
+    function userAssociatedWithFileName(address userAccount, string memory fileName) public view returns (bool) {
+        // Get the ipfs cids of the files with the same fileName no matter the version
+        string[] memory filesIpfsCID = fileRegister.getIpfsCIDsForName(fileName);
+        
+        for (uint256 i = 0; i < user_Has_File.length; i++) {
+            for (uint256 j = 0; j < filesIpfsCID.length; j++) {
+                if (user_Has_File[i].userAccount == userAccount && keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(filesIpfsCID[j]))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Sees if the message sender is associated with a certain file
     function messageSenderAssociatedToFile(string memory fileIpfsCID) public view returns (bool) {
         for (uint256 i=0; i<user_Has_File.length; i++) {

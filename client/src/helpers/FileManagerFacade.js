@@ -39,8 +39,8 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  async uploadFile(fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new UploadFileCommand(this, fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
   
@@ -77,6 +77,11 @@ class FileManagerFacade {
   async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith) {
     const updatePermissionsCommand = new UpdatePermissionsCommand(this, selectedFile, permissions, accountUserShareFileWith);
     await updatePermissionsCommand.execute();
+  }
+
+  // Verifies if the user is already associated with a file with the same name
+  async userAssociatedWithFileName(userAccount, fileName) {
+    return await BlockchainWrapper.userAssociatedWithFileName(this.accessControlContract, userAccount, fileName,this.selectedUser.account);
   }
 
   // Get all active files that were uploaded too the blockchain
@@ -178,6 +183,11 @@ class FileManagerFacade {
   // Returns if a user is associated with a file
   async verifyUserAssociatedWithFile(userAccount, fileIpfsCid) {
     return await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
+  }
+
+  // Returns the latest version of a file
+  async getLatestVersionOfFile(fileName) {
+    return await BlockchainWrapper.getLatestVersionOfFile(this.fileRegisterContract, fileName, this.selectedUser.account);
   }
 
   // Generates a symmetric key

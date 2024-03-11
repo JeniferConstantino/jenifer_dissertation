@@ -5,9 +5,10 @@ import "./AccessControl.sol";
 
 contract FileRegister {
 
-    struct File {
+    struct File {                 
         string ipfsCID;            // CID from IPFS (hash) - Unique
-        string fileName;           // File Name - cannot be repeated
+        string fileName;           // File Name         
+        int version;               // Keeps the version of the file
         address owner;             // The owner - who uploaded the file
         string fileType;           // Image or file
         string iv;                 // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
@@ -22,6 +23,7 @@ contract FileRegister {
     }
 
     mapping(string => File) private files;  // Key: ipfsCID
+    string[] ipfsCids; // Stores the unique ipfs CIDs => Solidity doesn't allow to iterate over a map
     Helper helper;
     address accessControlAddress;
 
@@ -45,6 +47,7 @@ contract FileRegister {
         if (msg.sender == accessControlAddress) { 
             if (canAddFile(file)) {
                 files[file.ipfsCID] = file;
+                ipfsCids.push(file.ipfsCID);
             }
         }
     }
@@ -55,7 +58,7 @@ contract FileRegister {
         if (bytes(files[fileIpfsCid].fileName).length > 0) {
             return ResultFile(true, files[fileIpfsCid]);       
         }
-        return ResultFile(false, File("", "", address(0), "", ""));       
+        return ResultFile(false, File("", "", 0, address(0), "", ""));       
     }
 
     // Verifies if a file can be added if: the transaction executer is the AccessControl.sol
@@ -85,5 +88,33 @@ contract FileRegister {
             return true;
         }
         return false;
+    }
+
+    // Function to return all IPFS CIDs associated with a given file name no matter the version
+    function getIpfsCIDsForName(string memory name) public view returns (string[] memory) {
+        string[] memory ipfsCIDs = new string[](ipfsCids.length);
+        uint256 count = 0;
+        for (uint256 i=0; i<ipfsCids.length; i++) {
+            if (keccak256(abi.encodePacked(files[ipfsCids[i]].fileName)) == keccak256(abi.encodePacked(name))) {
+                ipfsCIDs[count] = files[ipfsCids[i]].ipfsCID;
+                count++;
+            }
+        }
+        assembly {
+            mstore(ipfsCIDs, count)
+        }
+        return ipfsCIDs;
+    }
+
+    // Returns the latest version of a file by its name
+    function getLatestVersionOfFile(string memory fileName) public view returns (int) {
+        int latestVersion = -1; 
+        for (uint256 i = 0; i < ipfsCids.length; i++) {
+            if (keccak256(abi.encodePacked(files[ipfsCids[i]].fileName)) == keccak256(abi.encodePacked(fileName)) && files[ipfsCids[i]].version > latestVersion) {
+                latestVersion = files[ipfsCids[i]].version;  // Update the latest version
+            }
+        }
+        
+        return latestVersion;  // Return the latest file with the desired fileName
     }
 }

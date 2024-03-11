@@ -41,6 +41,11 @@ class BlockchainWrapper {
         return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid).call({from: selectedUserAccount});
     }
 
+    // Returns true if the user is already associated with a file with the given name
+    static userAssociatedWithFileName = async (accessControlContract, userAccount, fileName, selectedUserAccount) => {
+        return await accessControlContract.methods.userAssociatedWithFileName(userAccount, fileName).call({from: selectedUserAccount});
+    }
+
     // Get the encrypted symmetric key of a file associated with a given user
     static getEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
         return await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
@@ -49,11 +54,10 @@ class BlockchainWrapper {
     // Get active files from the Blockchain given a user
     static getFilesUploadedBlockchain = async (accessControlContract, userAccount, state, selectedUserAccount) => {
         var result = await accessControlContract.methods.getUserFiles(userAccount, state).call({from: selectedUserAccount});
-        console.log("result: ", result.success, " state: ", state);
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
-                var fileApp = new FileApp(file.fileName, file.owner, file.ipfsCID, file.iv);
+                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv);
                 fileApp.fileType = file.fileType;
                 files.push(fileApp);
             });
@@ -69,6 +73,11 @@ class BlockchainWrapper {
     // Returns true or false, according to if a user is already associated with a file or not
     static verifyUserAssociatedWithFile = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
         return await accessControlContract.methods.userAssociatedWithFile(userAccount, fileIpfsCid).call({from: selectedUserAccount});
+    }
+
+    // Returns the latest version of a file
+    static getLatestVersionOfFile = async (fileRegister, fileName, selectedUserAccount) => {
+        return await fileRegister.methods.getLatestVersionOfFile(fileName).call({from: selectedUserAccount});
     }
 
     // Gets the permissions a user has over a file

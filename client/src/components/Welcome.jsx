@@ -38,7 +38,7 @@ const Welcome = () => {
                         <p>Good to see you arrive here! Set a unique name to use in the app.</p>
                     </div>
                     <div className='login-column'>
-                        <div className='input-button-container'>
+                        <div className='input-button-container-welcome'>
                             <input
                                 type="text"
                                 id="username"
@@ -49,7 +49,7 @@ const Welcome = () => {
                             />
                         </div>
                         
-                        <div className='button-container'>
+                        <div className='button-container-welcome'>
                             <button className='app-button app-button__welcome' onClick={handleBack}>Back</button>
                             <button className='app-button app-button__welcome' onClick={onNext}>Next</button>
                         </div>
