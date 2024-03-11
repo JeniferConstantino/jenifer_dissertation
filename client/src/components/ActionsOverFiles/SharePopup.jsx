@@ -21,6 +21,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
         
         // Performs the association of a user with a file given certain permissions
         await fileManagerFacadeInstance.associateUserFilePermissions(selectedFile, permissions, accountUserShareFileWith);
+        cleanFields();
         handleShare();
     }
 
@@ -81,14 +82,24 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
 
     // Closes the share name popup
     const handleCloseShareNamePopup = () => {
-        setUsernameToShare('');
-        setShowPermissions(false);
+        cleanFields();
         handleShare();
     }
 
     // Hides the permissions from the popup
     const handleCloseSharePermissionsPopup = () => {
+        cleanFields();
+    }
+
+    // Cleans fields before going
+    const cleanFields = () => {
+        setUsernameToShare("");
         setShowPermissions(false);
+        setCheckboxes({
+            download: false,
+            delete: false,
+            share: false
+        });
     }
 
     return(

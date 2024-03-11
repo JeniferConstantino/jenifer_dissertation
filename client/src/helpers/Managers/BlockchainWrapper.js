@@ -57,7 +57,7 @@ class BlockchainWrapper {
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
-                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv);
+                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv, file.state);
                 fileApp.fileType = file.fileType;
                 files.push(fileApp);
             });

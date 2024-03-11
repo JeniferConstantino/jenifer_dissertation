@@ -140,8 +140,8 @@ contract AccessControl {
     //                                             the file is in the active state
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if ((msg.sender == accountUser) && 
-             userAssociatedWithFile(accountUser, fileIpfsCID) /*&&
-             keccak256(abi.encodePacked(getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))*/) {
+             userAssociatedWithFile(accountUser, fileIpfsCID) &&
+             keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(accountUser, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
                     return Helper.ResultString(true, user_Has_File[i].encSymmetricKey);
@@ -210,9 +210,11 @@ contract AccessControl {
 
     // Sees if a user is already associated with a file if: the message sender is associated with the file
     //                                                      or the message sender is the auditLogControl
+    //                                                      and the file is in the active state
     function userAssociatedWithFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
-        if (messageSenderAssociatedToFile(fileIpfsCID) ||
-            msg.sender == address(auditLogControl) // AuditLogControl also calls this method for the validation of one of his methods
+        if ((messageSenderAssociatedToFile(fileIpfsCID) ||
+            msg.sender == address(auditLogControl) // AuditLogControl also calls this method for the validation of one of his methods    
+            ) && keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
         ) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
@@ -259,7 +261,7 @@ contract AccessControl {
             userHasPermissionOverFile(msg.sender, fileIpfsCID, "share") && // The transaction executer can only share a file if he has share permissions 
             !userAssociatedWithFile(userAccount, fileIpfsCID) && // The user cannot be already be associated with the file, in order to not have duplicated records
             fileRegister.fileExists(fileIpfsCID) &&        // verifies if the file exist
-            /*keccak256(abi.encodePacked(getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) &&*/
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) &&
             userRegister.existingAddress(userAccount)   // verifies if the user exist
         ) {
             return true;
@@ -271,8 +273,8 @@ contract AccessControl {
     function elegibleToUpdPermissions(address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
             !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
-            userHasPermissionOverFile(msg.sender, fileIpfsCID, "share") /*&& // The transaction executer can only share a file if he has share permissions 
-            keccak256(abi.encodePacked(getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))*/
+            userHasPermissionOverFile(msg.sender, fileIpfsCID, "share") && // The transaction executer can only share a file if he has share permissions 
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
         ) {
             return true;
         }
