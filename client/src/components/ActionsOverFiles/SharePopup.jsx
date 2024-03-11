@@ -107,7 +107,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                         <>
                                             <div className='section-title-upload-popup'>
                                                 <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseSharePermissionsPopup}/>
-                                                <h2 className='upload-file-header'>Share File - Permissions</h2>
+                                                <h2 className='share-file-header'>Share File - Permissions</h2>
                                             </div>
                                             <p className='share-file-description note'>You're about to share the file <strong><em>"{selectedFile.fileName}"</em></strong>.</p>
                                             <p className='share-file-description'>Edit the user's permissions.</p>
@@ -116,7 +116,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                         <>
                                             <div className='section-title-upload-popup'>
                                                 <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseShareNamePopup}/>
-                                                <h2 className='upload-file-header'>Share File - Name</h2>
+                                                <h2 className='share-file-header'>Share File - Name</h2>
                                             </div>
                                             <p className='share-file-description note'>You're about to share the file <strong><em>"{selectedFile.fileName}"</em></strong>.</p>
                                             <p className='share-file-description'>Input the name of the user to share the file with.</p>

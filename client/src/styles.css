@@ -152,7 +152,7 @@ h1 {
 }
 
 .input-username {
-  border: 1px solid #ddd; 
+  border: 1px solid #ddd;
   border-radius: 10px; 
   padding: 10px; 
   margin-bottom: 10px; 
@@ -527,8 +527,15 @@ h1 {
 }
 
 /*----------- Home Page // POPUP Share Document -----------*/
+.share-file-header {
+  color: #FF812C;
+  padding-left: 1px;
+  padding-bottom: 10px;
+}
+
 .note { 
   font-size: 13px;
+  color: #2E231D;
 }
 
 .share-file-description {
@@ -555,7 +562,7 @@ h1 {
   -moz-appearance: none;
   width: 18px;
   height: 15px;
-  background-color: #f4f4f4;
+  background-color: #DADADA;
   border-radius: 4px;
   cursor: pointer;
   margin-right: 6px;
@@ -581,8 +588,10 @@ h1 {
 }
 
 .input-usernameShare {
+  background-color: #DADADA;
   margin-top: 2%;
   flex: 1;
+  color: #2E231D;
 }
 
 .input-button-container {
@@ -595,8 +604,12 @@ h1 {
   padding: 15px;
 }
 
+.app-button__share:focus {
+  outline: 2px solid #FF812C; /* Adjust the width and color as needed */
+}
+
 .readonly {
-  background-color: #f4f4f4; 
+  background-color: #DADADA; 
   color: #888; 
   cursor: not-allowed; 
   outline: none;
