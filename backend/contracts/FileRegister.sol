@@ -131,6 +131,16 @@ contract FileRegister {
         return latestVersion;  // Return the latest file with the desired fileName
     }
 
+    // Returns the owner of the original file (version 0), given its name
+    function getFileOwner(string memory fileName) public view returns (address) {
+        for (uint256 i = 0; i < ipfsCids.length; i++) {
+            if (keccak256(abi.encodePacked(files[ipfsCids[i]].fileName)) == keccak256(abi.encodePacked(fileName)) && files[ipfsCids[i]].version == 0) {
+                return files[ipfsCids[i]].owner;  // Update the latest version
+            }
+        }
+        return address(0);
+    }
+
     // Returns the state of a file if: the transaction executer is the AccessControl contract
     function getFileState(string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if(msg.sender == accessControlAddress) {

@@ -80,6 +80,11 @@ class BlockchainWrapper {
         return await fileRegister.methods.getLatestVersionOfFile(fileName).call({from: selectedUserAccount});
     }
 
+    // Returns the file owner of a given file
+    static getFileOwner = async (fileRegister, fileName, selectedUserAccount) => {
+        return await fileRegister.methods.getFileOwner(fileName).call({from: selectedUserAccount});
+    }
+
     // Gets the permissions a user has over a file
     static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, fileIpfsCid, selectedUserAccount) => {
         return await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, fileIpfsCid).call({from: selectedUserAccount}); 

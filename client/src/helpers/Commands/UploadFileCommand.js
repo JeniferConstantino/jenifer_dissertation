@@ -25,18 +25,20 @@ class UploadFileCommand extends Command {
         const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
         console.log('File encrypted and added to IPFS', fileCID);
 
-        // Grabs the latest version of the file, no matter if the file is in the active or deactive state
+        var fileOwner = this.fileManager.selectedUser.account;
+        // If true => re-upload
         if(this.fileVersion !== 0){
-            // get the latest version of a file based on its name
+            // get the latest version of a file based on its name, no matter if the file is in the active or deactive state
             const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(this.fileUpl.name.toLowerCase().toString());
-            const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer
+            const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer            
+            this.fileVersion = latestVersion + 1; // updates the version of the current file by incrementing 1
 
-            // updates the version of the current file by incrementing 1
-            this.fileVersion = latestVersion + 1;
+            // gets the file owner of the original file
+            fileOwner = await this.fileManager.getFileOwner(this.fileUpl.name.toLowerCase().toString());
         }
 
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion, this.fileManager.selectedUser.account, fileCID, iv.toString('base64'), "");
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion,  fileOwner, fileCID, iv.toString('base64'), "");
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, this.fileManager.selectedUser.publicKey).toString('base64');
 

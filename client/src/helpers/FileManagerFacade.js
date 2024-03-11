@@ -190,6 +190,11 @@ class FileManagerFacade {
     return await BlockchainWrapper.getLatestVersionOfFile(this.fileRegisterContract, fileName, this.selectedUser.account);
   }
 
+  // Returns the file owner of the original file
+  async getFileOwner(fileName) {
+    return await BlockchainWrapper.getFileOwner(this.fileRegisterContract, fileName, this.selectedUser.account);
+  }
+
   // Generates a symmetric key
   generateSymmetricKey() {
     return EncryptionWrapper.generateSymmetricKey();
