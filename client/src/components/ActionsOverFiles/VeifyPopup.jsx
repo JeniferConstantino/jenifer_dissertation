@@ -1,0 +1,119 @@
+import React, { useState } from 'react';
+import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
+import {Buffer} from 'buffer';
+import { FcPlus } from "react-icons/fc";
+
+const VeifyPopup = ({handleClosePopup, show, children}) => {
+
+    const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
+    const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
+
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [droppedFile, setDroppedFile] = useState(null);
+
+    const [fileUpl, setFileUpl] = useState(null);
+    const [fileAsBuffer, setFileAsBuffer] = useState(null);
+
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    }
+
+    const handleDragLeave = (e) => {
+        setIsDragOver(false);
+    }
+
+    const handleFileVerify = async (e) => {
+        setDroppedFile(false);
+        
+        console.log('Verify file ...')
+        e.preventDefault()
+
+        if(fileAsBuffer){
+            console.log();
+            try{
+                console.log("Verify will be performed.");
+            } catch (error) {
+                console.error("Error verifying file:", error);
+            }
+        }
+    }
+
+    // Converts the droped file into a format that IPFS can undertsand and sets it to the state
+    const handleFileDrop = (e) => {
+        setIsDragOver(false);
+        const file = e.dataTransfer.files[0];
+        setDroppedFile(file);
+
+        console.log('capture file ...')
+        e.preventDefault()
+        
+        const fileInpt = e.dataTransfer;
+
+        if (fileInpt.files.length !== 0) {
+            const file = fileInpt.files[0] // access to the file
+            setFileUpl(file);
+
+            const reader = new window.FileReader()
+            reader.readAsArrayBuffer(file)
+            reader.onloadend = () => {
+                setFileAsBuffer(Buffer(reader.result)) // format that allows to post to IPFS
+            }
+        }
+    };
+
+    // Sets to close the popup to verify a file
+    const handleCloseVerifyPopup = () => {
+        cleanFields();
+        handleClosePopup("verify"); 
+    }
+
+    const cleanFields = () => {
+        setShowDragDrop(true);
+        setDroppedFile(null);
+        setFileAsBuffer(null);
+    }
+
+    return(
+        <>
+            <div className={showHideClassName}>
+                <div className='modal-wrapper'>
+                    <div className="modal-background"></div>
+                    { showDragDrop && (
+                        <div className="modal">
+                            <section>
+                                {children}
+                                <div className='popup-section section-title-upload-popup'>
+                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseVerifyPopup}/>
+                                    <h2 className='upload-file-header'>Verify File</h2>
+                                </div>
+                                <div 
+                                    className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleFileDrop}
+                                >
+                                    {droppedFile ? (
+                                        <>
+                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <button className="app-button__upload app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
+                                        </>
+                                    ) : (
+                                        <p> <FcPlus/> Drop your file</p>  
+                                    )}
+                                </div>
+                                <div className='popup-section'>
+                                    <button className="app-button__upload app-button" onClick={handleFileVerify}>Verify</button>
+                                </div>
+                            </section>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+
+}
+
+export default VeifyPopup;

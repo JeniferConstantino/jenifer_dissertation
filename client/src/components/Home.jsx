@@ -4,6 +4,7 @@ import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
+import VeifyPopup from './ActionsOverFiles/VeifyPopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
@@ -236,6 +237,7 @@ const Home = () => {
                     </div>
                     
                     <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showVerifyPopup} handleClosePopup={handleClosePopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
