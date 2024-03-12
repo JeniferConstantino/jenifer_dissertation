@@ -38,16 +38,30 @@ class UpdatePermissionsCommand extends Command {
                 return;
             }
     
-            await this.fileManager.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, permissionsArray);
-            // Verifies if the updateUserFilPermissions was successfull
-            var result = await this.fileManager.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);    
-            if (!this.arraysHaveSameContent(result.resultStrings, permissionsArray)) {
-                console.log("Something went wrong while trying to associate the user with the file.");
-                return;
+            if (permissionsArray.length !== 0) {
+                // update users' permissions
+                await this.fileManager.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, permissionsArray);
+                
+                // Verifies if the updateUserFilPermissions was successfull
+                var result = await this.fileManager.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);    
+                if (!this.arraysHaveSameContent(result.resultStrings, permissionsArray)) {
+                    console.log("Something went wrong while trying to associate the user with the file.");
+                    return;
+                } else {
+                    console.log("File Shared."); 
+                }     
             } else {
-                console.log("File Shared."); 
-            }          
-            console.log("Permissions updated.");
+                // remove the relationship between the user and the file
+                await this.fileManager.removeUserFileAssociation(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
+
+                // Verifies if the relationship was well removed
+                var userAssociatedFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
+                if (userAssociatedFile) {
+                    console.log("Something went wrong while trying to remove the relationship between the user and the file.");
+                } else {
+                    console.log("Relationship removed"); 
+                }
+            }
         } catch (error) {
             console.log("ERROR: ", error);
         }

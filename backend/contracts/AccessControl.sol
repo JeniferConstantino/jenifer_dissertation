@@ -134,6 +134,22 @@ contract AccessControl {
         }
     }
 
+    // Remove the relationship between a user and a file
+    function removeUserFileAssociation(address userAccount, string memory fileIpfsCID) public {
+        for (uint i=0; i<user_Has_File.length; i++) {
+            if (user_Has_File[i].userAccount == userAccount && 
+                keccak256(bytes(user_Has_File[i].ipfsCID)) == keccak256(bytes(fileIpfsCID))) {
+                // Remove the entry by swapping it with the last element and then reducing the array length
+                user_Has_File[i] = user_Has_File[user_Has_File.length - 1];
+                user_Has_File.pop();
+
+                // Writes to the Audit Log
+                auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, "-", "removed access");
+                return;
+            }
+        }
+    }
+
     // Returns the encrypted symmetric key of a given user and file
     // The user can only get the symmetric key if: he is associated with the file 
     //                                             the transaction executer is the same as the account user

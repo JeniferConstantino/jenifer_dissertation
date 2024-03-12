@@ -145,6 +145,11 @@ class FileManagerFacade {
     return BlockchainWrapper.updateUserFilePermissions(this.accessControlContract, userAccount, fileIpfsCid, permissionsArray, this.selectedUser.account);
   }
 
+  // Remove the relationship between a user and a file
+  removeUserFileAssociation(userAccount, fileIpfsCid) {
+    return BlockchainWrapper.removeUserFileAssociation(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  }
+
   // Deletes the files' association with the users, and deletes the file
   async deactivateFile(userAccount, fileIpfsCid) {
     return await BlockchainWrapper.deactivateFile(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);

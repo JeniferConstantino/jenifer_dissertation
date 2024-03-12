@@ -45,7 +45,7 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
                     {logs.slice().reverse().map((log, index) => (
                         <div key={index} className="log-entry">
                             <div className="log-column content-padding">
-                                {log.action === 'share' || log.action === 'update permissions' ? (
+                                {log.action === 'share' || log.action === 'update permissions' || log.action === 'removed access'? (
                                     <span>{userNamesFrom[log.executer]} -&gt; {userNamesTo[log.userAccount]}</span>
                                 ) : (
                                     <span>{userNamesTo[log.userAccount]}</span>
