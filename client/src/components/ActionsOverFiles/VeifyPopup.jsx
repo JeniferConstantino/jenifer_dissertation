@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
+import InfoPopup from '../Infos/InfoPopup';
+import { FcCheckmark, FcCancel } from "react-icons/fc";
 
-const VeifyPopup = ({handleClosePopup, show, children}) => {
+const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
+    const [showInfoPopup, setShowInfoPopup] = useState(false); // controls the warning visibility
+    const [titleInfoPopup, setTtileInfoPopup] = useState(""); // Sets the title to be showed in the info popup
+    const [message, setMessage] = useState(""); // Sets the message to be showed in the info popup
 
     const [isDragOver, setIsDragOver] = useState(false);
     const [droppedFile, setDroppedFile] = useState(null);
 
-    const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
 
 
@@ -25,15 +29,21 @@ const VeifyPopup = ({handleClosePopup, show, children}) => {
     }
 
     const handleFileVerify = async (e) => {
-        setDroppedFile(false);
         
         console.log('Verify file ...')
         e.preventDefault()
 
         if(fileAsBuffer){
-            console.log();
             try{
-                console.log("Verify will be performed.");
+                const validFile = await fileManagerFacadeInstance.verifyFile(fileAsBuffer);
+                setTtileInfoPopup(validFile ? "Valid" : "Invalid");
+                setShowInfoPopup(true);
+                setShowDragDrop(false);
+                if (validFile) {
+                    setMessage("Congrats! File is valid. Proceed with more verifications.");
+                } else {
+                    setMessage("Ups. File is not valid. Proceed with more verifications.");
+                }
             } catch (error) {
                 console.error("Error verifying file:", error);
             }
@@ -53,8 +63,7 @@ const VeifyPopup = ({handleClosePopup, show, children}) => {
 
         if (fileInpt.files.length !== 0) {
             const file = fileInpt.files[0] // access to the file
-            setFileUpl(file);
-
+            
             const reader = new window.FileReader()
             reader.readAsArrayBuffer(file)
             reader.onloadend = () => {
@@ -69,11 +78,21 @@ const VeifyPopup = ({handleClosePopup, show, children}) => {
         handleClosePopup("verify"); 
     }
 
+    const handleContinue = () => {
+        // file version is -1, indicating that is a reupload of an existing file
+        cleanFields();
+    }
+
     const cleanFields = () => {
+        setShowInfoPopup(false);
+        setTtileInfoPopup("");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
     }
+
+    const iconComponent = titleInfoPopup === "Valid" ? FcCheckmark : FcCancel;
+
 
     return(
         <>
@@ -108,6 +127,9 @@ const VeifyPopup = ({handleClosePopup, show, children}) => {
                                 </div>
                             </section>
                         </div>
+                    )}
+                    {showInfoPopup && droppedFile!=null && (
+                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent}/>
                     )}
                 </div>
             </div>

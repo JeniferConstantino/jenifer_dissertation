@@ -13,6 +13,7 @@ contract FileRegister {
         string fileType;           // Image or file
         string iv;                 // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
         string state;              // active and deactive
+        string fileHash;           // hash of the file: SHA-256
     }
     struct ResultFile {
         bool success;
@@ -69,7 +70,7 @@ contract FileRegister {
         ) {
             return ResultFile(true, files[fileIpfsCid]);       
         }
-        return ResultFile(false, File("", "", 0, address(0), "", "", ""));       
+        return ResultFile(false, File("", "", 0, address(0), "", "", "", ""));       
     }
 
     // Verifies if a file can be added if: the transaction executer is the AccessControl.sol
@@ -145,6 +146,14 @@ contract FileRegister {
     function getFileState(string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if(msg.sender == accessControlAddress) {
             return Helper.ResultString(true, files[fileIpfsCID].state);
+        }
+        return Helper.ResultString(false, "");
+    }
+
+    // Returns the file hash of a file if: the transaction executes is the AccessControl contract
+    function getFileHash(string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
+        if (msg.sender == accessControlAddress) {
+            return Helper.ResultString(true, files[fileIpfsCID].fileHash);
         }
         return Helper.ResultString(false, "");
     }

@@ -14,7 +14,7 @@ class FileApp {
       Verify: 'verify'
   }
 
-  constructor(fileName, version, owner, ipfsCID, iv, state) {
+  constructor(fileName, version, owner, ipfsCID, iv, state, fileHash) {
     this.ipfsCID = ipfsCID;               // CID from IPFS (hash) Unique
     this.fileName = fileName;             // File Name
     this.version = version;               // File Version
@@ -22,6 +22,7 @@ class FileApp {
     this._fileType = "";                  // image or file
     this.iv = iv;                         // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
     this.state = state;                   // Indicates if the file is in the state active or deactive
+    this.fileHash = fileHash;             // Hash of the file in SHA-256
   }
 
   // returns the fileType

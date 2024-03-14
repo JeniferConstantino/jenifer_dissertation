@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
-import WarningPopup from '../Warnings/WarningPopup';
+import WarningPopup from '../Infos/WarningPopup';
 import { FcPlus } from "react-icons/fc";
 
 const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUser, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
@@ -36,7 +36,8 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
         if(fileAsBuffer){
             console.log();
             try{
-                var userHasFileWithName = await fileManagerFacadeInstance.userAssociatedWithFileName(selectedUser.account, fileUpl.name.trim());
+                var userHasFileWithName = await fileManagerFacadeInstance.userAssociatedWithFileName(selectedUser.account, fileUpl.name.trim().toLowerCase());
+                console.log("userHasFileWithName: ", userHasFileWithName);
                 if (userHasFileWithName) {
                     setShowWarning(true); // Sends Warning saying that a new version will be added => file editing
                     setShowDragDrop(false);
@@ -128,7 +129,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
                         </div>
                     )}
                     {showWarning && droppedFile!=null && (
-                        <WarningPopup handleContinue={handleContinue} cleanFields={cleanFields} message={"A new version of the file will be uploaded. Do you want to continue?"} showWarning = {showWarning}/>
+                        <WarningPopup handleContinue={handleContinue} cleanFields={cleanFields} title={"Warning"} message={"A new version of the file will be uploaded. Do you want to continue?"} showWarning = {showWarning}/>
                     )}
                 </div>
             </div>

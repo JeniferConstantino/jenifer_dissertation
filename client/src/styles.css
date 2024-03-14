@@ -168,8 +168,9 @@ h1 {
 .input-button-container-welcome {
   width: 100%;
 }
-/*----------- Warning Popup -----------*/
-.warning-content {
+
+/*----------- Popups -----------*/
+.popup-content {
   display: flex;
   flex-direction: row;
   font-size: 15px;
@@ -177,44 +178,50 @@ h1 {
   padding-top: 10px;
 }
 
-.textWarning{
-  font-weight: bold;
-  padding-left: 9px;
-}
-.messageWarning{
-  margin-top: 18px;
-}
-
-.warning{
+.right-section{
   padding-right: 20px;
   padding-left: 10px;
 }
-.buttonsContent {
+
+.textInfo{
+  font-weight: bold;
+  padding-left: 9px;
+  color: #2E231D;
+}
+
+.message-popup{
+  margin-top: 18px;
+  color: #2E231D;
+}
+
+.buttons-content {
   padding-right: 10px;
 }
 
-.button-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.app-button__warning {
+.app-button__popup {
   padding: 2%;
   margin-top: 10px;
   margin-right: 10px;
 }
 
-.modalWarning {
+.modalPopup {
   position: relative;
   z-index: 2; /* Ensure the modal appears above the background */
   background-color: white;
   border-radius: 10px;
 }
 
-.display-block-warning {
+.display-block-popup {
   display: block;
   width: 400px;
   padding: 10px;
+}
+
+/*----------- Warning Popup -----------*/
+
+.button-container { /*TODO: THINK NOT NEEDED*/
+  display: flex;
+  flex-direction: column;
 }
 
 /*----------- Home Page -----------*/

@@ -308,6 +308,25 @@ contract AccessControl {
         return false;
     }
 
+    // Verifies if a file is valid or not. 
+    // A file is valid if: the user has a file (is associated with a file)
+    //                     in the active state 
+    //                     with the same file hash
+    function verifyValidFile (address userAccount, string memory fileHash) public view returns (bool) {
+        // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
+        for (uint256 i=0; i<user_Has_File.length; i++) {
+            string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
+            string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
+            if ( user_Has_File[i].userAccount == userAccount &&
+                (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
+                (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
+            ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Sees if the ipfsCID and the account (primary keys) are the same as the inputs 
     function isKeyEqual(address accountInput, address accountList, string memory ipfsCIDInput, string memory ipfsCIDList) public pure returns (bool){
         return (accountList == accountInput) && (keccak256(abi.encodePacked(ipfsCIDList)) == keccak256(abi.encodePacked(ipfsCIDInput)));

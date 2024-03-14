@@ -25,6 +25,9 @@ class UploadFileCommand extends Command {
         const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
         console.log('File encrypted and added to IPFS', fileCID);
 
+        // Generates the hash of the file
+        const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
+
         var fileOwner = this.fileManager.selectedUser.account;
         // If true => re-upload
         if(this.fileVersion !== 0){
@@ -38,7 +41,7 @@ class UploadFileCommand extends Command {
         }
 
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion,  fileOwner, fileCID, iv.toString('base64'), "");
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion,  fileOwner, fileCID, iv.toString('base64'), "", fileHash);
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, this.fileManager.selectedUser.publicKey).toString('base64');
 
@@ -62,6 +65,7 @@ class UploadFileCommand extends Command {
         var tempUloadedActiveFiles = [...this.uploadedActiveFiles, fileUploaded]
         var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUploaded]; // Updates the state with the result
         console.log('File added to the blockchain');
+
         this.handleFileUploaded(tempUloadedActiveFiles, tempUpdatedUploadedFiles);
     }
 }

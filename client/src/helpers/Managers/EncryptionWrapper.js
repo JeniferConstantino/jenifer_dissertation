@@ -72,6 +72,19 @@ class EncryptionWrapper {
             throw new Error("Error decrypting file.");
         }        
     }
+
+    // Generates a hash using SHA-256
+    static async generateHash256 (fileAsBuffer) {
+        try {
+            const hash = crypto.createHash('sha256');
+            hash.update(fileAsBuffer);
+            const hashHex = hash.digest('hex');
+            return hashHex;
+        } catch (error) {
+            console.error("Error generating hash: ", error);
+            throw new Error("Error generating hash.");
+        }
+    }
 }
 
 export default EncryptionWrapper;

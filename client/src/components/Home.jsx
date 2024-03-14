@@ -237,7 +237,7 @@ const Home = () => {
                     </div>
                     
                     <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
-                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showVerifyPopup} handleClosePopup={handleClosePopup}/>
+                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>

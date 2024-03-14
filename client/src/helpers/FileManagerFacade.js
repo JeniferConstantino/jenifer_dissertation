@@ -2,6 +2,7 @@ import BlockchainWrapper from './Managers/BlockchainWrapper';
 import EncryptionWrapper from './Managers/EncryptionWrapper';
 import IPFSWrapper from './Managers/IPFSWrapper';
 import UploadFileCommand from './Commands/UploadFileCommand';
+import VerifyFileCommand from './Commands/VerifyFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
 import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand';
@@ -77,6 +78,12 @@ class FileManagerFacade {
   async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith) {
     const updatePermissionsCommand = new UpdatePermissionsCommand(this, selectedFile, permissions, accountUserShareFileWith);
     await updatePermissionsCommand.execute();
+  }
+
+  // Verifies if a file already exists in the app
+  async verifyFile(fileAsBuffer) {
+    const verifyFileCommand = new VerifyFileCommand(this, fileAsBuffer);
+    return await verifyFileCommand.execute();
   }
 
   // Verifies if the user is already associated with a file with the same name
@@ -200,6 +207,16 @@ class FileManagerFacade {
     return await BlockchainWrapper.getFileOwner(this.fileRegisterContract, fileName, this.selectedUser.account);
   }
 
+  // Returns if a file is valid or not
+  async verifyValidFile(userAccount, fileHash) { 
+    return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
+  }
+
+  // Generates a hash using SHA-256
+  async generateHash256(fileAsBuffer) {
+    return await EncryptionWrapper.generateHash256(fileAsBuffer);
+  }
+
   // Generates a symmetric key
   generateSymmetricKey() {
     return EncryptionWrapper.generateSymmetricKey();
@@ -253,9 +270,6 @@ class FileManagerFacade {
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
-
-  // TODO
-  verifyFile() {}
 
 }
 

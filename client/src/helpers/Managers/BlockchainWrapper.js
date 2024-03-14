@@ -57,7 +57,7 @@ class BlockchainWrapper {
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
-                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv, file.state);
+                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv, file.state, file.fileHash);
                 fileApp.fileType = file.fileType;
                 files.push(fileApp);
             });
@@ -83,6 +83,11 @@ class BlockchainWrapper {
     // Returns the file owner of a given file
     static getFileOwner = async (fileRegister, fileName, selectedUserAccount) => {
         return await fileRegister.methods.getFileOwner(fileName).call({from: selectedUserAccount});
+    }
+
+    // Returns if a file is valid or not
+    static verifyValidFile = async (accessControlContract, userAccount, fileHash, selectedUserAccount) => {
+        return await accessControlContract.methods.verifyValidFile(userAccount, fileHash).call({from: selectedUserAccount});
     }
 
     // Gets the permissions a user has over a file
