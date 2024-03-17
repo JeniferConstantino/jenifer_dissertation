@@ -22,7 +22,7 @@ contract Helper {
     // Verifies if the fields are valid 
     // The one seeing if the user has the right fields should be the same one executing the transaction
     function validUserFields(UserRegister.User memory user) public pure returns (bool) {
-        if (user.account != address(0) && bytes(user.userName).length != 0 && bytes(user.publicKey).length != 0 && bytes(user.privateKey).length != 0) {
+        if (user.account != address(0) && bytes(user.userName).length != 0) {
             return true;
         }
         return false;

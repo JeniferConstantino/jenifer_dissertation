@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp';
+import InfoPopup from './Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
-const Welcome = () => {
+const Register = () => {
     const navigate = useNavigate();
     const {fileManagerFacadeInstance} = useWeb3();
     const [username, setUsername] = useState('');
+    const [showInfoPopup, setShowInfoPopup] = useState(false); // controls the info popup visibility
+    const [titleInfoPopup, setTitleInfoPopup] = useState("");  // title to be used in the info popup
+    const [mnemonic, setMnemonic] = useState();                // mnemonic to be set in the info popup
 
     const onNext = async (e) => {
         if(username.trim() === ''){
@@ -15,18 +20,33 @@ const Welcome = () => {
         }
 
         // Adds the user to the blockchain and redirects him to the home page
-        UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username).then(()=>{
+        UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username).then((mnemonic)=>{
             if (fileManagerFacadeInstance.current._selectedUser != null) {
-                navigate('/home');
+                setTitleInfoPopup("Attention");
+                setMnemonic(mnemonic);
+                setShowInfoPopup(true);
             }
         }).catch(err=>{
             console.log(err);
         })      
     };
 
+    const handleContinue = () => {
+        cleanFields();
+        navigate('/home');
+    }
+
+    const cleanFields = () => {
+        setShowInfoPopup(false);
+        setMnemonic("");
+        setTitleInfoPopup("");
+    }
+
     const handleBack = async (e) => {
         navigate('/');
     }
+
+    const iconComponent = FcHighPriority;
 
     return (
         <>
@@ -55,11 +75,15 @@ const Welcome = () => {
                         </div>
                     </div>
                 </div>
+                {showInfoPopup && (
+                    <div className='modal-wrapper'>
+                        <InfoPopup handleContinue={handleContinue} message={""} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent} mnemonic={mnemonic}/>
+                    </div>
+                )}
             </div>
         </>
-        
     );
 
 }
 
-export default Welcome;
+export default Register;

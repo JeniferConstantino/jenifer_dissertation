@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from "./components/Login";
+import WalletConnection from "./components/WalletConnection";
 import Home from "./components/Home";
-import Welcome from "./components/Welcome";
+import Register from "./components/Register";
 import Web3Provider from "./helpers/web3Client"
 import nearsoftLogo from './imgs/nearsoftLogo.png';
+import Login from './components/Login';
 
 
 function App() {
@@ -13,9 +14,10 @@ function App() {
         <img className='nearsoftLogo' src={nearsoftLogo} alt='Logo'/>
         <Web3Provider>
           <Routes>
-            <Route path="/" element={<Login/>}/>
+            <Route path="/" element={<WalletConnection/>}/>
             <Route path="/home" element={<Home/>}/>
-            <Route path="/welcome" element={<Welcome/>}/>
+            <Route path="/register" element={<Register/>}/>
+            <Route path="/login" element={<Login/>}/>
           </Routes>
         </Web3Provider>
       </Router>

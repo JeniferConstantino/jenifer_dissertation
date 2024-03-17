@@ -4,15 +4,35 @@ import FileApp from './../FileApp';
 // Concrete command for uploading a file
 class UploadFileCommand extends Command {
 
-    constructor(fileManager, fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    constructor(fileManager, firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
         this.fileManager = fileManager;
         this.fileUpl = fileUpl;
-        this.fileVersion = fileVersion;
+        this.firstUpload = firstUpload;
         this.fileAsBuffer = fileAsBuffer;
         this.handleFileUploaded = handleFileUploaded;
         this.uploadedActiveFiles = uploadedActiveFiles;
         this.uploadedFiles = uploadedFiles;
+    }
+
+    // Determines the file owner, depending if is a reupload or a first upload
+    async getFileOwner(firstUpload) {
+        var fileOwner;
+        if(firstUpload === -1){ // Re-upload
+            fileOwner = await this.fileManager.getFileOwner(this.fileUpl.name.toLowerCase().toString()); // gets the file owner of the original file
+            return fileOwner;
+        }
+        fileOwner = this.fileManager.selectedUser.account;  // 1st upload
+        return fileOwner;
+    }
+
+    // Calculates the version of the current file
+    async getFileVersion(fileUplName) {
+        // get the latest version of a file based on its name, no matter if the file is in the active or deactive state
+        const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(fileUplName.toLowerCase().toString());
+        const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer            
+        var fileVersion = latestVersion + 1; // gets the file version of the current file
+        return fileVersion;
     }
 
     async execute(){
@@ -28,22 +48,13 @@ class UploadFileCommand extends Command {
         // Generates the hash of the file
         const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
 
-        var fileOwner = this.fileManager.selectedUser.account;
-        // If true => re-upload
-        if(this.fileVersion !== 0){
-            // get the latest version of a file based on its name, no matter if the file is in the active or deactive state
-            const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(this.fileUpl.name.toLowerCase().toString());
-            const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer            
-            this.fileVersion = latestVersion + 1; // updates the version of the current file by incrementing 1
-
-            // gets the file owner of the original file
-            fileOwner = await this.fileManager.getFileOwner(this.fileUpl.name.toLowerCase().toString());
-        }
+        var fileOwner = await this.getFileOwner(this.firstUpload);
+        var fileVersion = await this.getFileVersion(this.fileUpl.name);
 
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.fileVersion,  fileOwner, fileCID, iv.toString('base64'), "", fileHash);
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), fileVersion,  fileOwner, fileCID, iv.toString('base64'), "", fileHash);
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
-        let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, this.fileManager.selectedUser.publicKey).toString('base64');
+        let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey')).toString('base64');
 
         // Associates the current user with the uploaded file 
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);

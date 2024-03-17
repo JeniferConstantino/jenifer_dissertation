@@ -31,6 +31,16 @@ class BlockchainWrapper {
         return userRegisterContract.methods.userRegistered(user).send({from: selectedAccount});
     }
 
+    // Verifies if a uer is associated with a mnemonic
+    static verifyUserAssociatedMnemonic = async (userRegisterContract, mnemonic, userAccount, selectedUserAccount) => {
+        return await userRegisterContract.methods.verifyUserAssociatedMnemonic(mnemonic, userAccount).call({from: selectedUserAccount});;
+    }
+
+    // Returns the user
+    static getUser = async (userRegisterContract, user, selectedUserAccount) => {
+        return await userRegisterContract.methods.getUser(user).call({from: selectedUserAccount});
+    }
+
     // Adds the file in the blockchain
     static addFile = (fileRegisterContract, file, selectedAccount) => {
         return fileRegisterContract.methods.addFile(file).send({from: selectedAccount});

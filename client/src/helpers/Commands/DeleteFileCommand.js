@@ -11,7 +11,7 @@ class DeleteFileCommand extends Command {
 
     async execute(){
         try {
-            // Calls the method to delete the association between the users and the files
+            // Calls the method to deactivate the file
             await this.fileManager.deactivateFile(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);    
             console.log("Association between the users and the files deleted.");
 

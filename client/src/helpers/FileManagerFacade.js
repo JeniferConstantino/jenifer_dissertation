@@ -40,8 +40,9 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  async uploadFile(fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileVersion, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  // reUpload receives 0 if the file is being uploaded for the first time and -1 if the file is being re-uploaded
+  async uploadFile(firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new UploadFileCommand(this, firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
   
@@ -212,6 +213,21 @@ class FileManagerFacade {
     return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
   }
 
+  // Verifies if a mnemonic belongs to a given user
+  async verifyUserAssociatedMnemonic(mnemonic, user) {
+    return await BlockchainWrapper.verifyUserAssociatedMnemonic(this.userRegisterContract, mnemonic, user, this.selectedUser.account);
+  }
+
+  // Returns the user
+  async getUser(user) {
+    return await BlockchainWrapper.getUser(this.userRegisterContract, user, this._selectedAccount.current);
+  }
+
+  // Hashes the mnemonic using symmetric encryption
+  async hashMnemonicSymmetricEncryption(mnemonic) {
+    return await EncryptionWrapper.hashMnemonicSymmetricEncryption(mnemonic);
+  }
+
   // Generates a hash using SHA-256
   async generateHash256(fileAsBuffer) {
     return await EncryptionWrapper.generateHash256(fileAsBuffer);
@@ -228,9 +244,19 @@ class FileManagerFacade {
     return {encryptedFile, iv};
   }
 
-  // Gets a key pair: public key and private key
-  generateKeyPair() {
-    return EncryptionWrapper.generateKeyPair();
+  // Generates the mnemonic associated with a user
+  generateMnemonic() {
+    return EncryptionWrapper.generateMnemonic();
+  }
+
+  // Generates a set of keys, given a mnemonic
+  async generateKeysFromMnemonic(mnemonic) {
+    return EncryptionWrapper.generateKeysFromMnemonic(mnemonic);
+  }
+
+  // Stores in the local storage
+  async storeLocalSotrage(privateKey, publicKey, address){
+    return EncryptionWrapper.storeLocalSotrage(privateKey, publicKey, address);
   }
 
   // Decrypts a symmetric key using a private key

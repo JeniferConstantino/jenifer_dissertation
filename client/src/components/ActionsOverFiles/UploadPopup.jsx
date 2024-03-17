@@ -37,7 +37,6 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
             console.log();
             try{
                 var userHasFileWithName = await fileManagerFacadeInstance.userAssociatedWithFileName(selectedUser.account, fileUpl.name.trim().toLowerCase());
-                console.log("userHasFileWithName: ", userHasFileWithName);
                 if (userHasFileWithName) {
                     setShowWarning(true); // Sends Warning saying that a new version will be added => file editing
                     setShowDragDrop(false);
