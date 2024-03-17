@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
-import WarningPopup from '../Infos/WarningPopup';
 import { FcPlus } from "react-icons/fc";
+import InfoPopup from '../Infos/InfoPopup';
+import { FcCheckmark, FcCancel } from "react-icons/fc";
 
-const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUser, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
+const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
-    const [showWarning, setShowWarning] = useState(false); // controls the warning visibility
+    const [showInfoPopup, setShowInfoPopup] = useState(false); // controls the warning visibility
+    const [titleInfoPopup, setTtileInfoPopup] = useState(""); // Sets the title to be showed in the info popup
+    const [message, setMessage] = useState(""); // Sets the message to be showed in the info popup
 
     const [isDragOver, setIsDragOver] = useState(false);
     const [droppedFile, setDroppedFile] = useState(null);
 
-    const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
 
 
@@ -26,32 +28,29 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
         setIsDragOver(false);
     }
 
-    // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
-    const handleFileUpload = async (e) => {
-        setDroppedFile(false);
+    const handleFileVerify = async (e) => {
         
-        console.log('UPLOAD file ...')
+        console.log('Verify file ...')
         e.preventDefault()
 
         if(fileAsBuffer){
-            console.log();
             try{
-                var userHasFileWithName = await fileManagerFacadeInstance.userAssociatedWithFileName(selectedUser.account, fileUpl.name.trim().toLowerCase());
-                if (userHasFileWithName) {
-                    setShowWarning(true); // Sends Warning saying that a new version will be added => file editing
-                    setShowDragDrop(false);
+                const validFile = await fileManagerFacadeInstance.verifyFile(fileAsBuffer);
+                setTtileInfoPopup(validFile ? "Valid" : "Invalid");
+                setShowInfoPopup(true);
+                setShowDragDrop(false);
+                if (validFile) {
+                    setMessage("Congrats! File is valid. Proceed with more verifications.");
                 } else {
-                    // Proceeds with the file upload - File version is 0, indicating that is the first time the file is being uploaded
-                    await fileManagerFacadeInstance.uploadFile(0, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
-                    cleanFields();
+                    setMessage("Ups. File is not valid. Proceed with more verifications.");
                 }
             } catch (error) {
-                console.error("Error uploading file:", error);
+                console.error("Error verifying file:", error);
             }
         }
     }
 
-    // Converts the uploaded file into a format that IPFS can undertsand and sets it to the state
+    // Converts the droped file into a format that IPFS can undertsand and sets it to the state
     const handleFileDrop = (e) => {
         setIsDragOver(false);
         const file = e.dataTransfer.files[0];
@@ -64,8 +63,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
 
         if (fileInpt.files.length !== 0) {
             const file = fileInpt.files[0] // access to the file
-            setFileUpl(file);
-
+            
             const reader = new window.FileReader()
             reader.readAsArrayBuffer(file)
             reader.onloadend = () => {
@@ -74,24 +72,27 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
         }
     };
 
-    // Sets to close the popup to upload a file
-    const handleCloseUploadPopup = () => {
+    // Sets to close the popup to verify a file
+    const handleCloseVerifyPopup = () => {
         cleanFields();
-        handleClosePopup("upload"); 
+        handleClosePopup("verify"); 
     }
 
     const handleContinue = () => {
         // file version is -1, indicating that is a reupload of an existing file
-        fileManagerFacadeInstance.uploadFile(-1, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
         cleanFields();
     }
 
     const cleanFields = () => {
-        setShowWarning(false); // Hide the warning popup
+        setShowInfoPopup(false);
+        setTtileInfoPopup("");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
     }
+
+    const iconComponent = titleInfoPopup === "Valid" ? FcCheckmark : FcCancel;
+
 
     return(
         <>
@@ -103,8 +104,8 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
                             <section>
                                 {children}
                                 <div className='popup-section section-title-upload-popup'>
-                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
-                                    <h2 className='upload-file-header'>Upload File</h2>
+                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseVerifyPopup}/>
+                                    <h2 className='upload-file-header'>Verify File</h2>
                                 </div>
                                 <div 
                                     className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
@@ -115,20 +116,20 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
                                     {droppedFile ? (
                                         <>
                                             <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                            <button className="app-button__upload app-button" onClick={handleCloseUploadPopup}> Cancel </button>
+                                            <button className="app-button__upload app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
                                         </>
                                     ) : (
                                         <p> <FcPlus/> Drop your file</p>  
                                     )}
                                 </div>
                                 <div className='popup-section'>
-                                    <button className="app-button__upload app-button" onClick={handleFileUpload}>Upload</button>
+                                    <button className="app-button__upload app-button" onClick={handleFileVerify}>Verify</button>
                                 </div>
                             </section>
                         </div>
                     )}
-                    {showWarning && droppedFile!=null && (
-                        <WarningPopup handleContinue={handleContinue} cleanFields={cleanFields} title={"Warning"} message={"A new version of the file will be uploaded. Do you want to continue?"} showWarning = {showWarning}/>
+                    {showInfoPopup && droppedFile!=null && (
+                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent}/>
                     )}
                 </div>
             </div>
@@ -137,4 +138,4 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedUse
 
 }
 
-export default UploadPopup;
+export default VeifyPopup;

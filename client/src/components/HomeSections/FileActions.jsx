@@ -30,6 +30,11 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
         handleOpenPopup("upload");
     }
 
+    // Sets to open the popup to verify file
+    const handlePopupOpenVerify = async () => {
+        handleOpenPopup(FileApp.FilePermissions.Verify); 
+    }
+
     // Downloads the selected file
     const handleDownload = async () => {
         // Verifies if the user has permissions to download
@@ -72,20 +77,6 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
         }
     }
 
-    // Sets to open the popup to verify file
-    const handlePopupOpenVerify = async () => {
-        if (selectedFile === null) {
-            console.log("Please select a file");
-        } else {
-            // Verifies if the user has permissions to verify
-            if (permissions.includes(FileApp.FilePermissions.Verify)) {
-                handleOpenPopup(FileApp.FilePermissions.Verify); 
-            } else {
-                console.log("User does't have permissions to verify the file.");
-            }
-        }
-    }
-
     return (
         <div className="file-actions-wrapper">
             <h1 className='files-header'>Files</h1>
@@ -102,7 +93,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
                 <FcShare className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Share)) ? "faded" : "not-faded"} size={25} />
             </button>
             <button onClick={handlePopupOpenVerify} title="verify">
-                <FcOk  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Verify)) ? "faded" : "not-faded"} size={25} />
+                <FcOk size={25} />
             </button>
         </div>
     );

@@ -2,6 +2,7 @@ import BlockchainWrapper from './Managers/BlockchainWrapper';
 import EncryptionWrapper from './Managers/EncryptionWrapper';
 import IPFSWrapper from './Managers/IPFSWrapper';
 import UploadFileCommand from './Commands/UploadFileCommand';
+import VerifyFileCommand from './Commands/VerifyFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
 import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand';
@@ -39,8 +40,9 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  // reUpload receives 0 if the file is being uploaded for the first time and -1 if the file is being re-uploaded
+  async uploadFile(firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new UploadFileCommand(this, firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
   
@@ -77,6 +79,17 @@ class FileManagerFacade {
   async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith) {
     const updatePermissionsCommand = new UpdatePermissionsCommand(this, selectedFile, permissions, accountUserShareFileWith);
     await updatePermissionsCommand.execute();
+  }
+
+  // Verifies if a file already exists in the app
+  async verifyFile(fileAsBuffer) {
+    const verifyFileCommand = new VerifyFileCommand(this, fileAsBuffer);
+    return await verifyFileCommand.execute();
+  }
+
+  // Verifies if the user is already associated with a file with the same name
+  async userAssociatedWithFileName(userAccount, fileName) {
+    return await BlockchainWrapper.userAssociatedWithFileName(this.accessControlContract, userAccount, fileName,this.selectedUser.account);
   }
 
   // Get all active files that were uploaded too the blockchain
@@ -116,8 +129,8 @@ class FileManagerFacade {
   }
 
   // Get file IPFS CID
-  async getFileByIpfsCID(fileIpfsCid) {
-      return await BlockchainWrapper.getFileByIpfsCID(this.fileRegisterContract, fileIpfsCid, this.selectedUser.account);
+  async getFileByIpfsCID(fileIpfsCid, state) {
+      return await BlockchainWrapper.getFileByIpfsCID(this.fileRegisterContract, fileIpfsCid, state, this.selectedUser.account);
   }
 
   // Get users' permissions over a file
@@ -131,8 +144,8 @@ class FileManagerFacade {
   }
 
   // Associates a user with a file
-  async associatedUserFile(userAccount, fileIpfsCid, encSymmetricKey) {
-    return await BlockchainWrapper.associatedUserFile(this.accessControlContract, userAccount, fileIpfsCid, encSymmetricKey, this.selectedUser.account);
+  async uploadFileUser(userAccount, file, encSymmetricKey) {
+    return await BlockchainWrapper.uploadFileUser(this.accessControlContract, userAccount, file, encSymmetricKey, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file
@@ -140,9 +153,14 @@ class FileManagerFacade {
     return BlockchainWrapper.updateUserFilePermissions(this.accessControlContract, userAccount, fileIpfsCid, permissionsArray, this.selectedUser.account);
   }
 
+  // Remove the relationship between a user and a file
+  removeUserFileAssociation(userAccount, fileIpfsCid) {
+    return BlockchainWrapper.removeUserFileAssociation(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  }
+
   // Deletes the files' association with the users, and deletes the file
-  async deactivateFileUserAssociation(userAccount, fileIpfsCid) {
-    return await BlockchainWrapper.deactivateFileUserAssociation(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  async deactivateFile(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.deactivateFile(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
   }
 
   // Deletes permanently the file
@@ -180,6 +198,41 @@ class FileManagerFacade {
     return await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
   }
 
+  // Returns the latest version of a file
+  async getLatestVersionOfFile(fileName) {
+    return await BlockchainWrapper.getLatestVersionOfFile(this.fileRegisterContract, fileName, this.selectedUser.account);
+  }
+
+  // Returns the file owner of the original file
+  async getFileOwner(fileName) {
+    return await BlockchainWrapper.getFileOwner(this.fileRegisterContract, fileName, this.selectedUser.account);
+  }
+
+  // Returns if a file is valid or not
+  async verifyValidFile(userAccount, fileHash) { 
+    return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
+  }
+
+  // Verifies if a mnemonic belongs to a given user
+  async verifyUserAssociatedMnemonic(mnemonic, user) {
+    return await BlockchainWrapper.verifyUserAssociatedMnemonic(this.userRegisterContract, mnemonic, user, this.selectedUser.account);
+  }
+
+  // Returns the user
+  async getUser(user) {
+    return await BlockchainWrapper.getUser(this.userRegisterContract, user, this._selectedAccount.current);
+  }
+
+  // Hashes the mnemonic using symmetric encryption
+  async hashMnemonicSymmetricEncryption(mnemonic) {
+    return await EncryptionWrapper.hashMnemonicSymmetricEncryption(mnemonic);
+  }
+
+  // Generates a hash using SHA-256
+  async generateHash256(fileAsBuffer) {
+    return await EncryptionWrapper.generateHash256(fileAsBuffer);
+  }
+
   // Generates a symmetric key
   generateSymmetricKey() {
     return EncryptionWrapper.generateSymmetricKey();
@@ -191,9 +244,19 @@ class FileManagerFacade {
     return {encryptedFile, iv};
   }
 
-  // Gets a key pair: public key and private key
-  generateKeyPair() {
-    return EncryptionWrapper.generateKeyPair();
+  // Generates the mnemonic associated with a user
+  generateMnemonic() {
+    return EncryptionWrapper.generateMnemonic();
+  }
+
+  // Generates a set of keys, given a mnemonic
+  async generateKeysFromMnemonic(mnemonic) {
+    return EncryptionWrapper.generateKeysFromMnemonic(mnemonic);
+  }
+
+  // Stores in the local storage
+  async storeLocalSotrage(privateKey, publicKey, address){
+    return EncryptionWrapper.storeLocalSotrage(privateKey, publicKey, address);
   }
 
   // Decrypts a symmetric key using a private key
@@ -233,9 +296,6 @@ class FileManagerFacade {
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
-
-  // TODO
-  verifyFile() {}
 
 }
 

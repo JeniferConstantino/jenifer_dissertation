@@ -1,19 +1,18 @@
 
 class UserApp {
 
-  constructor(account, userName, publicKey, privateKey) {
+  constructor(account, userName, mnemonic, publicKey) {
     this.account = account;       // Address Account in MetaMask - Unique
     this.userName = userName;     // Name of the user - unique
-    this.publicKey = publicKey;   // User's public key
-    this.privateKey = privateKey; // User's private key
+    this.mnemonic = mnemonic;     // Mnemonic of the user => seed phrase
+    this.publicKey = publicKey;   // Stores the users' public key
   }
 
   // Sees if the user already exists in the app by seeing if the account is already stored in the blockchain
   static async verifyIfAccountExists(fileManagerFacadeInstance) {
     try {
       // Verifies if the user exist
-      var result = await fileManagerFacadeInstance.userRegisterContract.methods.getUser(fileManagerFacadeInstance._selectedAccount.current).call({from: fileManagerFacadeInstance._selectedAccount.current});
-    
+      var result = await fileManagerFacadeInstance.getUser(fileManagerFacadeInstance._selectedAccount.current);
       if (result.success === false) {
           console.log("User first time in the app");
           return null;
@@ -30,15 +29,30 @@ class UserApp {
     }
   }
 
+  // Sees if the mnemonic corresponds to the user
+  static async verifyMnemonic(mnemonic, fileManagerFacadeInstance){
+    // verifies if the user is associated with the entered mnemonic
+    var userAsscoiatedWithMnemonic = await fileManagerFacadeInstance.verifyUserAssociatedMnemonic(mnemonic, fileManagerFacadeInstance._selectedAccount.current);
+    if(userAsscoiatedWithMnemonic) {
+      return true;
+    } 
+    return false;
+  }
+
   // Stores the user in the blockchain
   static async storeUserBlockchain(fileManagerFacadeInstance, userName) {
-    // Prepares the user to be stored
-    const {privateKey, publicKey} = fileManagerFacadeInstance.generateKeyPair();
-    console.log("Key Pair generated");
-
-    // Adds the user to the blockchain
     try {
-      var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, publicKey, privateKey);
+      // Generates a mnemonic
+      const mnemonic = await fileManagerFacadeInstance.generateMnemonic();
+      // Gets a private and public key from the mnemonic
+      const {privateKey, publicKey, address} = await fileManagerFacadeInstance.generateKeysFromMnemonic(mnemonic);
+      // Stores the private and public key in the local storage
+      await fileManagerFacadeInstance.storeLocalSotrage(privateKey, publicKey, address);
+      // Hash the mnemonic before storing it - using symmetric encryption
+      const hashedMnemonic = await fileManagerFacadeInstance.hashMnemonicSymmetricEncryption(mnemonic);
+      // Cretaes the user to be stored
+      var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex'));
+      
       // Verifies if the user is elegible to register
       var existingAddress = await fileManagerFacadeInstance.existingAddress(userLogged.account);
       var existingUserName = await fileManagerFacadeInstance.existingUserName(userLogged.userName);     
@@ -54,7 +68,7 @@ class UserApp {
         fileManagerFacadeInstance._selectedUser = userLogged;
         // --------------------------------------------------
         console.log("Registration - user added in the blockchain.");
-        return;
+        return mnemonic;
       }
       console.log("Something went wrong when trying to add the user to the blockchain.");       
     } catch (error) {

@@ -14,12 +14,15 @@ class FileApp {
       Verify: 'verify'
   }
 
-  constructor(fileName, owner, ipfsCID, iv) {
-    this.fileName = fileName;             // Unique
+  constructor(fileName, version, owner, ipfsCID, iv, state, fileHash) {
+    this.ipfsCID = ipfsCID;               // CID from IPFS (hash) Unique
+    this.fileName = fileName;             // File Name
+    this.version = version;               // File Version
     this.owner = owner;                   // The owner - who uploaded the file
-    this.ipfsCID = ipfsCID;               // CID from IPFS (hash)
-    this.iv = iv;                         // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
     this._fileType = "";                  // image or file
+    this.iv = iv;                         // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
+    this.state = state;                   // Indicates if the file is in the state active or deactive
+    this.fileHash = fileHash;             // Hash of the file in SHA-256
   }
 
   // returns the fileType

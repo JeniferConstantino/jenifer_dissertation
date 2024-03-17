@@ -4,6 +4,7 @@ import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
+import VeifyPopup from './ActionsOverFiles/VeifyPopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
@@ -11,6 +12,8 @@ import SharePopup from './ActionsOverFiles/SharePopup';
 import FileApp from '../helpers/FileApp';
 
 const Home = () => {
+    const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);
+    const homeClassName = isUploadPopupDisplayed ? 'content-container blurred' : 'content-container';
 
     const [uploadedActiveFiles, setUploadedActiveFiles] = useState([]);
     const [uploadedFiles, setUploadedFiles ] = useState([]);
@@ -93,14 +96,14 @@ const Home = () => {
         }
 
     }, [fetchActiveFiles]);
-
-    useEffect(() => {
-        fetchLogs();
-    }, [fetchLogs]);
     
     useEffect(() => {
         fetchFiles();
     }, [fetchFiles]);
+
+    useEffect(() => {
+        fetchLogs();
+    }, [fetchLogs]);
 
     // Get the logs
     const getLogs = async () => {
@@ -165,6 +168,7 @@ const Home = () => {
     const handleOpenPopup = (chosenAction) => {
         switch (chosenAction) {
             case "upload": 
+                setIsUploadPopupDisplayed(true);
                 setShowUploadPopup(true);
                 return;
             case FileApp.FilePermissions.Download: 
@@ -189,6 +193,7 @@ const Home = () => {
     const handleClosePopup = async (chosenAction) => {
         switch(chosenAction) {
             case "upload": 
+                setIsUploadPopupDisplayed(false);
                 setShowUploadPopup(false);
                 return;
             case FileApp.FilePermissions.Download: 
@@ -213,7 +218,7 @@ const Home = () => {
         <>
             {selectedUser && (
                 <> 
-                    <div className='content-container'>
+                    <div className={homeClassName}>
                         <div className='menu-wrapper'>
                             <Logout selectedUser={selectedUser}/>
                         </div>
@@ -224,13 +229,15 @@ const Home = () => {
                         </div>
                     </div>
                 
-                    <div className='content-container'>
+                    <div className={homeClassName}>
                         <div className='home-wrapper content-wrapper'>
                             <AuditLog logs={logs} fileManagerFacadeInstance={fileManagerFacadeInstance.current}/>
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
                     </div>
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>

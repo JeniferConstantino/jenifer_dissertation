@@ -136,25 +136,23 @@ h1 {
 }
 
 /*----------- Welcome Page -----------*/
+.button-container-welcome {
+  width: 100%;
+  gap: 10px; 
+}
 
 .app-button__welcome {
-  padding: 10% 16%;
-  margin-top: 10%;
+  padding: 3% 10%;
+  margin-top: 5%;
+  margin-right: 10px;
 }
 
 .app-button__welcome:focus {
   outline: 2px solid #FF812C; /* Adjust the width and color as needed */
 }
 
-.button-container {
-  display: flex;
-  gap: 10px; 
-  align-items: center;
-  margin-right: 20%;
-}
-
 .input-username {
-  border: 1px solid #ddd; 
+  border: 1px solid #ddd;
   border-radius: 10px; 
   padding: 10px; 
   margin-bottom: 10px; 
@@ -165,6 +163,72 @@ h1 {
 
 .input-usernameWelcome {
   width: 80%;
+}
+
+.input-button-container-welcome {
+  width: 100%;
+}
+
+/*----------- Popups -----------*/
+.popup-content {
+  display: flex;
+  flex-direction: row;
+  font-size: 15px;
+  color: #2E231D;
+  padding-top: 10px;
+}
+
+.right-section{
+  padding-right: 20px;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.textInfo{
+  font-weight: bold;
+  padding-left: 9px;
+  color: #2E231D;
+}
+
+.message-popup{
+  margin-top: 18px;
+  color: #2E231D;
+}
+
+.buttons-content {
+  padding-right: 10px;
+}
+
+.app-button__popup {
+  padding: 2%;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.modalPopup {
+  position: relative;
+  z-index: 2; /* Ensure the modal appears above the background */
+  background-color: white;
+  border-radius: 10px;
+}
+
+.display-block-popup {
+  display: block;
+  width: 600px;
+  padding: 10px;
+}
+
+/*----------- Warning Popup -----------*/
+
+.button-container { /*TODO: THINK NOT NEEDED*/
+  display: flex;
+  flex-direction: column;
 }
 
 /*----------- Home Page -----------*/
@@ -186,6 +250,11 @@ h1 {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 150px;
+}
+
+.blurred {
+  filter: blur(1px); /* Apply blur effect to the Home component */
+  pointer-events: none; /* Disable interactions with elements in the Home component */
 }
 
 /*----------- Home Page // Logout section -----------*/
@@ -390,6 +459,49 @@ h1 {
   margin-bottom: 5px;
 }
 
+/*----------- Home Page // POPUPups -----------*/
+
+.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  z-index: 2; 
+  
+  justify-content: center;
+}
+
+.modal-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(48, 48, 48, 0.2); /* Semi-transparent black background */
+  z-index: 1; /* Ensure the background appears behind the modal */
+}
+
+.modal {
+  position: relative;
+  z-index: 2; /* Ensure the modal appears above the background */
+  background-color: white;
+  width: 300px;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+
+.display-block {
+  display: block;
+  width: 50%;
+}
+
+.display-none {
+  display: none;
+}
 /*----------- Home Page // POPUP Upload Document -----------*/
 .upload-file-header {
   color: #FF812C;
@@ -401,36 +513,17 @@ h1 {
   flex-direction: row;
 }
 
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #DFDFDF;
-  padding: 20px;
-  border-radius: 10px;
-  z-index: 1000;
-}
-
-.display-block {
-  display: block;
-  width: 50%;
-}
-
-.display-none {
-  display: none;
-  background-color: brown;
-}
-
 .popup-section {
   margin-bottom: 20px;
 }
 
 .drag-drop-section {
-  border: 2px dashed #2E231D;
+  border: 2px dashed #555555;
   padding: 20px;
+  background-color: #DADADA;
   cursor: pointer;
   border-radius: 10px;
+  font-size: 14px;
 }
 
 /* Add additional styles for visual feedback when dragging over the drop area */
@@ -448,8 +541,15 @@ h1 {
 }
 
 /*----------- Home Page // POPUP Share Document -----------*/
+.share-file-header {
+  color: #FF812C;
+  padding-left: 1px;
+  padding-bottom: 10px;
+}
+
 .note { 
   font-size: 13px;
+  color: #2E231D;
 }
 
 .share-file-description {
@@ -476,7 +576,7 @@ h1 {
   -moz-appearance: none;
   width: 18px;
   height: 15px;
-  background-color: #f4f4f4;
+  background-color: #DADADA;
   border-radius: 4px;
   cursor: pointer;
   margin-right: 6px;
@@ -502,8 +602,10 @@ h1 {
 }
 
 .input-usernameShare {
+  background-color: #DADADA;
   margin-top: 2%;
   flex: 1;
+  color: #2E231D;
 }
 
 .input-button-container {
@@ -516,8 +618,12 @@ h1 {
   padding: 15px;
 }
 
+.app-button__share:focus {
+  outline: 2px solid #FF812C; /* Adjust the width and color as needed */
+}
+
 .readonly {
-  background-color: #f4f4f4; 
+  background-color: #DADADA; 
   color: #888; 
   cursor: not-allowed; 
   outline: none;

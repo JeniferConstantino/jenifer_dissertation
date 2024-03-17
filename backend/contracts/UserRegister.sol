@@ -7,8 +7,8 @@ contract UserRegister {
     struct User {
         address account;           // Address Account in MetaMask - Unique
         string userName;           // Name of the user - unique
-        string publicKey;          // User's public key
-        string privateKey;         // User's private key
+        string mnemonic;           // Users' mnemonic => seed phrase
+        string publicKey;
     }
 
     struct ResultUser {
@@ -34,8 +34,8 @@ contract UserRegister {
     function userRegistered(User memory user) public {
         if (user.account == msg.sender) {
             if (canRegister(user)) { // Checks if the user is elegible to register (including validating fields)
-                users[user.account] = User(user.account, user.userName, user.publicKey, user.privateKey);
-                usersByName[user.userName] = User(user.account, user.userName, user.publicKey, user.privateKey);
+                users[user.account] = User(user.account, user.userName, user.mnemonic, user.publicKey);
+                usersByName[user.userName] = User(user.account, user.userName, user.mnemonic, user.publicKey);
                 userNameExists[user.userName] = true;
             } 
         }
@@ -87,6 +87,14 @@ contract UserRegister {
             }
         }
         return false;        
+    }
+
+    // Checks if a user is associated with a certain mnemonic
+    function verifyUserAssociatedMnemonic(string memory mnemonic, address account) public view returns (bool) {
+        if(keccak256(abi.encodePacked(users[account].mnemonic)) == keccak256(abi.encodePacked(mnemonic))){
+            return true;
+        }
+        return false;
     }
 
     // Verifies if the address exists (if the user already exists)

@@ -31,7 +31,7 @@ class ShareFileCommand extends Command {
 
         // Decrypts symmetric key using the users' private key
         var encSymmetricKeyBuffer = Buffer.from(encSymmetricKey, 'base64');
-        var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, this.fileManager.selectedUser.privateKey);
+        var decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, localStorage.getItem('privateKey'));
         
         // Get the public key of the user to share file with
         result = await this.fileManager.getPubKeyUser(this.accountUserToShareFileWith);
