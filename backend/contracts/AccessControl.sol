@@ -95,7 +95,9 @@ contract AccessControl {
     //             file exists with "active" state
     //             user exists
     function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public {
-        if (elegibleToShare(userAccount, fileIpfsCID)) {
+        if (elegibleToShare(userAccount, fileIpfsCID) &&
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
+        ) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions, "");
             if (validFields) {
                 // Associates the given user with the file

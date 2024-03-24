@@ -59,16 +59,10 @@ class UploadFileCommand extends Command {
         if (!result.success) {
             console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
             return; 
-        }
-
-        var fileUpld = new FileApp(resultGetFile.file[1], resultGetFile.file[2], resultGetFile.file[3] , resultGetFile.file[4], resultGetFile.file[0], resultGetFile.file[6], resultGetFile.file[7], resultGetFile.file[8]);
-        fileUpld.fileType = fileUpld.defineFileType(resultGetFile.file[1]);
-        
-        var tempUloadedActiveFiles = [...this.uploadedActiveFiles, fileUpld]
-        var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUpld]; // Updates the state with the result
+        }        
         console.log('File added to the blockchain');
 
-        this.handleFileUploaded(tempUloadedActiveFiles, tempUpdatedUploadedFiles);
+        this.handleFileUploaded("upload");
     }
 }
 

@@ -49,12 +49,9 @@ class EditFileCommand extends Command {
             console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
             return; 
         }
+        console.log('File edited');
 
-        var tempUloadedActiveFiles = [...this.uploadedActiveFiles, resultGetFile.file]
-        var tempUpdatedUploadedFiles = [...this.uploadedFiles, resultGetFile.file]; // Updates the state with the result
-        console.log('File added to the blockchain');
-
-        this.handleFileUploaded(tempUloadedActiveFiles, tempUpdatedUploadedFiles);
+        this.handleFileUploaded("edit");
     }
 }
 

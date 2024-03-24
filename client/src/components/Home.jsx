@@ -32,6 +32,7 @@ const Home = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
+    const [refreshPage, setRefreshPage] = useState(false);
     const { fileManagerFacadeInstance } = useWeb3();
 
     // Get Active Files
@@ -97,15 +98,15 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    }, [fetchActiveFiles]);
+    }, [fetchActiveFiles, refreshPage]);
     
     useEffect(() => {
         fetchFiles();
-    }, [fetchFiles]);
+    }, [fetchFiles, refreshPage]);
 
     useEffect(() => {
         fetchLogs();
-    }, [fetchLogs]);
+    }, [fetchLogs, refreshPage]);
 
     // Get the logs
     const getLogs = async () => {
@@ -135,12 +136,11 @@ const Home = () => {
     }
 
     // Closes popup and updates uploaded files
-    const handleUpload = async (tempUpdatedUploadedActiveFiles, tempUpdatedUploadedFiles) => {
+    const handleUpload = async (popupToClose) => {
         try {
             await getLogs();
-            setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
-            setUploadedFiles(tempUpdatedUploadedFiles);
-            handleClosePopup("upload");
+            setRefreshPage(prevState => !prevState);
+            handleClosePopup(popupToClose);
         } catch (error) {
             console.log("error: ", error);
         }
