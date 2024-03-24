@@ -67,11 +67,11 @@ class BlockchainWrapper {
         let files = [];
         if (result.success) {
             result.files.forEach(file => {
-                var fileApp = new FileApp(file.fileName, file.version, file.owner, file.ipfsCID, file.iv, file.state, file.fileHash);
+                var fileApp = new FileApp(file.fileName, file.version, file.prevIpfsCID, file.owner, file.ipfsCID, file.iv, file.state, file.fileHash);
                 fileApp.fileType = file.fileType;
                 files.push(fileApp);
             });
-        } 
+        }
         return files;
     }
 
@@ -128,6 +128,11 @@ class BlockchainWrapper {
     // Associates a user with a file
     static uploadFileUser = async (accessControlContract, userAccount, file, encSymmetricKey, selectedUserAccount) => {
         return await accessControlContract.methods.uploadFile(userAccount, file, encSymmetricKey).send({ from: selectedUserAccount });
+    }
+
+    // Edits the file (sets the selected file state to edited and adds the new file to the system)
+    static editFileUpl = async (accessControlContract, selectedFile, fileEdited, encSymmetricKey, selectedUserAccount) => {
+        return await accessControlContract.methods.editFile(selectedFile, fileEdited, encSymmetricKey).send({ from: selectedUserAccount });
     }
 
     // Share File: associates a file with a user given certain permissions

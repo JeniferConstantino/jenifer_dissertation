@@ -9,15 +9,17 @@ class FileApp {
   // Enum permissions
   static FilePermissions = {
       Download: 'download',
+      Edit: 'edit',
       Delete: 'delete',
       Share: 'share',
       Verify: 'verify'
   }
 
-  constructor(fileName, version, owner, ipfsCID, iv, state, fileHash) {
+  constructor(fileName, version, prevIpfsCID, owner, ipfsCID, iv, state, fileHash) {
     this.ipfsCID = ipfsCID;               // CID from IPFS (hash) Unique
     this.fileName = fileName;             // File Name
     this.version = version;               // File Version
+    this.prevIpfsCID = prevIpfsCID;       // the IPFS CID of the file from which it was edited. If 1st uload => 0
     this.owner = owner;                   // The owner - who uploaded the file
     this._fileType = "";                  // image or file
     this.iv = iv;                         // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
@@ -33,6 +35,21 @@ class FileApp {
   // sets the fileType
   set fileType(fileType) {
     this._fileType = fileType;
+  }
+
+  // returns the version
+  get fileVersion() {
+    return this.version;
+  }
+
+  // returns the owner
+  get fileOwner() {
+    return this.owner;
+  }
+
+  // returns the ipfsCid
+  get fileIpfsCid() {
+    return this.ipfsCID;
   }
 
   // Determines the file type

@@ -9,6 +9,7 @@ contract FileRegister {
         string ipfsCID;            // CID from IPFS (hash) - Unique
         string fileName;           // File Name         
         int version;               // Keeps the version of the file
+        string prevIpfsCID;        // Keeps the file IPFS from which it was edited. If 1st upload => 0
         address owner;             // The owner - who uploaded the file
         string fileType;           // Image or file
         string iv;                 // Initialization Vector for AES (used in file encryption and decryption with symmetric key)
@@ -49,9 +50,30 @@ contract FileRegister {
         if (msg.sender == accessControlAddress) { 
             if (canAddFile(file)) {
                 file.state = "active";
+                file.prevIpfsCID = "0"; // because it's the first upload 
                 files[file.ipfsCID] = file;
                 ipfsCids.push(file.ipfsCID);
             }
+        }
+    }
+
+    // Edits a file - like an upload 
+    // Edit a file if: the transaction executer is the accessControl address
+    // In here: the file owner is the same 
+    //          the previousIpfsCid is the one from which the file is being edited from
+    //          the file version is incremented to one
+    //          the file state is now edited but the new edited file is in the state active
+    function editFile(File memory selectedFile, File memory newFile) public {
+        if (msg.sender == accessControlAddress) {
+            files[selectedFile.ipfsCID].state = "edited";
+
+            newFile.owner = selectedFile.owner;
+            newFile.prevIpfsCID = selectedFile.ipfsCID;
+            newFile.version = selectedFile.version + 1;
+            newFile.state = "active";
+
+            files[newFile.ipfsCID] = newFile; // adds the new file
+            ipfsCids.push(newFile.ipfsCID);
         }
     }
 
@@ -70,7 +92,7 @@ contract FileRegister {
         ) {
             return ResultFile(true, files[fileIpfsCid]);       
         }
-        return ResultFile(false, File("", "", 0, address(0), "", "", "", ""));       
+        return ResultFile(false, File("", "", 0, "", address(0), "", "", "", ""));       
     }
 
     // Verifies if a file can be added if: the transaction executer is the AccessControl.sol

@@ -502,16 +502,24 @@ h1 {
 .display-none {
   display: none;
 }
-/*----------- Home Page // POPUP Upload Document -----------*/
-.upload-file-header {
+/*----------- Home Page // POPUP Upload + Edit  -----------*/
+
+.section-title-drop-popup {
+  display: flex;
+  flex-direction: row;
+}
+
+.drop-file-header {
   color: #FF812C;
   padding-left: 10px;
 }
 
-.section-title-upload-popup {
-  display: flex;
-  flex-direction: row;
+.app-button__drop {
+  width: 100%; /* Set the width to 100% */
+  padding: 15px; /* Adjust padding as needed */
 }
+
+/*----------- Home Page // POPUP Upload Document -----------*/
 
 .popup-section {
   margin-bottom: 20px;
@@ -531,14 +539,14 @@ h1 {
   border-style: solid;
 }
 
-.app-button__upload {
-  width: 100%; /* Set the width to 100% */
-  padding: 15px; /* Adjust padding as needed */
-}
-
 .app-button_back{
   cursor: pointer; 
 }
+
+/*----------- Home Page // POPUP Edit Document -----------*/
+
+
+
 
 /*----------- Home Page // POPUP Share Document -----------*/
 .share-file-header {

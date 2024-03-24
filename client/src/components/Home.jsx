@@ -4,6 +4,7 @@ import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
+import EditPopup from './ActionsOverFiles/EditPopup';
 import VeifyPopup from './ActionsOverFiles/VeifyPopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
@@ -13,14 +14,15 @@ import FileApp from '../helpers/FileApp';
 
 const Home = () => {
     const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);
-    const homeClassName = isUploadPopupDisplayed ? 'content-container blurred' : 'content-container';
+    const [isEditPopupDisplayed, setIsEditPopupDisplayed] = useState(false);
+    const homeClassName = isUploadPopupDisplayed || isEditPopupDisplayed ? 'content-container blurred' : 'content-container';
 
     const [uploadedActiveFiles, setUploadedActiveFiles] = useState([]);
     const [uploadedFiles, setUploadedFiles ] = useState([]);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [showUploadPopup, setShowUploadPopup] = useState(false);
+    const [showEditPopup, setShowEditPopup] = useState(false);
     const [showDownloadPopup, setShowDownloadPopup] = useState(false);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showSharePopup, setShowSharePopup] = useState(false);
@@ -135,7 +137,6 @@ const Home = () => {
     // Closes popup and updates uploaded files
     const handleUpload = async (tempUpdatedUploadedActiveFiles, tempUpdatedUploadedFiles) => {
         try {
-            console.log("getting logs");
             await getLogs();
             setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
             setUploadedFiles(tempUpdatedUploadedFiles);
@@ -174,6 +175,10 @@ const Home = () => {
             case FileApp.FilePermissions.Download: 
                 setShowDownloadPopup(true);
                 return;
+            case FileApp.FilePermissions.Edit:
+                setIsEditPopupDisplayed(true);
+                setShowEditPopup(true); 
+                return;
             case FileApp.FilePermissions.Delete:
                 setShowDeletePopup(true);
                 return;
@@ -198,6 +203,10 @@ const Home = () => {
                 return;
             case FileApp.FilePermissions.Download: 
                 setShowDownloadPopup(false);
+                return;
+            case FileApp.FilePermissions.Edit:
+                setIsEditPopupDisplayed(false);
+                setShowEditPopup(false);
                 return;
             case FileApp.FilePermissions.Delete:
                 setShowDeletePopup(false);
@@ -236,7 +245,8 @@ const Home = () => {
                         </div>
                     </div>
                     
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
                     <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>

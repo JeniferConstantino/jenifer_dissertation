@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
+import { MdOutlineEdit } from "react-icons/md";
 import FileApp from '../../helpers/FileApp';
 
 const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile}) => {
@@ -45,7 +46,21 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
                 handleOpenPopup(FileApp.FilePermissions.Download); 
             }
         } else {
-            console.log("User does't have permissions to download the file.");
+            console.log("User doesn't have permissions to download the file.");
+        }
+    }
+
+    // Edits the selected file (a new version will be uploaded)
+    const handleEditFile = async () => {
+        // Verifies if the user has permissions to edit the file
+        if (permissions.includes(FileApp.FilePermissions.Edit)) {
+            if (selectedFile === null) {
+                console.log("Please select a file");
+            } else {
+                handleOpenPopup(FileApp.FilePermissions.Edit);
+            }
+        } else {
+            console.log("User doesn't have permissions to edit the file.");
         }
     }
 
@@ -58,7 +73,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
             if (permissions.includes(FileApp.FilePermissions.Delete)) {
                 handleOpenPopup(FileApp.FilePermissions.Delete); 
             } else {
-                console.log("User does't have permissions to delete the file.");
+                console.log("User doesn't have permissions to delete the file.");
             } 
         }
     }
@@ -72,7 +87,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
             if (permissions.includes(FileApp.FilePermissions.Share)) {
                 handleOpenPopup(FileApp.FilePermissions.Share); 
             } else {
-                console.log("User does't have permissions to share the file.");
+                console.log("User doesn't have permissions to share the file.");
             }
         }
     }
@@ -85,6 +100,9 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
             </button>
             <button onClick={handleDownload} title="download">
                 <FcInternal className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Download)) ? "faded" : "not-faded"} size={25}/>
+            </button>
+            <button onClick={handleEditFile} title="edit">
+                <MdOutlineEdit className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Edit)) ? "faded" : "not-faded"} size={25}/>
             </button>
             <button onClick={handlePopupOpenDelete} title="delete">
                 <FcFullTrash  className={!(selectedFile && permissions.includes(FileApp.FilePermissions.Delete)) ? "faded" : "not-faded"} size={25} />

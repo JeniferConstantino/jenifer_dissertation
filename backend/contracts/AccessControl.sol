@@ -37,10 +37,11 @@ contract AccessControl {
     //              fields are valid
     function uploadFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey) public {  
         if (elegibleToUpload(userAccount, file.ipfsCID)) {
-            string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
+            string[] memory permissionsOwner = new string[](4); // because the file owner has all permissions
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
+            permissionsOwner[3] = "edit";
             bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, encSymmetricKey, permissionsOwner, file.state); // Validates if the file and the user exist
             if (validFields){
                 // Adds the file
@@ -60,6 +61,32 @@ contract AccessControl {
             }
         }
     }  
+
+    // Edit file if: the transaction executer as "Edit" permissions over a file
+    //               the file exists in the active state
+    // TODO: I need to see if it has valid fields
+    // TODO: I have to make sure the user is not editing an old version of the file
+    function editFile(FileRegister.File memory selectedFile, FileRegister.File memory newFile, string memory encSymmetricKey) public {
+        if (elegibleToEdit(selectedFile.ipfsCID)) {
+            // Adds the file
+            fileRegister.editFile(selectedFile, newFile);
+            // Performs the association between the users and this edited file
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(selectedFile.ipfsCID))) {
+                    // Performs the association between the user and the file
+                    User_Has_File memory userFileData = User_Has_File({
+                        userAccount: user_Has_File[i].userAccount,
+                        ipfsCID: newFile.ipfsCID,
+                        encSymmetricKey: encSymmetricKey,
+                        permissions: user_Has_File[i].permissions
+                    });
+                    user_Has_File.push(userFileData);
+                }
+            }
+            // Writes the audit log
+            auditLogControl.recordLogFromAccessControl(msg.sender, selectedFile.ipfsCID, msg.sender, "-", "edit");
+        }
+    }
 
     // File Share: only if the userAccount!=msg.sender (a user cannot change its own permissions), 
     //             userAccount is not the file owner (file owners' permissions cannot change)
@@ -302,6 +329,17 @@ contract AccessControl {
             !userAssociatedWithFile(userAccount, fileIpfsCID) &&// if already associated then it should be called the share file()
             userRegister.existingAddress(userAccount)   // verifies if the user exist
             ) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verifies if the user is elegible to edit the file: if the user has edit permissions over the file
+    //                                                    if the file is in the state active
+    function elegibleToEdit(string memory fileIpfsCID) public view returns (bool) {
+        if (userHasPermissionOverFile(msg.sender, fileIpfsCID, "edit") &&
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
+        ) {
             return true;
         }
         return false;

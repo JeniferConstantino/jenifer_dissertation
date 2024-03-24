@@ -4,26 +4,14 @@ import FileApp from './../FileApp';
 // Concrete command for uploading a file
 class UploadFileCommand extends Command {
 
-    constructor(fileManager, firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    constructor(fileManager, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
         this.fileManager = fileManager;
         this.fileUpl = fileUpl;
-        this.firstUpload = firstUpload;
         this.fileAsBuffer = fileAsBuffer;
         this.handleFileUploaded = handleFileUploaded;
         this.uploadedActiveFiles = uploadedActiveFiles;
         this.uploadedFiles = uploadedFiles;
-    }
-
-    // Determines the file owner, depending if is a reupload or a first upload
-    async getFileOwner(firstUpload) {
-        var fileOwner;
-        if(firstUpload === -1){ // Re-upload
-            fileOwner = await this.fileManager.getFileOwner(this.fileUpl.name.toLowerCase().toString()); // gets the file owner of the original file
-            return fileOwner;
-        }
-        fileOwner = this.fileManager.selectedUser.account;  // 1st upload
-        return fileOwner;
     }
 
     // Calculates the version of the current file
@@ -36,7 +24,7 @@ class UploadFileCommand extends Command {
     }
 
     async execute(){
-        // Encrypt symmetric key
+        // Generate symmetric key
         const symmetricKey = this.fileManager.generateSymmetricKey(); 
         // Encrypts uploaded file 
         const {encryptedFile, iv} = await this.fileManager.encryptFileWithSymmetricKey(this.fileAsBuffer, symmetricKey);
@@ -48,11 +36,11 @@ class UploadFileCommand extends Command {
         // Generates the hash of the file
         const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
 
-        var fileOwner = await this.getFileOwner(this.firstUpload);
-        var fileVersion = await this.getFileVersion(this.fileUpl.name);
+        var fileOwner = this.fileManager.selectedUser.account;
+        var fileVersion = 0; // 1st upload
 
         // Prepares the file to be stored
-        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), fileVersion,  fileOwner, fileCID, iv.toString('base64'), "", fileHash);
+        let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), fileVersion, "" , fileOwner, fileCID, iv.toString('base64'), "", fileHash);
         fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey')).toString('base64');
 
@@ -60,21 +48,24 @@ class UploadFileCommand extends Command {
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
         
         // Verifies file correctly added
-        var result = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID, "active");
-        console.log("result in upload: ", result);
-        if (!result.success) {
-            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", result);
+        var resultGetFile = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID, "active");
+        console.log("result in upload: ", resultGetFile);
+        if (!resultGetFile.success) {
+            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", resultGetFile);
             return; 
         }
         // Verifies if the file is uploaded correctly
-        result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID);
+        var result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID);
         if (!result.success) {
             console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
             return; 
         }
 
-        var tempUloadedActiveFiles = [...this.uploadedActiveFiles, fileUploaded]
-        var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUploaded]; // Updates the state with the result
+        var fileUpld = new FileApp(resultGetFile.file[1], resultGetFile.file[2], resultGetFile.file[3] , resultGetFile.file[4], resultGetFile.file[0], resultGetFile.file[6], resultGetFile.file[7], resultGetFile.file[8]);
+        fileUpld.fileType = fileUpld.defineFileType(resultGetFile.file[1]);
+        
+        var tempUloadedActiveFiles = [...this.uploadedActiveFiles, fileUpld]
+        var tempUpdatedUploadedFiles = [...this.uploadedFiles, fileUpld]; // Updates the state with the result
         console.log('File added to the blockchain');
 
         this.handleFileUploaded(tempUloadedActiveFiles, tempUpdatedUploadedFiles);
