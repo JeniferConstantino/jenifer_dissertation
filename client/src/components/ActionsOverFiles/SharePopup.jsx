@@ -8,6 +8,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
     const [showPermissions, setShowPermissions] = useState(false);
     const [permissions, setCheckboxes] = useState({
         download: false,
+        edit: false,
         delete: false,
         share: false
     });
@@ -52,6 +53,9 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                 switch (permission) {
                     case FileApp.FilePermissions.Download:
                     permissions.download = true;
+                    break;
+                    case FileApp.FilePermissions.Edit:
+                    permissions.edit = true;
                     break;
                     case FileApp.FilePermissions.Delete:
                     permissions.delete = true;
@@ -148,6 +152,10 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                                 <label >
                                                     <input type="checkbox" name="download" checked={permissions.download} onChange={handleCheckboxChange} />
                                                     Download
+                                                </label>
+                                                <label >
+                                                    <input type="checkbox" name="edit" checked={permissions.edit} onChange={handleCheckboxChange} />
+                                                    Edit
                                                 </label>
                                                 <label >
                                                     <input type="checkbox" name="delete" checked={permissions.delete} onChange={handleCheckboxChange} />
