@@ -226,11 +226,10 @@ contract AccessControl {
 
     // Sees if a user is already associated with a file if: the message sender is associated with the file
     //                                                      or the message sender is the auditLogControl
-    //                                                      and the file is in the active state
     function userAssociatedWithFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if ((messageSenderAssociatedToFile(fileIpfsCID) ||
             msg.sender == address(auditLogControl) // AuditLogControl also calls this method for the validation of one of his methods    
-            ) && keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
+            )
         ) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
