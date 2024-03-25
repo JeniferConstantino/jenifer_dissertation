@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk, FcInfo } from 'react-icons/fc';
 import { MdOutlineEdit } from "react-icons/md";
 import FileApp from '../../helpers/FileApp';
 
-const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile}) => {
-    
-    const [permissions, setPermissions] = useState([]);
+const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions, permissions, selectedFile}) => {
 
     // When rendering, the permissions of the selected file are set
     useEffect( () => {
@@ -24,7 +22,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
         };
 
         fetchPermissions();
-    }, [selectedFile, fileManagerFacadeInstance]);
+    }, [selectedFile, fileManagerFacadeInstance, setPermissions]);
 
     // Sets to open the popup for upload file
     const handlePopupOpenUpload = () => {

@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
+import FileApp from '../../helpers/FileApp';
 
-const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, show, children}) => {
+const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, handleOpenPopup, show, permissions, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [uploadedFiles, setUploadedFiles ] = useState([]);
@@ -27,10 +28,14 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
         fetchFiles();
     }, [fetchFiles]);
 
-
     // Preforms the file download
-    const handleDownload = (editName) => {
-        console.log(`Downloading file for edit: ${editName}`);
+    const handleDownload = async (file) => {
+        // Verifies if the user has permissions to download
+        if (permissions.includes(FileApp.FilePermissions.Download)) {
+            await fileManagerFacadeInstance.downloadFile(file); 
+        } else {
+            console.log("User doesn't have permissions to download the file.");
+        }
     }
 
     // Sets to close the popup to verify a file
@@ -101,8 +106,8 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                                     <h4 className='info-prev-edits-title'>Previous Edits</h4>
                                     <div className="edit-list">
                                         <ul>
-                                            {uploadedFiles.map((files, index) => (
-                                                <li key={index} onClick={() => handleDownload(files[1])}>v.{files[2]} {files[1]}</li>
+                                            {uploadedFiles.map((file, index) => (
+                                                <li key={index} onClick={() => handleDownload(file)}>v.{file[2]} {file[1]}</li>
                                             ))}
                                         </ul>
                                     </div>

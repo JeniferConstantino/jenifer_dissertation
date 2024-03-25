@@ -18,6 +18,7 @@ const Home = () => {
     const [isEditPopupDisplayed, setIsEditPopupDisplayed] = useState(false);
     const homeClassName = isUploadPopupDisplayed || isEditPopupDisplayed ? 'content-container blurred' : 'content-container';
 
+    const [permissions, setPermissions] = useState([]);
     const [uploadedActiveFiles, setUploadedActiveFiles] = useState([]);
     const [uploadedFiles, setUploadedFiles ] = useState([]);
     const [logs, setLogs] = useState([]);
@@ -239,7 +240,7 @@ const Home = () => {
                             <Logout selectedUser={selectedUser}/>
                         </div>
                         <div className='home-wrapper content-wrapper'>
-                            <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
+                            <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile} setPermissions={setPermissions} permissions={permissions}/>
                             <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedActiveFiles={uploadedActiveFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
@@ -258,7 +259,7 @@ const Home = () => {
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
-                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} show={showInfoPopup}/>
+                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} handleOpenPopup={handleOpenPopup} permissions={permissions} show={showInfoPopup}/>
                 </>
             )}
         </>

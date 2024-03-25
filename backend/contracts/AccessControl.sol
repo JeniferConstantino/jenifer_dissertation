@@ -186,7 +186,9 @@ contract AccessControl {
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if ((msg.sender == accountUser) && 
              userAssociatedWithFile(accountUser, fileIpfsCID) &&
-             keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))) {
+             (keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) ||
+              keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("edited")) 
+             )) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(accountUser, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
                     return Helper.ResultString(true, user_Has_File[i].encSymmetricKey);
@@ -290,7 +292,9 @@ contract AccessControl {
     function messageSenderAssociatedToFile(string memory fileIpfsCID) public view returns (bool) {
         for (uint256 i=0; i<user_Has_File.length; i++) {
             if (isKeyEqual(msg.sender, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID) &&
-                keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
+                ( keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active")) ||
+                  keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("edited")) 
+                )
             ) {
                 return true;
             }
