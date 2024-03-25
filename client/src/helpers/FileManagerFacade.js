@@ -2,6 +2,7 @@ import BlockchainWrapper from './Managers/BlockchainWrapper';
 import EncryptionWrapper from './Managers/EncryptionWrapper';
 import IPFSWrapper from './Managers/IPFSWrapper';
 import UploadFileCommand from './Commands/UploadFileCommand';
+import EditFileCommand from './Commands/EditFileCommand'
 import VerifyFileCommand from './Commands/VerifyFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
@@ -40,10 +41,15 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  // reUpload receives 0 if the file is being uploaded for the first time and -1 if the file is being re-uploaded
-  async uploadFile(firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, firstUpload, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
+  }
+
+  // Edits an existing file 
+  async editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const editCommand = new EditFileCommand(this, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+    await editCommand.execute();
   }
   
   // Gets the file from IPFS, decryts and downloads
@@ -97,6 +103,11 @@ class FileManagerFacade {
     return await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, state, this.selectedUser.account);
   }
 
+  // Get the historic of a file - get previous edited files from the oldest to the most recent one
+  async getPrevEditedFiles(fileIpfsCid) {
+    return await BlockchainWrapper.getPrevEditedFiles(this.fileRegisterContract, fileIpfsCid, this.selectedUser.account);
+  }
+
   // Get all logs that were stored in the blockchain
   async getLogsUserFilesBlockchain(uploadedFiles) {
     var filesIpfsCid = uploadedFiles.map(file => file.ipfsCID);
@@ -146,6 +157,11 @@ class FileManagerFacade {
   // Associates a user with a file
   async uploadFileUser(userAccount, file, encSymmetricKey) {
     return await BlockchainWrapper.uploadFileUser(this.accessControlContract, userAccount, file, encSymmetricKey, this.selectedUser.account);
+  }
+
+  // Edits the uploaded file
+  async editFileUpl(selectedFile, fileEdited, encSymmetricKey) { 
+    return await BlockchainWrapper.editFileUpl(this.accessControlContract, selectedFile, fileEdited, encSymmetricKey, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file

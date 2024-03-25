@@ -103,9 +103,9 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                         <div className="modal">
                             <section>
                                 {children}
-                                <div className='popup-section section-title-upload-popup'>
+                                <div className='popup-section section-title-drop-popup'>
                                     <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseVerifyPopup}/>
-                                    <h2 className='upload-file-header'>Verify File</h2>
+                                    <h2 className='drop-file-header'>Verify File</h2>
                                 </div>
                                 <div 
                                     className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
@@ -116,20 +116,20 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                                     {droppedFile ? (
                                         <>
                                             <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                            <button className="app-button__upload app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
+                                            <button className="app-button__drop app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
                                         </>
                                     ) : (
                                         <p> <FcPlus/> Drop your file</p>  
                                     )}
                                 </div>
                                 <div className='popup-section'>
-                                    <button className="app-button__upload app-button" onClick={handleFileVerify}>Verify</button>
+                                    <button className="app-button__drop app-button" onClick={handleFileVerify}>Verify</button>
                                 </div>
                             </section>
                         </div>
                     )}
                     {showInfoPopup && droppedFile!=null && (
-                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent}/>
+                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent} mnemonic=""/>
                     )}
                 </div>
             </div>

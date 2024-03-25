@@ -6,8 +6,9 @@ module.exports = {
   paths: {
     artifacts: '../client/src/contracts',
   },
-  network: {
+  networks: {
     hardhat: {
+      allowUnlimitedContractSize: true, 
       chainId: 31337,
     }
   }

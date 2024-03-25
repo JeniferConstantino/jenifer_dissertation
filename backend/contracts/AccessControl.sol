@@ -37,10 +37,11 @@ contract AccessControl {
     //              fields are valid
     function uploadFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey) public {  
         if (elegibleToUpload(userAccount, file.ipfsCID)) {
-            string[] memory permissionsOwner = new string[](3); // because the file owner has all permissions
+            string[] memory permissionsOwner = new string[](4); // because the file owner has all permissions
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
+            permissionsOwner[3] = "edit";
             bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, encSymmetricKey, permissionsOwner, file.state); // Validates if the file and the user exist
             if (validFields){
                 // Adds the file
@@ -61,6 +62,32 @@ contract AccessControl {
         }
     }  
 
+    // Edit file if: the transaction executer as "Edit" permissions over a file
+    //               the file exists in the active state
+    // TODO: I need to see if it has valid fields
+    // TODO: I have to make sure the user is not editing an old version of the file
+    function editFile(FileRegister.File memory selectedFile, FileRegister.File memory newFile, string memory encSymmetricKey) public {
+        if (elegibleToEdit(selectedFile.ipfsCID)) {
+            // Adds the file
+            fileRegister.editFile(selectedFile, newFile);
+            // Performs the association between the users and this edited file
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(selectedFile.ipfsCID))) {
+                    // Performs the association between the user and the file
+                    User_Has_File memory userFileData = User_Has_File({
+                        userAccount: user_Has_File[i].userAccount,
+                        ipfsCID: newFile.ipfsCID,
+                        encSymmetricKey: encSymmetricKey,
+                        permissions: user_Has_File[i].permissions
+                    });
+                    user_Has_File.push(userFileData);
+                }
+            }
+            // Writes the audit log
+            auditLogControl.recordLogFromAccessControl(msg.sender, selectedFile.ipfsCID, msg.sender, "-", "edit");
+        }
+    }
+
     // File Share: only if the userAccount!=msg.sender (a user cannot change its own permissions), 
     //             userAccount is not the file owner (file owners' permissions cannot change)
     //             msg.sender has "share" permissions over the file
@@ -68,7 +95,9 @@ contract AccessControl {
     //             file exists with "active" state
     //             user exists
     function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) public {
-        if (elegibleToShare(userAccount, fileIpfsCID)) {
+        if (elegibleToShare(userAccount, fileIpfsCID) &&
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
+        ) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions, "");
             if (validFields) {
                 // Associates the given user with the file
@@ -157,7 +186,9 @@ contract AccessControl {
     function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if ((msg.sender == accountUser) && 
              userAssociatedWithFile(accountUser, fileIpfsCID) &&
-             keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))) {
+             (keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) ||
+              keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("edited")) 
+             )) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(accountUser, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
                     return Helper.ResultString(true, user_Has_File[i].encSymmetricKey);
@@ -226,11 +257,10 @@ contract AccessControl {
 
     // Sees if a user is already associated with a file if: the message sender is associated with the file
     //                                                      or the message sender is the auditLogControl
-    //                                                      and the file is in the active state
     function userAssociatedWithFile(address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if ((messageSenderAssociatedToFile(fileIpfsCID) ||
             msg.sender == address(auditLogControl) // AuditLogControl also calls this method for the validation of one of his methods    
-            ) && keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
+            )
         ) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
@@ -262,7 +292,9 @@ contract AccessControl {
     function messageSenderAssociatedToFile(string memory fileIpfsCID) public view returns (bool) {
         for (uint256 i=0; i<user_Has_File.length; i++) {
             if (isKeyEqual(msg.sender, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID) &&
-                keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
+                ( keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active")) ||
+                  keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("edited")) 
+                )
             ) {
                 return true;
             }
@@ -303,6 +335,17 @@ contract AccessControl {
             !userAssociatedWithFile(userAccount, fileIpfsCID) &&// if already associated then it should be called the share file()
             userRegister.existingAddress(userAccount)   // verifies if the user exist
             ) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verifies if the user is elegible to edit the file: if the user has edit permissions over the file
+    //                                                    if the file is in the state active
+    function elegibleToEdit(string memory fileIpfsCID) public view returns (bool) {
+        if (userHasPermissionOverFile(msg.sender, fileIpfsCID, "edit") &&
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
+        ) {
             return true;
         }
         return false;

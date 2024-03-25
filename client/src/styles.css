@@ -502,16 +502,24 @@ h1 {
 .display-none {
   display: none;
 }
-/*----------- Home Page // POPUP Upload Document -----------*/
-.upload-file-header {
+/*----------- Home Page // POPUP Upload + Edit  -----------*/
+
+.section-title-drop-popup {
+  display: flex;
+  flex-direction: row;
+}
+
+.drop-file-header {
   color: #FF812C;
   padding-left: 10px;
 }
 
-.section-title-upload-popup {
-  display: flex;
-  flex-direction: row;
+.app-button__drop {
+  width: 100%; /* Set the width to 100% */
+  padding: 15px; /* Adjust padding as needed */
 }
+
+/*----------- Home Page // POPUP Upload Document -----------*/
 
 .popup-section {
   margin-bottom: 20px;
@@ -531,13 +539,70 @@ h1 {
   border-style: solid;
 }
 
-.app-button__upload {
-  width: 100%; /* Set the width to 100% */
-  padding: 15px; /* Adjust padding as needed */
-}
-
 .app-button_back{
   cursor: pointer; 
+}
+
+/*----------- Home Page // POPUP Document Info -----------*/
+
+.previous-edits-section {
+  margin-top: 25px;
+  color: #2E231D;
+}
+
+.info-prev-edits-title {
+  margin-bottom: 5px;
+}
+
+.edit-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ccc; 
+  border-radius: 5px;
+  background-color: #DADADA;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 540px;
+}
+
+.edit-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.edit-list ul li {
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.file-details-section {
+  list-style-type: none;
+  margin-top: 20px; 
+  color: #2E231D;
+  max-width: 100%;
+}
+
+.row {
+  flex: 1 1 100%;
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.column-lable{
+  flex: 1;
+}
+
+.column:last-child {
+  flex-basis: 90%; /* Adjust the width of the value column */
+  max-width: 85%;
+}
+
+.modal-info {
+  width: 555px;
+  max-width: 100%;
+  display: flex;
 }
 
 /*----------- Home Page // POPUP Share Document -----------*/

@@ -3,7 +3,7 @@ import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
 
-const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
+const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
@@ -24,17 +24,16 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         setIsDragOver(false);
     }
 
-    // Sends the file to IPFS and receivs a CID - a hash that is unique to the stored file
-    const handleFileUpload = async (e) => {
+    // Puts the current file in the state edited + uploads the current file with an updated version (sends to IPFS and receives a CID - a hash that is unique to the stored file)
+    const handleFileEdit = async (e) => {
         setDroppedFile(false);
         
         console.log('UPLOAD file ...')
         e.preventDefault()
 
         if(fileAsBuffer){
-            console.log();
             try{
-                await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+                await fileManagerFacadeInstance.editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
             } catch (error) {
                 console.error("Error uploading file:", error);
@@ -66,9 +65,9 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     };
 
     // Sets to close the popup to upload a file
-    const handleCloseUploadPopup = () => {
+    const handleCloseEditPopup = () => {
         cleanFields();
-        handleClosePopup("upload"); 
+        handleClosePopup("edit"); 
     }
 
     const cleanFields = () => {
@@ -87,8 +86,8 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                             <section>
                                 {children}
                                 <div className='popup-section section-title-drop-popup'>
-                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseUploadPopup}/>
-                                    <h2 className='drop-file-header'>Upload File</h2>
+                                    <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseEditPopup}/>
+                                    <h2 className='drop-file-header'>Edit File</h2>
                                 </div>
                                 <div 
                                     className={`popup-section drag-drop-section ${isDragOver ? 'drag-over' : ''}`}
@@ -99,14 +98,14 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                                     {droppedFile ? (
                                         <>
                                             <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                            <button className="app-button__drop app-button" onClick={handleCloseUploadPopup}> Cancel </button>
+                                            <button className="app-button__drop app-button" onClick={cleanFields}> Cancel </button>
                                         </>
                                     ) : (
                                         <p> <FcPlus/> Drop your file</p>  
                                     )}
                                 </div>
                                 <div className='popup-section'>
-                                    <button className="app-button__drop app-button" onClick={handleFileUpload}>Upload</button>
+                                    <button className="app-button__drop app-button" onClick={handleFileEdit}>Edit</button>
                                 </div>
                             </section>
                         </div>
@@ -118,4 +117,4 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
 
 }
 
-export default UploadPopup;
+export default EditPopup;

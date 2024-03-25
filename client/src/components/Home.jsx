@@ -4,7 +4,9 @@ import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
 import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
+import EditPopup from './ActionsOverFiles/EditPopup';
 import VeifyPopup from './ActionsOverFiles/VeifyPopup';
+import InfoFilePopup from './ActionsOverFiles/InfoFilePopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
@@ -13,23 +15,27 @@ import FileApp from '../helpers/FileApp';
 
 const Home = () => {
     const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);
-    const homeClassName = isUploadPopupDisplayed ? 'content-container blurred' : 'content-container';
+    const [isEditPopupDisplayed, setIsEditPopupDisplayed] = useState(false);
+    const homeClassName = isUploadPopupDisplayed || isEditPopupDisplayed ? 'content-container blurred' : 'content-container';
 
+    const [permissions, setPermissions] = useState([]);
     const [uploadedActiveFiles, setUploadedActiveFiles] = useState([]);
     const [uploadedFiles, setUploadedFiles ] = useState([]);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [showUploadPopup, setShowUploadPopup] = useState(false);
+    const [showEditPopup, setShowEditPopup] = useState(false);
     const [showDownloadPopup, setShowDownloadPopup] = useState(false);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+    const [showInfoPopup, setShowInfoPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
+    const [refreshPage, setRefreshPage] = useState(false);
     const { fileManagerFacadeInstance } = useWeb3();
 
     // Get Active Files
@@ -64,7 +70,6 @@ const Home = () => {
                 setLoading(false);   
             });
         }
-        
     }, [fileManagerFacadeInstance, selectedUser]);
 
     // Get Logs
@@ -95,15 +100,15 @@ const Home = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
 
-    }, [fetchActiveFiles]);
+    }, [fetchActiveFiles, refreshPage]);
     
     useEffect(() => {
         fetchFiles();
-    }, [fetchFiles]);
+    }, [fetchFiles, refreshPage]);
 
     useEffect(() => {
         fetchLogs();
-    }, [fetchLogs]);
+    }, [fetchLogs, refreshPage]);
 
     // Get the logs
     const getLogs = async () => {
@@ -133,13 +138,11 @@ const Home = () => {
     }
 
     // Closes popup and updates uploaded files
-    const handleUpload = async (tempUpdatedUploadedActiveFiles, tempUpdatedUploadedFiles) => {
+    const handleUpload = async (popupToClose) => {
         try {
-            console.log("getting logs");
             await getLogs();
-            setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
-            setUploadedFiles(tempUpdatedUploadedFiles);
-            handleClosePopup("upload");
+            setRefreshPage(prevState => !prevState);
+            handleClosePopup(popupToClose);
         } catch (error) {
             console.log("error: ", error);
         }
@@ -174,6 +177,10 @@ const Home = () => {
             case FileApp.FilePermissions.Download: 
                 setShowDownloadPopup(true);
                 return;
+            case FileApp.FilePermissions.Edit:
+                setIsEditPopupDisplayed(true);
+                setShowEditPopup(true); 
+                return;
             case FileApp.FilePermissions.Delete:
                 setShowDeletePopup(true);
                 return;
@@ -182,6 +189,9 @@ const Home = () => {
                 return;
             case FileApp.FilePermissions.Verify:
                 setShowVerifyPopup(true);
+                return;
+            case FileApp.FilePermissions.Info:
+                setShowInfoPopup(true);
                 return;
             default:
                 console.log("NOT A VALID OPERATION: ", chosenAction);
@@ -199,6 +209,10 @@ const Home = () => {
             case FileApp.FilePermissions.Download: 
                 setShowDownloadPopup(false);
                 return;
+            case FileApp.FilePermissions.Edit:
+                setIsEditPopupDisplayed(false);
+                setShowEditPopup(false);
+                return;
             case FileApp.FilePermissions.Delete:
                 setShowDeletePopup(false);
                 return;
@@ -208,9 +222,12 @@ const Home = () => {
             case FileApp.FilePermissions.Verify:
                 setShowVerifyPopup(false);
                 return;
+            case FileApp.FilePermissions.Info:
+                setShowInfoPopup(false);
+                return;
             default:
                 console.log("NOT A VALID OPERATION: ", chosenAction);
-                return;
+            return;
         }
     }
 
@@ -223,7 +240,7 @@ const Home = () => {
                             <Logout selectedUser={selectedUser}/>
                         </div>
                         <div className='home-wrapper content-wrapper'>
-                            <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile}/>
+                            <FileActions fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleOpenPopup={handleOpenPopup} selectedFile={selectedFile} setPermissions={setPermissions} permissions={permissions}/>
                             <DisplayUplDocs selectedFile={selectedFile} setSelectedFile={setSelectedFile} uploadedActiveFiles={uploadedActiveFiles} loading={loading} maxFilesPerColumn={maxFilesPerColumn}/> 
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
@@ -236,11 +253,13 @@ const Home = () => {
                         </div>
                     </div>
                     
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedUser={selectedUser} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
                     <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
+                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} handleOpenPopup={handleOpenPopup} permissions={permissions} show={showInfoPopup}/>
                 </>
             )}
         </>
