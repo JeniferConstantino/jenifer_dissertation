@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk  } from 'react-icons/fc';
+import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk, FcInfo } from 'react-icons/fc';
 import { MdOutlineEdit } from "react-icons/md";
 import FileApp from '../../helpers/FileApp';
 
@@ -34,6 +34,15 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
     // Sets to open the popup to verify file
     const handlePopupOpenVerify = async () => {
         handleOpenPopup(FileApp.FilePermissions.Verify); 
+    }
+
+    // Sets to open the popup on the files' information
+    const handlePopupOpenInfo = async () => {
+        if (selectedFile === null) {
+            console.log("Please select a file");
+        } else {
+            handleOpenPopup(FileApp.FilePermissions.Info); 
+        }
     }
 
     // Downloads the selected file
@@ -112,6 +121,9 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, selectedFile})
             </button>
             <button onClick={handlePopupOpenVerify} title="verify">
                 <FcOk size={25} />
+            </button>
+            <button onClick={handlePopupOpenInfo} title="info">
+                <FcInfo size={25} />
             </button>
         </div>
     );

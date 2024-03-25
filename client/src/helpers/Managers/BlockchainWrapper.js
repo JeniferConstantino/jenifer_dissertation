@@ -75,6 +75,12 @@ class BlockchainWrapper {
         return files;
     }
 
+    // Get previously edited files of a certain file, from the oldest to the most recent one
+    static getPrevEditedFiles = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
+        var result = await fileRegisterContract.methods.getEditedFileByIpfsCid(fileIpfsCid).call({from: selectedUserAccount});
+        return result;
+    }
+
     // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
     static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
         return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});

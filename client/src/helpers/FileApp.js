@@ -12,7 +12,8 @@ class FileApp {
       Edit: 'edit',
       Delete: 'delete',
       Share: 'share',
-      Verify: 'verify'
+      Verify: 'verify',
+      Info: 'info'
   }
 
   constructor(fileName, version, prevIpfsCID, owner, ipfsCID, iv, state, fileHash) {

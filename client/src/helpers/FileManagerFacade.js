@@ -103,6 +103,11 @@ class FileManagerFacade {
     return await BlockchainWrapper.getFilesUploadedBlockchain(this.accessControlContract, selectedUser.account, state, this.selectedUser.account);
   }
 
+  // Get the historic of a file - get previous edited files from the oldest to the most recent one
+  async getPrevEditedFiles(fileIpfsCid) {
+    return await BlockchainWrapper.getPrevEditedFiles(this.fileRegisterContract, fileIpfsCid, this.selectedUser.account);
+  }
+
   // Get all logs that were stored in the blockchain
   async getLogsUserFilesBlockchain(uploadedFiles) {
     var filesIpfsCid = uploadedFiles.map(file => file.ipfsCID);

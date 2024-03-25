@@ -543,10 +543,67 @@ h1 {
   cursor: pointer; 
 }
 
-/*----------- Home Page // POPUP Edit Document -----------*/
+/*----------- Home Page // POPUP Document Info -----------*/
 
+.previous-edits-section {
+  margin-top: 25px;
+  color: #2E231D;
+}
 
+.info-prev-edits-title {
+  margin-bottom: 5px;
+}
 
+.edit-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ccc; 
+  border-radius: 5px;
+  background-color: #DADADA;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 540px;
+}
+
+.edit-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.edit-list ul li {
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.file-details-section {
+  list-style-type: none;
+  margin-top: 20px; 
+  color: #2E231D;
+  max-width: 100%;
+}
+
+.row {
+  flex: 1 1 100%;
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.column-lable{
+  flex: 1;
+}
+
+.column:last-child {
+  flex-basis: 90%; /* Adjust the width of the value column */
+  max-width: 85%;
+}
+
+.modal-info {
+  width: 555px;
+  max-width: 100%;
+  display: flex;
+}
 
 /*----------- Home Page // POPUP Share Document -----------*/
 .share-file-header {

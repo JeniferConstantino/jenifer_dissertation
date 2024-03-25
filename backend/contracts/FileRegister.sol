@@ -95,6 +95,34 @@ contract FileRegister {
         return ResultFile(false, File("", "", 0, "", address(0), "", "", "", ""));       
     }
 
+    // Gets the edited files of a given file 
+    function getEditedFileByIpfsCid(string memory fileIpfsCid) public view returns (ResultFiles memory) {
+        File[] memory editedFiles = new File[](ipfsCids.length);
+        
+        File memory currentFile = files[fileIpfsCid];
+        uint256 indexEditedFiles = 0;
+
+        // Loop until a file with prevIpfsCid reaches 0
+        while(keccak256(abi.encodePacked(currentFile.prevIpfsCID)) != keccak256(abi.encodePacked("0"))) {
+            editedFiles[indexEditedFiles] = currentFile;
+            indexEditedFiles++;
+
+            string memory prevIpfsCID = currentFile.prevIpfsCID;
+            currentFile = files[prevIpfsCID];
+        }
+
+        // Stores the final (with prevIpfsCid = 0) on the editedFiles
+        editedFiles[indexEditedFiles] = currentFile;
+        indexEditedFiles++;
+        
+        // Resize the result array to remove unused elements
+        assembly {
+            mstore(editedFiles, indexEditedFiles)
+        }
+
+        return ResultFiles(true, editedFiles);
+    }
+
     // Verifies if a file can be added if: the transaction executer is the AccessControl.sol
     //                                     file is not already stored => avoid overlay of information
     //                                     file parameters are valid

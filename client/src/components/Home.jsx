@@ -6,6 +6,7 @@ import AuditLog from './HomeSections/AuditLog/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
 import EditPopup from './ActionsOverFiles/EditPopup';
 import VeifyPopup from './ActionsOverFiles/VeifyPopup';
+import InfoFilePopup from './ActionsOverFiles/InfoFilePopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
@@ -27,6 +28,7 @@ const Home = () => {
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [showSharePopup, setShowSharePopup] = useState(false);
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+    const [showInfoPopup, setShowInfoPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -67,7 +69,6 @@ const Home = () => {
                 setLoading(false);   
             });
         }
-        
     }, [fileManagerFacadeInstance, selectedUser]);
 
     // Get Logs
@@ -188,6 +189,9 @@ const Home = () => {
             case FileApp.FilePermissions.Verify:
                 setShowVerifyPopup(true);
                 return;
+            case FileApp.FilePermissions.Info:
+                setShowInfoPopup(true);
+                return;
             default:
                 console.log("NOT A VALID OPERATION: ", chosenAction);
                 return;
@@ -217,9 +221,12 @@ const Home = () => {
             case FileApp.FilePermissions.Verify:
                 setShowVerifyPopup(false);
                 return;
+            case FileApp.FilePermissions.Info:
+                setShowInfoPopup(false);
+                return;
             default:
                 console.log("NOT A VALID OPERATION: ", chosenAction);
-                return;
+            return;
         }
     }
 
@@ -251,6 +258,7 @@ const Home = () => {
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
+                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} show={showInfoPopup}/>
                 </>
             )}
         </>
