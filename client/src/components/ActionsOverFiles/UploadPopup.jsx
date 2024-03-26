@@ -72,6 +72,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     }
 
     const cleanFields = () => {
+        handleFileUploaded("upload");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);

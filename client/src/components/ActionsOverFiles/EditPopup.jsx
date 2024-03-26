@@ -71,6 +71,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
     }
 
     const cleanFields = () => {
+        handleFileUploaded("edit");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);

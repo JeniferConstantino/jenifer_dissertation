@@ -1,8 +1,8 @@
-import Command from "./Command";
-import FileApp from './../FileApp';
+import FileApp from '../FileApp';
+import DropFileCommand from "./DropFileCommand";
 
 // Concrete command for uploading a file
-class EditFileCommand extends Command {
+class DropEdit extends DropFileCommand {
 
     constructor(fileManager, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
@@ -46,19 +46,7 @@ class EditFileCommand extends Command {
         return encryKeysUsers;
     }
 
-    async execute(){
-        // Encrypt symmetric key
-        const symmetricKey = this.fileManager.generateSymmetricKey(); 
-        // Encrypts the dropped file 
-        const {encryptedFile, iv} = await this.fileManager.encryptFileWithSymmetricKey(this.fileAsBuffer, symmetricKey);
-        
-        // Add the dropped file to IPFS
-        const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
-        console.log('File encrypted and added to IPFS', fileCID);
-
-        // Generates the hash of the dropped file
-        const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
-
+    async storeFile(symmetricKey, iv, fileHash, fileCID){
         // Prepares the file to be stored
         let fileEdited = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.selectedFile.version+1,  this.selectedFile.ipfsCID, this.selectedFile.owner, fileCID, iv.toString('base64'), "active", fileHash);
         fileEdited.fileType = fileEdited.defineFileType(this.fileUpl.name);
@@ -71,23 +59,9 @@ class EditFileCommand extends Command {
         
         // Calls the method on the contract responsible for uploading the edited file and changing the state of the previous one
         await this.fileManager.editFileUpl(this.selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile); 
-
-        // Verifies file correctly added
-        var resultGetFile = await this.fileManager.getFileByIpfsCID(fileEdited.ipfsCID, "active");
-        if (!resultGetFile.success) {
-            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", resultGetFile);
-            return; 
-        }
-        // Verifies if the file is uploaded correctly
-        var result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, fileEdited.ipfsCID);
-        if (!result.success) {
-            console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
-            return; 
-        }
-        console.log('File edited');
-
-        this.handleFileUploaded("edit");
+    
+        return fileEdited;
     }
 }
 
-export default EditFileCommand;
+export default DropEdit;

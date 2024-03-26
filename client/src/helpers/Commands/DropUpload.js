@@ -1,8 +1,8 @@
 import Command from "./Command";
-import FileApp from './../FileApp';
+import FileApp from '../FileApp';
 
 // Concrete command for uploading a file
-class UploadFileCommand extends Command {
+class DropUpload extends Command {
 
     constructor(fileManager, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
@@ -38,23 +38,8 @@ class UploadFileCommand extends Command {
         // Associates the current user with the uploaded file 
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
         
-        // Verifies file correctly added
-        var resultGetFile = await this.fileManager.getFileByIpfsCID(fileUploaded.ipfsCID, "active");
-        console.log("result in upload: ", resultGetFile);
-        if (!resultGetFile.success) {
-            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", resultGetFile);
-            return; 
-        }
-        // Verifies if the file is uploaded correctly
-        var result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, fileUploaded.ipfsCID);
-        if (!result.success) {
-            console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
-            return; 
-        }        
-        console.log('File added to the blockchain');
-
-        this.handleFileUploaded("upload");
+        return fileUploaded;
     }
 }
 
-export default UploadFileCommand;
+export default DropUpload;

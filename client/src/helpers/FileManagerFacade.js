@@ -1,8 +1,8 @@
 import BlockchainWrapper from './Managers/BlockchainWrapper';
 import EncryptionWrapper from './Managers/EncryptionWrapper';
 import IPFSWrapper from './Managers/IPFSWrapper';
-import UploadFileCommand from './Commands/UploadFileCommand';
-import EditFileCommand from './Commands/EditFileCommand'
+import DropUpload from './Commands/DropUpload';
+import DropEdit from './Commands/DropEdit'
 import VerifyFileCommand from './Commands/VerifyFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
@@ -42,13 +42,13 @@ class FileManagerFacade {
 
   // Uploads File into the system
   async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+    const uploadCommand = new DropUpload(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
 
   // Edits an existing file 
   async editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const editCommand = new EditFileCommand(this, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+    const editCommand = new DropEdit(this, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await editCommand.execute();
   }
   
