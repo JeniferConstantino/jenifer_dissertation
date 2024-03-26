@@ -103,4 +103,15 @@ contract Helper {
         return (accountList == accountInput) && (keccak256(abi.encodePacked(ipfsCIDList)) == keccak256(abi.encodePacked(ipfsCIDInput)));
     }
 
+    // Puts a string in lower case
+    function toLower(string memory _str) external pure returns (string memory) {
+        bytes memory strBytes = bytes(_str);
+        for (uint i = 0; i < strBytes.length; i++) {
+            if ((uint8(strBytes[i]) >= 65) && (uint8(strBytes[i]) <= 90)) {
+                strBytes[i] = bytes1(uint8(strBytes[i]) + 32); // Convert uppercase to lowercase
+            }
+        }
+        return string(strBytes);
+    }
+
 }

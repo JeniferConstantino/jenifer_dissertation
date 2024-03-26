@@ -35,7 +35,7 @@ contract UserRegister {
     function userRegistered(User memory user) external {
         if (user.account == msg.sender) {
             if (canRegister(user)) { // Checks if the user is elegible to register (including validating fields)
-                users[user.account] = User(user.account, user.userName, user.mnemonic, user.publicKey);
+                users[user.account] = User(user.account, helper.toLower(user.userName), user.mnemonic, user.publicKey);
                 usersByName[user.userName] = User(user.account, user.userName, user.mnemonic, user.publicKey);
                 userNameExists[user.userName] = true;
             } 
