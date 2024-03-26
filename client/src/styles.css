@@ -493,6 +493,9 @@ h1 {
   border-radius: 10px;
 }
 
+.modal-info-popup {
+  width: 600px;
+}
 
 .display-block {
   display: block;
