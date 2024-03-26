@@ -64,17 +64,6 @@ class FileManagerFacade {
     await deleteCommand.execute(); 
   }
 
-  // Associates a user with a file given certain permissions 
-  async associateUserFilePermissions (selectedFile, permissions, accountUserShareFileWith) {
-    // Verifies if the user is already associated with the file
-    const userAssociatedWithFile = await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, selectedFile.ipfsCID, accountUserShareFileWith, this.selectedUser.account);
-    if (userAssociatedWithFile) {
-      await this.updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith);
-      return;
-    } 
-    await this.shareFileCommand(selectedFile, permissions, accountUserShareFileWith);
-  }
-
   // Shares the file with a given user that was not already associated with a file
   async shareFileCommand(selectedFile, permissions, accountUserShareFileWith) {
     const shareCommand = new ShareFileCommand(this, selectedFile, permissions, accountUserShareFileWith);
@@ -91,6 +80,17 @@ class FileManagerFacade {
   async verifyFile(fileAsBuffer) {
     const verifyFileCommand = new VerifyFileCommand(this, fileAsBuffer);
     return await verifyFileCommand.execute();
+  }
+
+  // Associates a user with a file given certain permissions 
+  async associateUserFilePermissions (selectedFile, permissions, accountUserShareFileWith) {
+    // Verifies if the user is already associated with the file
+    const userAssociatedWithFile = await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, selectedFile.ipfsCID, accountUserShareFileWith, this.selectedUser.account);
+    if (userAssociatedWithFile) {
+      await this.updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith);
+      return;
+    } 
+    await this.shareFileCommand(selectedFile, permissions, accountUserShareFileWith);
   }
 
   // Verifies if the user is already associated with a file with the same name

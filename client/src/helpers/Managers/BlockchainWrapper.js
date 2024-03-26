@@ -51,6 +51,17 @@ class BlockchainWrapper {
         return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid, state).call({from: selectedUserAccount});
     }
 
+    // Get previously edited files of a certain file, from the oldest to the most recent one
+    static getPrevEditedFiles = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
+        var result = await fileRegisterContract.methods.getEditedFilesByIpfsCid(fileIpfsCid).call({from: selectedUserAccount});
+        return result;
+    }
+
+    // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
+    static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
+        return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
+    }
+
     // Gets the users with download permissions over a file
     static getUsersWithDownloadPermissionsFile = async (accessControlContract, file, selectedUserAccount) => {
         return accessControlContract.methods.getUsersWithDownloadPermissionsFile(file).call({from: selectedUserAccount});
@@ -78,17 +89,6 @@ class BlockchainWrapper {
             });
         }
         return files;
-    }
-
-    // Get previously edited files of a certain file, from the oldest to the most recent one
-    static getPrevEditedFiles = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
-        var result = await fileRegisterContract.methods.getEditedFilesByIpfsCid(fileIpfsCid).call({from: selectedUserAccount});
-        return result;
-    }
-
-    // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
-    static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
-        return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
     }
 
     // Returns true or false, according to if a user is already associated with a file or not
