@@ -101,6 +101,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
         setShowPermissions(false);
         setCheckboxes({
             download: false,
+            edit: false,
             delete: false,
             share: false
         });

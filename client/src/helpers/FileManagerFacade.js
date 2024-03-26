@@ -160,8 +160,8 @@ class FileManagerFacade {
   }
 
   // Edits the uploaded file
-  async editFileUpl(selectedFile, fileEdited, encSymmetricKey) { 
-    return await BlockchainWrapper.editFileUpl(this.accessControlContract, selectedFile, fileEdited, encSymmetricKey, this.selectedUser.account);
+  async editFileUpl(selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile) { 
+    return await BlockchainWrapper.editFileUpl(this.accessControlContract, selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file
@@ -214,16 +214,6 @@ class FileManagerFacade {
     return await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
   }
 
-  // Returns the latest version of a file
-  async getLatestVersionOfFile(fileName) {
-    return await BlockchainWrapper.getLatestVersionOfFile(this.fileRegisterContract, fileName, this.selectedUser.account);
-  }
-
-  // Returns the file owner of the original file
-  async getFileOwner(fileName) {
-    return await BlockchainWrapper.getFileOwner(this.fileRegisterContract, fileName, this.selectedUser.account);
-  }
-
   // Returns if a file is valid or not
   async verifyValidFile(userAccount, fileHash) { 
     return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
@@ -237,6 +227,11 @@ class FileManagerFacade {
   // Returns the user
   async getUser(user) {
     return await BlockchainWrapper.getUser(this.userRegisterContract, user, this._selectedAccount.current);
+  }
+
+  // Gets the users with download permissions over a file 
+  async getUsersWithDownloadPermissionsFile(file) {
+    return await BlockchainWrapper.getUsersWithDownloadPermissionsFile(this.accessControlContract, file, this.selectedUser.account);
   }
 
   // Hashes the mnemonic using symmetric encryption

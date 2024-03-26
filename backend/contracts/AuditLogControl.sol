@@ -7,6 +7,7 @@ contract AuditLogControl {
     struct ResultAuditLogs {
         bool success;
         AuditLog[] logs;
+        string message;
     }
     
     struct AuditLog {
@@ -29,8 +30,10 @@ contract AuditLogControl {
     }
 
     // Records executions performed by the AccessControl.sol contract. Be it: upload, share, delete, or update permissions
-    function recordLogFromAccessControl(address executer, string memory fileIpfsCid, address userAccount, string memory permissions, string memory action) public {
-        if (msg.sender == accessControlContractAddress) {
+    function recordLogFromAccessControl(address executer, string memory fileIpfsCid, address userAccount, string memory permissions, string memory action) external {
+        if (msg.sender == accessControlContractAddress &&
+            userAccount == address(uint160(userAccount))
+        ) {
             AuditLog memory auditLog = AuditLog({
                 fileIpfsCid: fileIpfsCid,
                 userAccount: userAccount,
@@ -44,7 +47,7 @@ contract AuditLogControl {
     }
 
     // Returns the logs of a given set of files only if: transaction executer is associated with the file         
-    function getLogs(string[] memory filesIpfsCid) public view returns (ResultAuditLogs memory){ 
+    function getLogs(string[] memory filesIpfsCid) external view returns (ResultAuditLogs memory){ 
         AuditLog[] memory auditLogFile = new AuditLog[](logs.length); // Stores the logs of the files
         uint resultIndex = 0;
         for (uint256 i = 0; i < filesIpfsCid.length; i++) {
@@ -64,9 +67,9 @@ contract AuditLogControl {
         }
         // Returns accordingly
         if (resultIndex != 0) {
-            return ResultAuditLogs(true, auditLogFile);
+            return ResultAuditLogs(true, auditLogFile, "");
         }
-        return ResultAuditLogs(false, new AuditLog[](0));
+        return ResultAuditLogs(false, new AuditLog[](0), "The transaction executer has to be associated with the file.");
     }
 
 }

@@ -14,15 +14,6 @@ class UploadFileCommand extends Command {
         this.uploadedFiles = uploadedFiles;
     }
 
-    // Calculates the version of the current file
-    async getFileVersion(fileUplName) {
-        // get the latest version of a file based on its name, no matter if the file is in the active or deactive state
-        const fileLatestVersion = await this.fileManager.getLatestVersionOfFile(fileUplName.toLowerCase().toString());
-        const latestVersion = parseInt(fileLatestVersion, 10); // Convert to integer            
-        var fileVersion = latestVersion + 1; // gets the file version of the current file
-        return fileVersion;
-    }
-
     async execute(){
         // Generate symmetric key
         const symmetricKey = this.fileManager.generateSymmetricKey(); 
