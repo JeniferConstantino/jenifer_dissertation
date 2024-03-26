@@ -57,6 +57,15 @@ class BlockchainWrapper {
         return result;
     }
 
+    // Verifies if the user is elegibe to get a file shared with or get the permissions updated
+    static validUserShareUpdtPerm = async (fileRegisterContract, userAccount, fileIpfsCid, selectedUserAccount) => {
+        const userIsFileOwner = await  fileRegisterContract.methods.userIsFileOwner(userAccount, fileIpfsCid).call({from: selectedUserAccount});
+        if (userAccount === selectedUserAccount || userIsFileOwner) {
+            return false;
+        }
+        return true;
+    }
+
     // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
     static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
         return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});

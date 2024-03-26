@@ -192,9 +192,9 @@ contract FileRegister {
         return false;
     }
 
-    // Returns if the user is the file owner if: the transaction executer is the AccessControl.sol
+    // Returns if the user is the file owner
     function userIsFileOwner(address userAccount, string memory fileIpfsCID) external view returns (bool) {
-        if (files[fileIpfsCID].owner == userAccount && msg.sender == accessControlAddress) {
+        if (files[fileIpfsCID].owner == userAccount) {
             return true;
         }
         return false;

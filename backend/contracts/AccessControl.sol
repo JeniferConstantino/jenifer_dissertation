@@ -178,16 +178,18 @@ contract AccessControl {
 
     // Remove the relationship between a user and a file
     function removeUserFileAssociation(address userAccount, string memory fileIpfsCID) external {
-        for (uint i=0; i<user_Has_File.length; i++) {
-            if (user_Has_File[i].userAccount == userAccount && 
-                keccak256(bytes(user_Has_File[i].ipfsCID)) == keccak256(bytes(fileIpfsCID))) {
-                // Remove the entry by swapping it with the last element and then reducing the array length
-                user_Has_File[i] = user_Has_File[user_Has_File.length - 1];
-                user_Has_File.pop();
+        if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
+            for (uint i=0; i<user_Has_File.length; i++) {
+                if (user_Has_File[i].userAccount == userAccount && 
+                    keccak256(bytes(user_Has_File[i].ipfsCID)) == keccak256(bytes(fileIpfsCID))) {
+                    // Remove the entry by swapping it with the last element and then reducing the array length
+                    user_Has_File[i] = user_Has_File[user_Has_File.length - 1];
+                    user_Has_File.pop();
 
-                // Writes to the Audit Log
-                auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, "-", "removed access");
-                return;
+                    // Writes to the Audit Log
+                    auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, "-", "removed access");
+                    return;
+                }
             }
         }
     }
@@ -340,7 +342,7 @@ contract AccessControl {
     }
 
     // Verifies if the user is elegible to share the file
-    function elegibleToShare(address userAccount, string memory fileIpfsCID) private view returns (bool) {
+    function elegibleToShare(address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
             !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
             userHasPermissionOverFile(msg.sender, fileIpfsCID, "share") && // The transaction executer can only share a file if he has share permissions 
@@ -355,7 +357,7 @@ contract AccessControl {
     }
 
     // Retruns if a user is elegible to update permissions of a user over a file
-    function elegibleToUpdPermissions(address userAccount, string memory fileIpfsCID) private view returns (bool) {
+    function elegibleToUpdPermissions(address userAccount, string memory fileIpfsCID) public view returns (bool) {
         if (msg.sender != userAccount && // msg.sender can't be the same as the userAccount because the user should not be able to give permissions to himself
             !fileRegister.userIsFileOwner(userAccount, fileIpfsCID) && // the userAccount cannot be the file owner account: the owner permissions cannot change they are always: share, delete, upload
             userHasPermissionOverFile(msg.sender, fileIpfsCID, "share") && // The transaction executer can only share a file if he has share permissions 

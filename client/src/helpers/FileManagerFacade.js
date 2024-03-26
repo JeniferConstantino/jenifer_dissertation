@@ -119,6 +119,11 @@ class FileManagerFacade {
     return await BlockchainWrapper.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser.account);
   }
 
+  // Verifies if the user is elegibe to get a file shared with or get the permissions updated
+  async validUserShareUpdtPerm(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.validUserShareUpdtPerm(this.fileRegisterContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  }
+
   // Get the user, according to the account
   async getUserUserName(userAccount) {
     return await BlockchainWrapper.getUserUserName(this.userRegisterContract, userAccount, this.selectedUser.account);

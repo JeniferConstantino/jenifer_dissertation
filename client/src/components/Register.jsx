@@ -82,7 +82,7 @@ const Register = () => {
                                 type="text"
                                 id="username"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                onChange={(e) => setUsername(e.target.value.toLowerCase())}
                                 placeholder='username'
                                 className='input-username input-usernameWelcome'
                             />
