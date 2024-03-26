@@ -13,8 +13,17 @@ class DownloadFileCommand extends Command {
             const fileContent = await this.fileManager.getFileFromIPFS(this.selectedFile.ipfsCID);
             console.log("Accessed file in IPFS.");
         
+            // Gets the file encrypted symmetric key
+            const result = await this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);
+            if (!result.success) {
+                console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
+                return;
+            }
+            const fileUserEncryptedSymmetricKey = result.resultString;
+            const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
+
             // Decrypts the file
-            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.fileManager.accessControlContract, this.selectedFile, this.fileManager.selectedUser, fileContent);
+            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.selectedFile, encryptedSymmetricKeyBuffer, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
 

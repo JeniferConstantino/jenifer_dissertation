@@ -31,7 +31,6 @@ class EditFileCommand extends Command {
         for (const userAddress of usersDonldPermFile) {
             // Gets the user public key
             const res = await this.fileManager.getPubKeyUser(userAddress);
-            console.log("res: ", res);
             if (!res.success) {
                 console.log("something went wrong while trying to get the users' public key.");
             }

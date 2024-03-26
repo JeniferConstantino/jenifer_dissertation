@@ -281,8 +281,8 @@ class FileManagerFacade {
   }
 
   // Decrypts a file uising a symmetric key
-  async decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent) {
-    return await EncryptionWrapper.decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent);
+  async decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent) {
+    return await EncryptionWrapper.decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent);
   }
 
   // Retursn all files in IPFS

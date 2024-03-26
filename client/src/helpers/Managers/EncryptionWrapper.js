@@ -62,26 +62,15 @@ class EncryptionWrapper {
     }
 
     // Decrypts a given file using a given symmetric key
-    static async decryptFileWithSymmetricKey (accessControlContract, fileEncrypted, selectedUser, fileContent) {
+    static async decryptFileWithSymmetricKey (fileEncrypted, encryptedSymmetricKeyBuffer, fileContent) {
         try {
             // Decrypts the symmetric key
-            const result = await accessControlContract.methods.getEncSymmetricKeyFileUser(selectedUser.account, fileEncrypted.ipfsCID).call({from: selectedUser.account});
-            if (!result.success) {
-                console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
-                return;
-            }
-            console.log("result.resultString: ", result.resultString);
-            const fileUserEncryptedSymmetricKey = result.resultString;
-            const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
             const ivBuffer = Buffer.from(fileEncrypted.iv, 'base64');
-            console.log("ivBuffer: ", ivBuffer);
             const decryptedSymmetricKey = EncryptionWrapper.decryptSymmetricKey(encryptedSymmetricKeyBuffer, localStorage.getItem('privateKey'));
-            console.log("decryptedSymmetricKey: ", decryptedSymmetricKey);
-
+            
             // Decrypt the file content using the decrypted symmetric key
             const decipher = crypto.createDecipheriv('aes-256-cbc', decryptedSymmetricKey, ivBuffer);
             const decryptedFileBuffer = Buffer.concat([decipher.update(fileContent), decipher.final()]);
-            console.log("decryptedFileBuffer: ", decryptedFileBuffer);
 
             return decryptedFileBuffer;
         } catch (error) {
