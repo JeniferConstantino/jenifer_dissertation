@@ -133,7 +133,7 @@ const Home = () => {
         } else if (windowWidth < 900) {
             setMaxFilesPerColumn(3);
         } else {
-            setMaxFilesPerColumn(7);
+            setMaxFilesPerColumn(5);
         }
     }
 
