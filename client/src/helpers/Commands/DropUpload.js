@@ -32,7 +32,7 @@ class DropUpload extends Command {
 
         // Prepares the file to be stored
         let fileUploaded = new FileApp(this.fileUpl.name.toLowerCase().toString(), fileVersion, "" , fileOwner, fileCID, iv.toString('base64'), "", fileHash);
-        fileUploaded.fileType = fileUploaded.defineFileType(this.fileUpl.name);
+        fileUploaded.fileType = FileApp.getFileType(this.fileUpl.name);
         let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey')).toString('base64');
 
         // Associates the current user with the uploaded file 

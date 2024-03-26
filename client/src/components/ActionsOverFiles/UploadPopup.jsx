@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
+import FileApp from '../../helpers/FileApp';
 
 const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
@@ -32,8 +33,11 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         e.preventDefault()
 
         if(fileAsBuffer){
-            console.log();
             try{
+                if(FileApp.getFileType(fileUpl.name) === "invalid") {
+                    console.log('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
+                    return;
+                }
                 await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
             } catch (error) {
