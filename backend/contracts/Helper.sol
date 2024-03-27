@@ -85,17 +85,17 @@ contract Helper {
     // Validates if a given set of permissions are valid
     function validPermissions(string[] memory permissions) external pure returns (bool) {
         for (uint i = 0; i<permissions.length; i++) {
-            if (keccak256(abi.encodePacked(permissions[i])) == keccak256(abi.encodePacked("download")) || 
-            keccak256(abi.encodePacked(permissions[i]))==keccak256(abi.encodePacked("edit")) ||
-            keccak256(abi.encodePacked(permissions[i]))==keccak256(abi.encodePacked("delete")) ||
-            keccak256(abi.encodePacked(permissions[i]))==keccak256(abi.encodePacked("share")) ||
-            keccak256(abi.encodePacked(permissions[i]))==keccak256(abi.encodePacked("verify")) ||
-            keccak256(abi.encodePacked(permissions[i]))==keccak256(abi.encodePacked("info"))
+            if (keccak256(abi.encodePacked(permissions[i])) != keccak256(abi.encodePacked("download")) && 
+            keccak256(abi.encodePacked(permissions[i]))!=keccak256(abi.encodePacked("edit")) &&
+            keccak256(abi.encodePacked(permissions[i]))!=keccak256(abi.encodePacked("delete")) &&
+            keccak256(abi.encodePacked(permissions[i]))!=keccak256(abi.encodePacked("share")) &&
+            keccak256(abi.encodePacked(permissions[i]))!=keccak256(abi.encodePacked("verify")) &&
+            keccak256(abi.encodePacked(permissions[i]))!=keccak256(abi.encodePacked("info"))
             ){
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     // Sees if the ipfsCID and the account (primary keys) are the same as the inputs 

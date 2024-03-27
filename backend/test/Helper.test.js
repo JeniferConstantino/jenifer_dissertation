@@ -15,124 +15,248 @@ describe("Helper", function () {
         let userAnaRita = {
             account: await signer1.getAddress(), // address of the one executing the transaction
             userName: "Ana Rita",
-            publicKey: "asd",
-            privateKey: "qwe"
+            mnemonic: "wisdom skate describe aim code april harsh reveal board order habit van",
+            publicKey: "asd"
         };
         const fileAnaRita = {
             ipfsCID: "anaRitaIpfsCID1",        
-            fileName: "anaRitaFile1.jpg",          
+            fileName: "anaRitaFile1.jpg",    
+            version: 0,
+            prevIpfsCID: 0,      
             owner: userAnaRita.account, // Ana Rita is the file owner             
             fileType: "image",           
-            iv: "ivFileAnaRita",  
+            iv: "ivFileAnaRita",
+            state: "active",
+            fileHash: "hashFileAnaRita"  
         };
 
         return { helperContract, userAnaRita, fileAnaRita, signer1, signer2 };
     }
 
-    it("Should return true if the users' fields are valid and the transaction executer is the same as the user", async function() {
-        // Arrange
-        const { helperContract, signer1, userAnaRita } = await loadFixture(deployContractAndSetVariables); 
 
-        // Act
-        const result = await helperContract.connect(signer1).validUserFields(userAnaRita);
+    describe("validUserFields", function(){
+        describe("when users' fiels are valid and transaction executer is the same as the user", function(){
+            it("should return true", async function(){
+                // Arrange
+                const { helperContract, signer1, userAnaRita } = await loadFixture(deployContractAndSetVariables); 
 
-        // Assert
-        expect(result).to.equal(true);
+                // Act
+                const result = await helperContract.connect(signer1).validUserFields(userAnaRita);
+
+                // Assert
+                expect(result).to.equal(true);
+            });
+        });
+        describe("when users' fiels are invalid and transaction executer is the same as the user", function(){
+            it ("should return false", async function(){
+                // Arrange
+                const { helperContract, signer2 } = await loadFixture(deployContractAndSetVariables); 
+                let invalidUser = {
+                    account: await signer2.getAddress(),
+                    userName: "", // invalid userName
+                    mnemonic: "wisdom skate describe aim code april harsh reveal board order habit van",
+                    publicKey: "wer"
+                };
+
+                // Act
+                const result = await helperContract.connect(signer2).validUserFields(invalidUser);
+
+                // Assert
+                expect(result).to.equal(false);
+            });
+        });
     });
 
-    it("Should return false if the users' fields are not valid, and the transaction executer is the same as the user", async function() {
-        // Arrange
-        const { helperContract, signer2 } = await loadFixture(deployContractAndSetVariables); 
-        let invalidUser = {
-            account: await signer2.getAddress(),
-            userName: "", // invalid userName
-            publicKey: "wer",
-            privateKey: "rew"
-        };
+    describe("fileParamValid", function(){
+        describe("when file parameters are valid", function(){
+            it("should return true", async function(){
+                // Arrange
+                const { helperContract, signer1, fileAnaRita } = await loadFixture(deployContractAndSetVariables); 
 
-        // Act
-        const result = await helperContract.connect(signer2).validUserFields(invalidUser);
+                // Act
+                const result = await helperContract.connect(signer1).fileParamValid(fileAnaRita);
 
-        // Assert
-        expect(result).to.equal(false);
+                // Assert
+                expect(result).to.equal(true);
+            });
+        });
+        describe("when file parameters are invalid", function(){
+            it ("should return false", async function(){
+                // Arrange
+                const { helperContract, signer1 } = await loadFixture(deployContractAndSetVariables); 
+                let invalidFile = {
+                    ipfsCID: "",    // invalid ipfsCID    
+                    fileName: "nameFile.jpg", 
+                    version: 0,
+                    prevIpfsCID: 0,      
+                    owner: await signer1.getAddress(),             
+                    fileType: "image",           
+                    iv: "yourIv_1",  
+                    state: "active",
+                    fileHash: "hashFileAnaRita"  
+                };
+
+                // Act
+                const result = await helperContract.connect(signer1).fileParamValid(invalidFile);
+
+                // Assert
+                expect(result).to.equal(false);
+            });
+        });
+    });
+
+    describe("verifyValidFields", function(){
+        describe("when userHasFile fields are valid", function(){
+            it("should return true", async function(){
+                // Arrange
+                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+
+                // Act
+                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"], "")
+
+                // Assert
+                expect(result).to.equal(true);
+            });
+        });
+        describe("when userHasFile fields are invalid", function(){
+            it ("should return false", async function(){
+                // Arrange
+                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
+                const encSymmetricKey = "";
+                
+                // Act
+                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"], "")
+
+                // Assert
+                expect(result).to.equal(false);
+            });
+        });
+    });
+
+
+
+
+    describe("stringArrayToString", function(){
+        describe("when permissions have content", function(){
+            it("should convert a string array into a string with comma-separated values", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const permissions = ["read", "write", "execute"];
+            
+                // Act
+                const result = await helperContract.stringArrayToString(permissions);
+            
+                // Assert
+                expect(result.success).to.equal(true);
+                expect(result.resultString).to.equal("read, write, execute");
+                expect(result.message).to.equal("");
+            });
+        });
+        describe("when permissions are empty", function(){
+            it ("should return an empty string", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const permissions = [];
+
+                // Act
+                const result = await helperContract.stringArrayToString(permissions);
+
+                // Assert
+                expect(result.success).to.equal(true);
+                expect(result.resultString).to.equal("");
+                expect(result.message).to.equal("");
+            });
+        });
+    });
+
+    describe("validPermissions", function(){
+        describe("when a given set of permissions are valid", function(){
+            it("should return true", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const permissions = ["download", "edit", "info"];
+
+                // Act
+                const result = await helperContract.validPermissions(permissions);
+
+                // Assert
+                expect(result).to.equal(true);
+            });
+        });
+        describe("when a given set of permissions are invalid", function(){
+            it ("should return false", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const permissions = ["create", "edit", "info"];
         
-    });
-    
-    it("Should return true if the file parameters are valid", async function() {
-        // Arrange
-        const { helperContract, signer1, fileAnaRita } = await loadFixture(deployContractAndSetVariables); 
-
-        // Act
-        const result = await helperContract.connect(signer1).fileParamValid(fileAnaRita);
-
-        // Assert
-        expect(result).to.equal(true);
-    });
-    
-    it("Should return false if the file parameters are invalid", async function() {
-        // Arrange
-        const { helperContract, signer1 } = await loadFixture(deployContractAndSetVariables); 
-        let invalidFile = {
-            ipfsCID: "",    // invalid ipfsCID    
-            fileName: "nameFile.jpg",          
-            owner: await signer1.getAddress(),             
-            fileType: "image",           
-            iv: "yourIv_1",  
-        };
-
-        // Act
-        const result = await helperContract.connect(signer1).fileParamValid(invalidFile);
-
-        // Assert
-        expect(result).to.equal(false);
-    });
-    
-    it("Should return true if the userHasFile fields are valid", async function() {
-        // Arrange
-        const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-
-        // Act
-        const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"])
-
-        // Assert
-        expect(result).to.equal(true);
-    });
-
-    it("Should return false if the userHasFile fields are invalid", async function() {
-        // Arrange
-        const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
-        const encSymmetricKey = "";
+                // Act
+                const result = await helperContract.validPermissions(permissions);
         
-        // Act
-        const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"])
-
-        // Assert
-        expect(result).to.equal(false);
+                // Assert
+                expect(result).to.equal(false);
+            });
+        });
     });
 
-    it("Should convert a string array into a string with comma-separated values", async function(){
-        // Arrange
-        const { helperContract} = await loadFixture(deployContractAndSetVariables);   
-        const permissions = ["read", "write", "execute"];
-    
-        // Call the function
-        const result = await helperContract.stringArrayToString(permissions);
-    
-        // Assert
-        expect(result).to.equal("read, write, execute");
+
+
+    describe("toLower", function(){
+        describe("when receiving uppercase letters", function(){
+            it("should convert to lower case", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const input = "HELLO";
+                const expectedOutput = "hello";
+
+                // Act
+                const result = await helperContract.toLower(input);
+
+                // Assert
+                expect(result).to.equal(expectedOutput);
+            });
+        });
+        describe("when receiving lowercase letters", function(){
+            it ("should leave them unchanged", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const input = "hello";
+                const expectedOutput = "hello";
+
+                // Act
+                const result = await helperContract.toLower(input);
+
+                // Assert
+                expect(result).to.equal(expectedOutput);
+            });
+        });
+        describe("when receiving special characters", function(){
+            it ("should leave them unchaged", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const input = "Hello World!";
+                const expectedOutput = "hello world!";
+
+                // Act
+                const result = await helperContract.toLower(input);
+
+                // Assert
+                expect(result).to.equal(expectedOutput);
+            });
+        });
+        describe("when receiving an empty string", function(){
+            it ("should return an empty string", async function(){
+                // Arrange
+                const { helperContract} = await loadFixture(deployContractAndSetVariables);   
+                const input = "";
+                const expectedOutput = "";
+
+                // Act
+                const result = await helperContract.toLower(input);
+
+                // Assert
+                expect(result).to.equal(expectedOutput);
+            });
+        });
     });
-
-    it("Should handle empty input array", async function(){
-        // Arrange
-        const { helperContract} = await loadFixture(deployContractAndSetVariables);   
-        const permissions = [];
-
-        // Call the function
-        const result = await helperContract.stringArrayToString(permissions);
-
-        // Assert
-        expect(result).to.equal("");
-    });
-
 });
