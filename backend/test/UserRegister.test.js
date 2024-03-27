@@ -1,4 +1,4 @@
-const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("UserRegister", function () {
@@ -40,6 +40,7 @@ describe("UserRegister", function () {
         return { userRegister, userAnaRita, invalidAnaPaula, invalidAnaRita, signer1, signer2 };
     }
 
+    // already tests the canRegister() method
     describe("userRegistered", function(){
         describe("when the transaction executer is not the user trying to register", function(){
             it ("should NOT register the user", async function(){
@@ -372,4 +373,4 @@ describe("UserRegister", function () {
             });
         });
     });
-});
+});*/

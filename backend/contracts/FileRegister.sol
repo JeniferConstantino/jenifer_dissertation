@@ -156,10 +156,7 @@ contract FileRegister {
 
     // Returns the state of a file if: the transaction executer is the AccessControl contract
     function getFileState(string memory fileIpfsCID) external view returns (Helper.ResultString memory) {
-        if(msg.sender == accessControlAddress) {
-            return Helper.ResultString(true, files[fileIpfsCID].state, "");
-        }
-        return Helper.ResultString(false, "", "The transaction executer can only be the AccessControl.sol contract.");
+        return Helper.ResultString(true, files[fileIpfsCID].state, "");
     }
 
     // Returns the file hash of a file if: the transaction executes is the AccessControl contract
