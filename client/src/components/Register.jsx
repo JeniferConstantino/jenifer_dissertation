@@ -96,12 +96,12 @@ const Register = () => {
                 </div>
                 {showInfoMnemonicPopup && (
                     <div className='modal-wrapper'>
-                        <InfoPopup handleContinue={handleContinueMnemonic} message={""} title={titleInfoMnemonicPopup} showInfoPopup = {showInfoMnemonicPopup} iconComponent={iconComponent} mnemonic={mnemonic}/>
+                        <InfoPopup handleContinue={handleContinueMnemonic} message={""} title={titleInfoMnemonicPopup} showInfoPopup = {showInfoMnemonicPopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={mnemonic}/>
                     </div>
                 )}
                 {showInfoNamePopup && (
                     <div className='modal-wrapper'>
-                        <InfoPopup handleContinue={handleContinueName} message={"Oops! It seems there's already a user with that name. Please note that capitalization doesn't matter, so try another variation or add something unique to differentiate."} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} mnemonic={""}/>
+                        <InfoPopup handleContinue={handleContinueName} message={"Oops! It seems there's already a user with that name. Please note that capitalization doesn't matter, so try another variation or add something unique to differentiate."} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
                     </div>
                 )}
             </div>

@@ -89,12 +89,12 @@ const Login = () => {
                         </div>
                     </div>
                 </div>
-                {showInfoNamePopup && (
-                    <div className='modal-wrapper'>
-                        <InfoPopup handleContinue={handleContinueName} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} mnemonic={""}/>
-                    </div>
-                )}
             </div>
+            {showInfoNamePopup && (
+                <div className='modal-wrapper'>
+                    <InfoPopup handleContinue={handleContinueName} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={false} mnemonic={""}/>
+                </div>
+            )}
         </>
     );
 

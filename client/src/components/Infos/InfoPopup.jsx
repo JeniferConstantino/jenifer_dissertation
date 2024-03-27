@@ -1,11 +1,11 @@
 import React from "react";
 
-const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent: IconComponentnent, mnemonic}) => {
+const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent: IconComponentnent, changeWithButton, mnemonic}) => {
     const showHideClassName = showInfoPopup ? 'modalPopup display-block-popup' : 'modalPopup display-none';
+    const changeWidth = changeWithButton ? 'app-button app-button__popup-width' : 'app-button app-button__popup';
 
     return (
         <div className={showHideClassName}>
-
             <div className='modal-wrapper'>
                 <div className="modal-background"></div>
                 <div className="modal modal-info-popup"> 
@@ -29,7 +29,7 @@ const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent
                                 )}
                             </div>
                             <div>
-                                <button className="app-button app-button__popup" onClick={handleContinue}>Continue</button>
+                                <button className={changeWidth} onClick={handleContinue}>Continue</button>
                             </div>
                         </div>
                     </div>

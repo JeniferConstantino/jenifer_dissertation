@@ -129,7 +129,7 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                         </div>
                     )}
                     {showInfoPopup && droppedFile!=null && (
-                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent} mnemonic=""/>
+                        <InfoPopup handleContinue={handleContinue} message={message} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent}  changeWithButton={true} mnemonic=""/>
                     )}
                 </div>
             </div>

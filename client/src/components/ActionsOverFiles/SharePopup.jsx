@@ -199,7 +199,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                     </section>
                     {showInfoNamePopup && (
                         <div className='modal-wrapper'>
-                            <InfoPopup handleContinue={handleCloseSharePermissionsPopup} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} mnemonic={""}/>
+                            <InfoPopup handleContinue={handleCloseSharePermissionsPopup} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent}  changeWithButton={true} mnemonic={""}/>
                         </div>
                     )}
                 </div>

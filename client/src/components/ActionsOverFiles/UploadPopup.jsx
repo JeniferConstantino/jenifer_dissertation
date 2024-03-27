@@ -89,7 +89,6 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         setTitleInfoNamePopup("");
     }
 
-
     const cleanFields = () => {
         handleFileUploaded("upload");
         setShowDragDrop(true);
@@ -134,15 +133,15 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                                     <button className="app-button__drop app-button" onClick={handleFileUpload}>Upload</button>
                                 </div>
                             </section>
-                            {showInfoWronfFilePopup && (
-                                <div className='modal-wrapper'>
-                                    <InfoPopup handleContinue={handleCloseWrongFileType} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoWronfFilePopup} iconComponent={iconComponent} mnemonic={""}/>
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
             </div>
+            {showInfoWronfFilePopup && (
+                <div className='modal-wrapper'>
+                    <InfoPopup handleContinue={handleCloseWrongFileType} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoWronfFilePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                </div>
+            )}
         </>
     );
 
