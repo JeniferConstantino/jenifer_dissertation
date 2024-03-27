@@ -49,7 +49,7 @@ class DropEdit extends DropFileCommand {
     async storeFile(symmetricKey, iv, fileHash, fileCID){
         // Prepares the file to be stored
         let fileEdited = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.selectedFile.version+1,  this.selectedFile.ipfsCID, this.selectedFile.owner, fileCID, iv.toString('base64'), "active", fileHash);
-        fileEdited.fileType = fileEdited.defineFileType(this.fileUpl.name);
+        fileEdited.fileType = FileApp.getFileType(this.fileUpl.name);
 
         // get the encrypted symmetric key for each user that has download permissions over the file to be edited
         let encryKeysUsers = await this.encryptedSymmetricKeys(this.selectedFile, symmetricKey);
