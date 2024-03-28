@@ -47,6 +47,18 @@ describe("FileRegister", function () {
             fileHash: "fileHashAnaPaula"  
         };
 
+        let fileEdited = {
+            ipfsCID: "file2CID",        
+            fileName: "file2.jpg",  
+            version: 1,
+            prevIpfsCID: "file1CID",        
+            owner: await signer1.getAddress(),             
+            fileType: "image",           
+            iv: "file2_iv",  
+            state: "active",
+            fileHash: "hashFile2"
+        };
+
         let file1Wrong = {
             ipfsCID: "file1CID",        
             fileName: "file1Wrong.jpg",   
@@ -73,7 +85,7 @@ describe("FileRegister", function () {
             publicKey: "publicKeyAnaPaula"
         };
 
-        return { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, userAnaPaula, file, fileAnaPaula, file1Wrong, signer1, signer2 };
+        return { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, userAnaPaula, file, fileEdited, fileAnaPaula, file1Wrong, signer1, signer2 };
     }
 
 
@@ -328,6 +340,100 @@ describe("FileRegister", function () {
                 const result = await fileRegisterContract.connect(signer1).getFileState(file.ipfsCID);
                 expect(result.success).to.equal(true);
                 expect(result.resultString).to.equal("active");
+            });
+        });
+    });
+
+    // method getIpfsCIDsByName() is already tested in the AccessControl.test by testing the userAssociatedWithFileName()
+
+    
+    describe("getEditedFilesByIpfsCid", async function(){
+        describe("when the file CID exists", async function(){
+            it("should return the edited files", async function(){
+                // Arrange
+                const { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, file, fileEdited, signer1 } = await loadFixture(deployContractAndSetVariables);        
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
+                await accessControlContract.connect(signer1).editFile(file, fileEdited, [userAnaRita.account], [encSymmetricKey]);
+
+                // Act
+                var result = await fileRegisterContract.connect(signer1).getEditedFilesByIpfsCid(fileEdited.ipfsCID);
+
+                // Assert
+                var expectedResponse = [ // an array of objects of the files
+                    ["file2CID",
+                    "file2.jpg",
+                    "1",
+                    "file1CID",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "image",
+                    "file2_iv",
+                    "active",
+                    "hashFile2"],
+                    [
+                    "file1CID",
+                    "file1.jpg",
+                    "0",
+                    "0",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "image",
+                    "file1_iv",
+                    "edited",
+                    "hashFile"]
+                ]; 
+                expect(result.success).to.equal(true);
+                expect(result.files).to.deep.equal(expectedResponse);
+            });
+        });
+    });
+
+    describe("getFileState", async function(){
+        it("should return the state of the given file", async function(){
+            // Arrange
+            const { fileRegisterContract, accessControlContract, userRegisterContract, userAnaRita, file, signer1 } = await loadFixture(deployContractAndSetVariables);   
+            const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+            await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+            await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
+            
+            // Act
+            const res = await fileRegisterContract.connect(signer1).getFileState(file.ipfsCID);
+
+            // Assert
+            expect(res.success).to.equal(true);
+            expect(res.resultString).to.equal("active");
+        });
+    });
+
+    describe("userIsFileOwner", async function(){
+        describe("when the the user is the file owner", async function(){
+            it("should return true", async function(){
+                // Arrange
+                const { fileRegisterContract, accessControlContract, userRegisterContract, userAnaRita, file, signer1 } = await loadFixture(deployContractAndSetVariables);   
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
+                
+                // Act
+                const res = await fileRegisterContract.connect(signer1).userIsFileOwner(userAnaRita.account, file.ipfsCID);
+
+                // Assert
+                expect(res).to.equal(true);
+            });
+        });
+        describe("when the user is not the file owner", async function(){
+            it("should return false", async function(){
+               // Arrange
+               const { fileRegisterContract, accessControlContract, userRegisterContract, userAnaRita, userAnaPaula, file, signer1 } = await loadFixture(deployContractAndSetVariables);   
+               const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+               await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+               await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
+               
+               // Act
+               const res = await fileRegisterContract.connect(signer1).userIsFileOwner(userAnaPaula.account, file.ipfsCID);
+
+               // Assert
+               expect(res).to.equal(false);
             });
         });
     });

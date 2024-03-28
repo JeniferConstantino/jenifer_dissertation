@@ -1,4 +1,4 @@
-/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("AuditLog", function () {
@@ -26,25 +26,28 @@ describe("AuditLog", function () {
         const userAnaRita = {
             account: await signer1.getAddress(),  // address of the one executing the transaction
             userName: "Ana Rita",
-            publicKey: "publicKeyAnaRita",
-            privateKey: "privatekeyAnaRita"
+            mnemonic: "wisdom skate describe aim code april harsh reveal board order habit van",
+            publicKey: "publicKeyAnaRita"
         };
 
         const userAnaPaula = {
             account: await signer2.getAddress(),  // address of the one executing the transaction
             userName: "Ana Paula",
-            publicKey: "publicKeyAnaPaula",
-            privateKey: "privatekeyAnaPaula"
+            mnemonic: "angry flavor wire wish struggle prepare apart say stuff lounge increase area",
+            publicKey: "publicKeyAnaPaula"
         };
 
         const fileAnaRita = {
-            ipfsCID: "anaRitaIpfsCID1",        
-            fileName: "anaRitaFile1.jpg",          
-            owner: userAnaRita.account, // Ana Rita is the file owner             
+            ipfsCID: "file1CID",        
+            fileName: "file1.jpg",  
+            version: 0,
+            prevIpfsCID: "0",        
+            owner: await signer1.getAddress(),             
             fileType: "image",           
-            iv: "ivFileAnaRita",  
+            iv: "file1_iv",  
+            state: "",
+            fileHash: "hashFile"
         };
-
         return { userRegisterContract, fileRegisterContract,  accessControl, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 };
     }
 
@@ -194,7 +197,7 @@ describe("AuditLog", function () {
         const encSymmetricKey = "encSymmetricKeyFileAnaRita";
         await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
         await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // gives the download permissions
-        await accessControl.connect(signer1).deactivateFileUserAssociation(userAnaRita.account, fileAnaRita.ipfsCID); // Eliminates the file by deactivating it
+        await accessControl.connect(signer1).deactivateFile(userAnaRita.account, fileAnaRita.ipfsCID); // Eliminates the file by deactivating it
 
         // Act
         const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
@@ -211,4 +214,4 @@ describe("AuditLog", function () {
         expect(result.success).to.equal(true);
         expect(result.logs.length).to.equal(2); // It has the upload and delete in the log, it didn't store the download
     });
-});*/
+});

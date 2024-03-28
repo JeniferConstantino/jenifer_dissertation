@@ -1,4 +1,4 @@
-/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("Helper", function () {
@@ -30,7 +30,26 @@ describe("Helper", function () {
             fileHash: "hashFileAnaRita"  
         };
 
-        return { helperContract, userAnaRita, fileAnaRita, signer1, signer2 };
+        const userAnaPaula = {
+            account: await signer2.getAddress(),  // address of the one executing the transaction
+            userName: "ana paula",
+            mnemonic: "angry flavor wire wish struggle prepare apart say stuff lounge increase area",
+            publicKey: "publicKeyAnaPaula"
+        };
+
+        const fileAnaPaula = {
+            ipfsCID: "anaPaulaIpfsCID2",        
+            fileName: "anaPaulaFile1.jpg",  
+            version: 0,
+            prevIpfsCID: "0",        
+            owner: userAnaPaula.account, // Ana Paula is the file owner             
+            fileType: "image",           
+            iv: "ivFileAnaPaula", 
+            state: "",
+            fileHash: "fileHashAnaPaula"  
+        };
+
+        return { helperContract, userAnaRita, userAnaPaula, fileAnaRita, fileAnaPaula, signer1, signer2 };
     }
 
 
@@ -259,4 +278,77 @@ describe("Helper", function () {
             });
         });
     });
-});*/
+
+    describe("isKeyEqual", async function(){
+        describe("when the account input and the file IPFS are the same as the list", async function(){
+            it("should return true", async function(){
+                // Arrange
+                const { helperContract, userAnaRita, fileAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+                const userHasFileList = [
+                    {
+                        userAccount: userAnaRita.account,
+                        ipfsCID: fileAnaRita.ipfsCID,
+                        encSymmetricKey: "yourEncSymmetricKey1",
+                        permissions: ["download", "delete", "share"]
+                    }
+                ];
+
+                // Act
+                const result = await helperContract.connect(signer1).isKeyEqual(
+                    userAnaRita.account, 
+                    userHasFileList[0].userAccount,
+                    fileAnaRita.ipfsCID,
+                    userHasFileList[0].ipfsCID);
+                
+                // Assert
+                expect(result).to.equal(true);
+            });
+        });
+        describe("when the account input is not the same as the one in the list", async function(){
+            it("should return false", async function(){
+                // Arrange     
+                const { helperContract, userAnaRita, userAnaPaula, fileAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);   
+                const userHasFileList = [
+                    {
+                        userAccount: userAnaPaula.account,
+                        ipfsCID: fileAnaPaula.ipfsCID,
+                        encSymmetricKey: "yourEncSymmetricKey1",
+                        permissions: ["download", "delete", "share"]
+                    }
+                ];
+                // Act
+                const result = await helperContract.connect(signer1).isKeyEqual(
+                    userAnaRita.account, 
+                    userHasFileList[0].userAccount,
+                    fileAnaPaula.ipfsCID,
+                    userHasFileList[0].ipfsCID);
+
+                // Assert
+                expect(result).to.equal(false);
+            });
+        });
+        describe("when the file IPFS input is not the same as the one in the list", async function(){
+            it("should return false", async function(){
+                // Arrange     
+                const { helperContract, fileAnaRita, userAnaPaula, fileAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);   
+                const userHasFileList = [
+                    {
+                        userAccount: userAnaPaula.account,
+                        ipfsCID: fileAnaPaula.ipfsCID,
+                        encSymmetricKey: "yourEncSymmetricKey1",
+                        permissions: ["download", "delete", "share"]
+                    }
+                ];
+                // Act
+                const result = await helperContract.connect(signer1).isKeyEqual(
+                    userAnaPaula.account, 
+                    userHasFileList[0].userAccount,
+                    fileAnaRita.ipfsCID,
+                    userHasFileList[0].ipfsCID);
+
+                // Assert
+                expect(result).to.equal(false); 
+            });
+        });
+    });
+});
