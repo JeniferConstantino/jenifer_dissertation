@@ -35,6 +35,18 @@ describe("FileRegister", function () {
             fileHash: "hashFile"
         };
 
+        const fileAnaPaula = {
+            ipfsCID: "anaPaulaIpfsCID2",        
+            fileName: "anaPaulaFile1.jpg",  
+            version: 0,
+            prevIpfsCID: "0",        
+            owner: signer2.getAddress(), // Ana Paula is the file owner             
+            fileType: "image",           
+            iv: "ivFileAnaPaula", 
+            state: "",
+            fileHash: "fileHashAnaPaula"  
+        };
+
         let file1Wrong = {
             ipfsCID: "file1CID",        
             fileName: "file1Wrong.jpg",   
@@ -61,7 +73,7 @@ describe("FileRegister", function () {
             publicKey: "publicKeyAnaPaula"
         };
 
-        return { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, userAnaPaula, file, file1Wrong, signer1, signer2 };
+        return { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, userAnaPaula, file, fileAnaPaula, file1Wrong, signer1, signer2 };
     }
 
 
@@ -196,6 +208,35 @@ describe("FileRegister", function () {
                 expect(result.file.iv).to.equal("");  
                 expect(result.file.state).to.equal("");  
                 expect(result.file.fileHash).to.equal("");  
+            });
+        });
+    });
+
+    // Tests editFile() => the other cases are tested on the AccessControl.sol
+    describe("editFile", function(){
+        describe("when the transaction executer has edit permissions over a file and the file is in the active state", async function(){
+            it("should set the file to edited state and create a new file in the active state", async function(){
+                // Arrange
+                const { accessControlContract, fileRegisterContract, userRegisterContract, file, fileAnaPaula, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                const encSymmetricKey = "encSymmetricKeyFile";
+                await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // gives the download permissions
+
+                // Act
+                const tx = await accessControlContract.connect(signer1).editFile(file, fileAnaPaula, [userAnaRita.account], [encSymmetricKey]);
+                await tx.wait();
+
+                // Assert
+                const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+                expect(receipt.status).to.equal(1); // 1 = success
+
+                var res = await fileRegisterContract.connect(signer1).getFileState(file.ipfsCID);
+                expect(res.success).to.equal(true);
+                expect(res.resultString).to.equal("edited");
+
+                res = await fileRegisterContract.connect(signer1).getFileState(fileAnaPaula.ipfsCID);
+                expect(res.success).to.equal(true);
+                expect(res.resultString).to.equal("active");
             });
         });
     });
