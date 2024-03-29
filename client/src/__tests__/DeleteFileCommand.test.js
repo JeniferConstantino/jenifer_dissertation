@@ -32,6 +32,10 @@ describe('DeleteFileCommand', () => {
         selectedFile = new FileApp();
     });
 
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     describe('execute', () => { 
         it('should delete the file and call handleFileDeleted', async () => {
             // Arrange

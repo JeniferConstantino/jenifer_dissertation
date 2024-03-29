@@ -32,7 +32,7 @@ class DownloadFileCommand extends Command {
             
             return blob;
         } catch (error) {
-        console.error("Error decrypting or downloading file: ", error);
+            console.error("Error decrypting or downloading file: ", error);
         }
     }
 }

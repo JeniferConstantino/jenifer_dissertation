@@ -26,11 +26,26 @@ describe('DownloadFileCommand', () => {
     let fileManager;
     let selectedFile;
     let downloadFileCommand;
+    let mockFileContent;
 
     beforeEach(() => {
         fileManager = new FileManagerFacade();
         selectedFile = new FileApp();
         downloadFileCommand = new DownloadFileCommand(fileManager, selectedFile);
+
+        mockFileContent = "some content on the file received from IPFS";
+        fileManager.getFileFromIPFS.mockResolvedValue(mockFileContent);
+
+        const mockEncSymmetricKey = "some encrypted symmetric key the user has over the file";
+        fileManager.getEncSymmetricKeyFileUser.mockResolvedValue({
+            success: true,
+            resultString: mockEncSymmetricKey
+        });
+
+        const mockDecryptedFileWithSymKey = Buffer.from("some file content that has been decript by the symmetric key");
+        fileManager.decryptFileWithSymmetricKey.mockResolvedValue(mockDecryptedFileWithSymKey);
+
+        fileManager.downloadFileAudit.mockResolvedValue();
     });
 
     afterEach(() => {
@@ -40,20 +55,7 @@ describe('DownloadFileCommand', () => {
     describe('execute', () => { 
         it('should download the file', async () => {
             // Arrange
-            const mockFileContent = "some content on the file received from IPFS";
-            fileManager.getFileFromIPFS.mockResolvedValue(mockFileContent);
-
-            const mockEncSymmetricKey = "some encrypted symmetric key the user has over the file";
-            fileManager.getEncSymmetricKeyFileUser.mockResolvedValue({
-                success: true,
-                resultString: mockEncSymmetricKey
-            });
-
-            const mockDecryptedFileWithSymKey = Buffer.from("some file content that has been decript by the symmetric key");
-            fileManager.decryptFileWithSymmetricKey.mockResolvedValue(mockDecryptedFileWithSymKey);
-
-            fileManager.downloadFileAudit.mockResolvedValue();
-
+            
             // Act
             await downloadFileCommand.execute();
 
@@ -66,15 +68,14 @@ describe('DownloadFileCommand', () => {
 
         it('should handle errors gracefully', async () => {
             // Arrange
-            /*const mockError = new Error('Mock error while deactivating file');
-            fileManager.deactivateFile.mockRejectedValueOnce(mockError);
-            const deleteFileCommand = new DeleteFileCommand(fileManager, selectedFile, handleFileDeletedMock, uploadedFiles);
+            const mockError = new Error('Mock error while downloading file');
+            fileManager.downloadFileAudit.mockRejectedValueOnce(mockError);
 
             // Act
-            await deleteFileCommand.execute();
+            await downloadFileCommand.execute();
 
             // Assert
-            expect(console.error).toHaveBeenCalledWith('Error while trying to delete the file: ', mockError);*/
+            expect(console.error).toHaveBeenCalledWith('Error decrypting or downloading file: ', mockError);
         });
     });
 });
