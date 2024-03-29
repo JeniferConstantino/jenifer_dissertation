@@ -8,7 +8,16 @@ const Download = ({show, fileManagerFacadeInstance, handleDownloaded, selectedFi
             if (show) {
                 console.log('Download file ...');
                 try {
-                    await fileManagerFacadeInstance.downloadFile(selectedFile);
+                    var blob = await fileManagerFacadeInstance.downloadFile(selectedFile);
+                    
+                    // Creates a downloaded link 
+                    const downloadLink = document.createElement("a");
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = selectedFile.fileName;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
                     handleDownloaded();
                 } catch (error) {
                     console.error('Error downloading file:', error);

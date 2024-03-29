@@ -30,13 +30,7 @@ class DownloadFileCommand extends Command {
             // Makes the treatment of the download in the backend and stores on the audit log
             await this.fileManager.downloadFileAudit(this.selectedFile.ipfsCID, this.fileManager.selectedUser.account);
             
-            // Creates a downloaded link 
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = this.selectedFile.fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+            return blob;
         } catch (error) {
         console.error("Error decrypting or downloading file: ", error);
         }

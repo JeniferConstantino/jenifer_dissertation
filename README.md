@@ -10,7 +10,8 @@
 1. Run IPFS node 
 2. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_all.js --network localhost
 3. cd client < npm run start
-4. cd backend < npx hardhat test => to run the tests
+4. cd backend < npx hardhat test => to run the tests in the backend
+5. cd client < npm test => to run the tests in the front end
 
 # Frequent Problems:
 

@@ -55,7 +55,7 @@ class FileManagerFacade {
   // Gets the file from IPFS, decryts and downloads
   async downloadFile(selectedFile) {
     const downloadCommand = new DownloadFileCommand(this, selectedFile);
-    await downloadCommand.execute(); 
+    return await downloadCommand.execute(); 
   }
 
   // Deletes the file from IPFS and the association between the user and the file
