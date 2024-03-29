@@ -32,7 +32,13 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
     const handleDownload = async (file) => {
         // Verifies if the user has permissions to download
         if (permissions.includes(FileApp.FilePermissions.Download)) {
-            await fileManagerFacadeInstance.downloadFile(file); 
+            const blob = await fileManagerFacadeInstance.downloadFile(file); 
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = selectedFile.fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
         } else {
             console.log("User doesn't have permissions to download the file.");
         }
