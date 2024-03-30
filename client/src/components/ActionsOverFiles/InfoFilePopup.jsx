@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import FileApp from '../../helpers/FileApp';
+import { FileApp } from '../../helpers/FileApp';
 
 const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, handleOpenPopup, show, permissions, children}) => {
 

@@ -11,7 +11,7 @@ import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
 import SharePopup from './ActionsOverFiles/SharePopup';
-import FileApp from '../helpers/FileApp';
+import { FileApp } from '../helpers/FileApp';
 
 const Home = () => {
     const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);

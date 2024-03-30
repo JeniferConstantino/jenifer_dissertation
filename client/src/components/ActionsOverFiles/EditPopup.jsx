@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
-import FileApp from '../../helpers/FileApp';
+import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
 
@@ -46,7 +46,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                     setMessage('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
                     return;
                 }
-                await fileManagerFacadeInstance.editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+                await fileManagerFacadeInstance.editFile(fileUpl.name, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
             } catch (error) {
                 console.error("Error uploading file:", error);

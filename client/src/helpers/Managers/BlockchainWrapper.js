@@ -1,4 +1,4 @@
-import FileApp from "../FileApp";
+import { FileApp } from "../FileApp";
 
 class BlockchainWrapper {
     // Gets the public key of the given user

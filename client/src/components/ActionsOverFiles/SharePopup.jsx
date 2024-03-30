@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import FileApp from '../../helpers/FileApp';
+import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
 

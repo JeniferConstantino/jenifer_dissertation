@@ -1,13 +1,13 @@
-import FileApp from '../FileApp';
+import {FileApp} from '../FileApp';
 import DropFileCommand from "./DropFileCommand";
 
 // Concrete command for uploading a file
 class DropEdit extends DropFileCommand {
 
-    constructor(fileManager, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    constructor(fileManager, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
         this.fileManager = fileManager;
-        this.fileUpl = fileUpl;
+        this.fileUplName = fileUplName;
         this.selectedFile = selectedFile;
         this.fileAsBuffer = fileAsBuffer;
         this.handleFileUploaded = handleFileUploaded;
@@ -34,13 +34,13 @@ class DropEdit extends DropFileCommand {
             if (!res.success) {
                 console.log("something went wrong while trying to get the users' public key.");
             }
-            const userPublicKey = res.resultString
+            const userPublicKey = res.resultString;
 
             // Encrypt the symmetric key with teach users' public  key
-            let encryptedSymmetricKey = await this.fileManager.encryptSymmetricKey(symmetricKey, userPublicKey).toString('base64');
+            let encryptedSymmetricKey = await this.fileManager.encryptSymmetricKey(symmetricKey, userPublicKey);
 
             // Store in the map the encrypted symmetric key as a value and with user as the key 
-            encryKeysUsers.set(userAddress, encryptedSymmetricKey);
+            encryKeysUsers.set(userAddress, encryptedSymmetricKey.toString('base64'));
         }
 
         return encryKeysUsers;
@@ -48,8 +48,8 @@ class DropEdit extends DropFileCommand {
 
     async storeFile(symmetricKey, iv, fileHash, fileCID){
         // Prepares the file to be stored
-        let fileEdited = new FileApp(this.fileUpl.name.toLowerCase().toString(), this.selectedFile.version+1,  this.selectedFile.ipfsCID, this.selectedFile.owner, fileCID, iv.toString('base64'), "active", fileHash);
-        fileEdited.fileType = FileApp.getFileType(this.fileUpl.name);
+        let fileEdited = new FileApp(this.fileUplName, this.selectedFile.version+1,  this.selectedFile.ipfsCID, this.selectedFile.owner, fileCID, iv.toString('base64'), "active", fileHash);
+        fileEdited.fileType = FileApp.getFileType(this.fileUplName);
 
         // get the encrypted symmetric key for each user that has download permissions over the file to be edited
         let encryKeysUsers = await this.encryptedSymmetricKeys(this.selectedFile, symmetricKey);

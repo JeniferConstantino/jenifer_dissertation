@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk, FcInfo } from 'react-icons/fc';
 import { MdOutlineEdit } from "react-icons/md";
-import FileApp from '../../helpers/FileApp';
+import { FileApp } from '../../helpers/FileApp';
 
 const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions, permissions, selectedFile}) => {
 

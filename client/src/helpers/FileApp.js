@@ -66,4 +66,4 @@ class FileApp {
 
 }
 
-export default FileApp;
+export {FileApp};
