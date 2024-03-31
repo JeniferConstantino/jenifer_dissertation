@@ -3,10 +3,10 @@ import Command from "./Command";
 // Concrete command for uploading a file
 class DropFileCommand extends Command {
 
-    constructor(fileManager, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    constructor(fileManager, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
         super();
         this.fileManager = fileManager;
-        this.fileUpl = fileUpl;
+        this.fileUplName = fileUplName;
         this.selectedFile = selectedFile;
         this.fileAsBuffer = fileAsBuffer;
         this.handleFileUploaded = handleFileUploaded;
