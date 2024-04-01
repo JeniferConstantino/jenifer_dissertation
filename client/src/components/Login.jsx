@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp'
+import InfoPopup from './Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const Login = () => {
+    const [showInfoNamePopup, setShowInfoNamePopup] = useState(false); // controls the info name popup visibility
+    const [message, setMessage] = useState("");
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");
     const navigate = useNavigate();
     const {fileManagerFacadeInstance} = useWeb3();
     const [mnemonic, setMnemonic] = useState('');
@@ -26,6 +31,9 @@ const Login = () => {
                 return;
             } 
             // TODO: Shows error popup
+            setShowInfoNamePopup(true);
+            setMessage("Invalid Mnemonic");
+            setTitleInfoNamePopup("Attention");
         }).catch(err=>{
             console.log(err);
         })   
@@ -37,13 +45,22 @@ const Login = () => {
         navigate('/home');
     }
 
+    const handleContinueName = () => {
+        cleanFields();
+        navigate('/login');
+    }
+
     const cleanFields = () => {
-        
+        setShowInfoNamePopup(false);
+        setMessage("");
+        setTitleInfoNamePopup("");
     }
 
     const handleBack = async (e) => {
         navigate('/');
     }
+
+    const iconComponent = FcHighPriority;
 
     return (
         <>
@@ -73,6 +90,11 @@ const Login = () => {
                     </div>
                 </div>
             </div>
+            {showInfoNamePopup && (
+                <div className='modal-wrapper'>
+                    <InfoPopup handleContinue={handleContinueName} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={false} mnemonic={""}/>
+                </div>
+            )}
         </>
     );
 

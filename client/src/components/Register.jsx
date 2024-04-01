@@ -9,8 +9,10 @@ const Register = () => {
     const navigate = useNavigate();
     const {fileManagerFacadeInstance} = useWeb3();
     const [username, setUsername] = useState('');
-    const [showInfoPopup, setShowInfoPopup] = useState(false); // controls the info popup visibility
-    const [titleInfoPopup, setTitleInfoPopup] = useState("");  // title to be used in the info popup
+    const [showInfoMnemonicPopup, setShowInfoMnemonicPopup] = useState(false); // controls the info mnemonic popup visibility
+    const [showInfoNamePopup, setShowInfoNamePopup] = useState(false); // controls the info name popup visibility
+    const [titleInfoMnemonicPopup, setTitleInfoMnemonicPopup] = useState("");  // title to be used in the info mnemonic popup
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");  // title to be used in the info name popup
     const [mnemonic, setMnemonic] = useState();                // mnemonic to be set in the info popup
 
     const onNext = async (e) => {
@@ -19,27 +21,44 @@ const Register = () => {
             return;
         }
 
+        // Verifies if there is a user with the same account or with the same name
+        var existingAddress = await fileManagerFacadeInstance.current.existingAddress(fileManagerFacadeInstance.current.selectedAccount.current);
+        var existingUserName = await fileManagerFacadeInstance.current.existingUserName(username.toLowerCase());     
+        if (existingAddress || existingUserName) {
+            console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
+            setShowInfoNamePopup(true);
+            setTitleInfoNamePopup("Attention");
+            return;
+        }
+
         // Adds the user to the blockchain and redirects him to the home page
         UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username).then((mnemonic)=>{
             if (fileManagerFacadeInstance.current._selectedUser != null) {
-                setTitleInfoPopup("Attention");
+                setTitleInfoMnemonicPopup("Attention");
                 setMnemonic(mnemonic);
-                setShowInfoPopup(true);
+                setShowInfoMnemonicPopup(true);
             }
         }).catch(err=>{
             console.log(err);
         })      
     };
 
-    const handleContinue = () => {
+    const handleContinueMnemonic = () => {
         cleanFields();
         navigate('/home');
     }
 
+    const handleContinueName = () => {
+        cleanFields();
+        navigate('/register');
+    }
+
     const cleanFields = () => {
-        setShowInfoPopup(false);
+        setShowInfoMnemonicPopup(false);
+        setShowInfoNamePopup(false);
         setMnemonic("");
-        setTitleInfoPopup("");
+        setTitleInfoMnemonicPopup("");
+        setTitleInfoNamePopup("");
     }
 
     const handleBack = async (e) => {
@@ -63,7 +82,7 @@ const Register = () => {
                                 type="text"
                                 id="username"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                onChange={(e) => setUsername(e.target.value.toLowerCase())}
                                 placeholder='username'
                                 className='input-username input-usernameWelcome'
                             />
@@ -75,9 +94,14 @@ const Register = () => {
                         </div>
                     </div>
                 </div>
-                {showInfoPopup && (
+                {showInfoMnemonicPopup && (
                     <div className='modal-wrapper'>
-                        <InfoPopup handleContinue={handleContinue} message={""} title={titleInfoPopup} showInfoPopup = {showInfoPopup} iconComponent={iconComponent} mnemonic={mnemonic}/>
+                        <InfoPopup handleContinue={handleContinueMnemonic} message={""} title={titleInfoMnemonicPopup} showInfoPopup = {showInfoMnemonicPopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={mnemonic}/>
+                    </div>
+                )}
+                {showInfoNamePopup && (
+                    <div className='modal-wrapper'>
+                        <InfoPopup handleContinue={handleContinueName} message={"Oops! It seems there's already a user with that name. Please note that capitalization doesn't matter, so try another variation or add something unique to differentiate."} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
                     </div>
                 )}
             </div>

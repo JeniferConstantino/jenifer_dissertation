@@ -1,6 +1,6 @@
 import React from "react";
 import { FcDocument , FcImageFile} from "react-icons/fc";
-import FileApp from "../../helpers/FileApp";
+import { FileApp } from "../../helpers/FileApp";
 
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loading, maxFilesPerColumn}) => {
 

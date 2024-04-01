@@ -1,8 +1,8 @@
 import BlockchainWrapper from './Managers/BlockchainWrapper';
 import EncryptionWrapper from './Managers/EncryptionWrapper';
 import IPFSWrapper from './Managers/IPFSWrapper';
-import UploadFileCommand from './Commands/UploadFileCommand';
-import EditFileCommand from './Commands/EditFileCommand'
+import DropUpload from './Commands/DropUpload';
+import DropEdit from './Commands/DropEdit'
 import VerifyFileCommand from './Commands/VerifyFileCommand';
 import DownloadFileCommand from './Commands/DownloadFileCommand';
 import ShareFileCommand from './Commands/ShareFileCommand';
@@ -41,38 +41,27 @@ class FileManagerFacade {
   }
 
   // Uploads File into the system
-  async uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new UploadFileCommand(this, fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  async uploadFile(fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const uploadCommand = new DropUpload(this, fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await uploadCommand.execute();
   }
 
   // Edits an existing file 
-  async editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const editCommand = new EditFileCommand(this, fileUpl, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  async editFile(fileUplName, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
+    const editCommand = new DropEdit(this, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
     await editCommand.execute();
   }
   
   // Gets the file from IPFS, decryts and downloads
   async downloadFile(selectedFile) {
     const downloadCommand = new DownloadFileCommand(this, selectedFile);
-    await downloadCommand.execute(); 
+    return await downloadCommand.execute(); 
   }
 
   // Deletes the file from IPFS and the association between the user and the file
   async deleteFile(selectedFile, handleFileDeleted, uploadedFiles) {
     const deleteCommand = new DeleteFileCommand(this, selectedFile, handleFileDeleted, uploadedFiles);
     await deleteCommand.execute(); 
-  }
-
-  // Associates a user with a file given certain permissions 
-  async associateUserFilePermissions (selectedFile, permissions, accountUserShareFileWith) {
-    // Verifies if the user is already associated with the file
-    const userAssociatedWithFile = await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, selectedFile.ipfsCID, accountUserShareFileWith, this.selectedUser.account);
-    if (userAssociatedWithFile) {
-      await this.updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith);
-      return;
-    } 
-    await this.shareFileCommand(selectedFile, permissions, accountUserShareFileWith);
   }
 
   // Shares the file with a given user that was not already associated with a file
@@ -91,6 +80,17 @@ class FileManagerFacade {
   async verifyFile(fileAsBuffer) {
     const verifyFileCommand = new VerifyFileCommand(this, fileAsBuffer);
     return await verifyFileCommand.execute();
+  }
+
+  // Associates a user with a file given certain permissions 
+  async associateUserFilePermissions (selectedFile, permissions, accountUserShareFileWith) {
+    // Verifies if the user is already associated with the file
+    const userAssociatedWithFile = await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, selectedFile.ipfsCID, accountUserShareFileWith, this.selectedUser.account);
+    if (userAssociatedWithFile) {
+      await this.updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith);
+      return;
+    } 
+    await this.shareFileCommand(selectedFile, permissions, accountUserShareFileWith);
   }
 
   // Verifies if the user is already associated with a file with the same name
@@ -117,6 +117,11 @@ class FileManagerFacade {
   // Gets the user, according to a certain username
   async getUserAccount(usernameToShare) {
     return await BlockchainWrapper.getUserAccount(usernameToShare, this.userRegisterContract, this.selectedUser.account);
+  }
+
+  // Verifies if the user is elegibe to get a file shared with or get the permissions updated
+  async validUserShareUpdtPerm(userAccount, fileIpfsCid) {
+    return await BlockchainWrapper.validUserShareUpdtPerm(this.fileRegisterContract, userAccount, fileIpfsCid, this.selectedUser.account);
   }
 
   // Get the user, according to the account
@@ -160,8 +165,8 @@ class FileManagerFacade {
   }
 
   // Edits the uploaded file
-  async editFileUpl(selectedFile, fileEdited, encSymmetricKey) { 
-    return await BlockchainWrapper.editFileUpl(this.accessControlContract, selectedFile, fileEdited, encSymmetricKey, this.selectedUser.account);
+  async editFileUpl(selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile) { 
+    return await BlockchainWrapper.editFileUpl(this.accessControlContract, selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile, this.selectedUser.account);
   }
 
   // Updates the users' permissions over a file
@@ -214,16 +219,6 @@ class FileManagerFacade {
     return await BlockchainWrapper.verifyUserAssociatedWithFile(this.accessControlContract, fileIpfsCid, userAccount, this.selectedUser.account);
   }
 
-  // Returns the latest version of a file
-  async getLatestVersionOfFile(fileName) {
-    return await BlockchainWrapper.getLatestVersionOfFile(this.fileRegisterContract, fileName, this.selectedUser.account);
-  }
-
-  // Returns the file owner of the original file
-  async getFileOwner(fileName) {
-    return await BlockchainWrapper.getFileOwner(this.fileRegisterContract, fileName, this.selectedUser.account);
-  }
-
   // Returns if a file is valid or not
   async verifyValidFile(userAccount, fileHash) { 
     return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
@@ -237,6 +232,11 @@ class FileManagerFacade {
   // Returns the user
   async getUser(user) {
     return await BlockchainWrapper.getUser(this.userRegisterContract, user, this._selectedAccount.current);
+  }
+
+  // Gets the users with download permissions over a file 
+  async getUsersWithDownloadPermissionsFile(file) {
+    return await BlockchainWrapper.getUsersWithDownloadPermissionsFile(this.accessControlContract, file, this.selectedUser.account);
   }
 
   // Hashes the mnemonic using symmetric encryption
@@ -286,8 +286,8 @@ class FileManagerFacade {
   }
 
   // Decrypts a file uising a symmetric key
-  async decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent) {
-    return await EncryptionWrapper.decryptFileWithSymmetricKey(accessControlContract, selectedFile, selectedUser, fileContent);
+  async decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent) {
+    return await EncryptionWrapper.decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent);
   }
 
   // Retursn all files in IPFS

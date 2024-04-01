@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
+import { FileApp } from '../../helpers/FileApp';
+import InfoPopup from '../Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
@@ -10,6 +13,10 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     
     const [isDragOver, setIsDragOver] = useState(false);
     const [droppedFile, setDroppedFile] = useState(null);
+
+    const [showInfoWronfFilePopup, setShowInfoWronfFilePopup] = useState(false);
+    const [message, setMessage] = useState("");
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");
 
     const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
@@ -32,9 +39,14 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         e.preventDefault()
 
         if(fileAsBuffer){
-            console.log();
             try{
-                await fileManagerFacadeInstance.uploadFile(fileUpl, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+                if(FileApp.getFileType(fileUpl.name) === "invalid") {
+                    setShowInfoWronfFilePopup(true);
+                    setTitleInfoNamePopup("Attention");
+                    setMessage('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
+                    return;
+                }
+                await fileManagerFacadeInstance.uploadFile(fileUpl.name, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
             } catch (error) {
                 console.error("Error uploading file:", error);
@@ -71,11 +83,23 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         handleClosePopup("upload"); 
     }
 
+    const handleCloseWrongFileType = () => {
+        setShowInfoWronfFilePopup(false);
+        setMessage("");
+        setTitleInfoNamePopup("");
+    }
+
     const cleanFields = () => {
+        handleFileUploaded("upload");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
+        setShowInfoWronfFilePopup(false);
+        setMessage("");
+        setTitleInfoNamePopup("");
     }
+
+    const iconComponent = FcHighPriority;
 
     return(
         <>
@@ -113,6 +137,11 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                     )}
                 </div>
             </div>
+            {showInfoWronfFilePopup && (
+                <div className='modal-wrapper'>
+                    <InfoPopup handleContinue={handleCloseWrongFileType} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoWronfFilePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                </div>
+            )}
         </>
     );
 

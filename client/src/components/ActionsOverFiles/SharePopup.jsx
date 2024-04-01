@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
-import FileApp from '../../helpers/FileApp';
+import { FileApp } from '../../helpers/FileApp';
+import InfoPopup from '../Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
     const [accountUserShareFileWith, setAccountUserShareFileWith] = useState("");
+    const [showInfoNamePopup, setShowInfoNamePopup] = useState(false); // controls the info name popup visibility
     const [showPermissions, setShowPermissions] = useState(false);
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");  // title to be used in the info name popup
+    const [message, setMessage] = useState("");
     const [permissions, setCheckboxes] = useState({
         download: false,
         edit: false,
@@ -19,7 +24,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
     const handleFileShare = async (e) => {
         e.preventDefault()
         console.log('Share file ...');
-        
+
         // Performs the association of a user with a file given certain permissions
         await fileManagerFacadeInstance.associateUserFilePermissions(selectedFile, permissions, accountUserShareFileWith);
         cleanFields();
@@ -32,18 +37,27 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
         if (usernameToShare !== "") {
             var result = await fileManagerFacadeInstance.getUserAccount(usernameToShare);
             if (!result.success) { // User doesn't exist
-                console.log(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
+                setShowInfoNamePopup(true);
+                setMessage(`The file: ${selectedFile.fileName} cannot be shared with: ${usernameToShare}. Since the name doesn't correspond to a user.`);
                 return;
             }
             var accountUserToShareFile = result.resultAddress;
+
+            // Ther username cannot be the same as the logged user neither can be the owner of the file
+            result = await fileManagerFacadeInstance.validUserShareUpdtPerm(accountUserToShareFile, selectedFile.ipfsCID);
+            if (!result) {
+                setShowInfoNamePopup(true);
+                setMessage("Invalid user: the user is either the owner of the file or the logged user.");
+                return;
+            }
 
             // Grabs the permissions that the user to share the file with already has over the current file
             result = await fileManagerFacadeInstance.getPermissionsUserOverFile(accountUserToShareFile, selectedFile.ipfsCID);
             if (!result.success) {
                 console.log("No permissions were found between the user and the file.");
-                // Displays to the user the checkboxes and make username field readonly 
                 setShowPermissions(true);
-                setAccountUserShareFileWith(accountUserToShareFile);
+                setTitleInfoNamePopup("Attention");
+                setAccountUserShareFileWith(accountUserToShareFile.toLowerCase());
                 return;
             }
             const userPermissions = result.resultStrings;
@@ -69,7 +83,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                 });
             // Displays to the user the checkboxes and make username field readonly 
             setShowPermissions(true);
-            setAccountUserShareFileWith(accountUserToShareFile);
+            setAccountUserShareFileWith(accountUserToShareFile.toLowerCase());
         } else {
             console.log("No name was inputed.");
         } 
@@ -97,14 +111,19 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
 
     // Cleans fields before going
     const cleanFields = () => {
+        setTitleInfoNamePopup("");
+        setShowInfoNamePopup(false);
         setUsernameToShare("");
         setShowPermissions(false);
         setCheckboxes({
             download: false,
+            edit: false,
             delete: false,
             share: false
         });
     }
+
+    const iconComponent = FcHighPriority;
 
     return(
         <div className={showHideClassName}>
@@ -141,7 +160,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                         type="text"
                                         id="usernameToShare"
                                         value={usernameToShare}
-                                        onChange={(e) => setUsernameToShare(e.target.value)}
+                                        onChange={(e) => setUsernameToShare(e.target.value.toLowerCase())}
                                         placeholder='name'
                                         className={`input-username input-usernameShare ${showPermissions ? 'readonly' : ''}`}
                                         readOnly ={showPermissions}
@@ -178,7 +197,11 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                         )
                         }
                     </section>
-
+                    {showInfoNamePopup && (
+                        <div className='modal-wrapper'>
+                            <InfoPopup handleContinue={handleCloseSharePermissionsPopup} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent}  changeWithButton={true} mnemonic={""}/>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

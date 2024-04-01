@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { FaAngleLeft, FaCheck  } from "react-icons/fa6";
 import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
+import { FileApp } from '../../helpers/FileApp';
+import InfoPopup from '../Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
@@ -10,6 +13,10 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
     
     const [isDragOver, setIsDragOver] = useState(false);
     const [droppedFile, setDroppedFile] = useState(null);
+
+    const [showInfoWronfFilePopup, setShowInfoWronfFilePopup] = useState(false);
+    const [message, setMessage] = useState("");
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");
 
     const [fileUpl, setFileUpl] = useState(null);
     const [fileAsBuffer, setFileAsBuffer] = useState(null);
@@ -33,7 +40,13 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
 
         if(fileAsBuffer){
             try{
-                await fileManagerFacadeInstance.editFile(fileUpl, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+                if(FileApp.getFileType(fileUpl.name) === "invalid") {
+                    setShowInfoWronfFilePopup(true);
+                    setTitleInfoNamePopup("Attention");
+                    setMessage('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
+                    return;
+                }
+                await fileManagerFacadeInstance.editFile(fileUpl.name, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
             } catch (error) {
                 console.error("Error uploading file:", error);
@@ -70,11 +83,20 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
         handleClosePopup("edit"); 
     }
 
+    const handleCloseWrongFileType = () => {
+        setShowInfoWronfFilePopup(false);
+        setMessage("");
+        setTitleInfoNamePopup("");
+    }
+
     const cleanFields = () => {
+        handleFileUploaded("edit");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
     }
+
+    const iconComponent = FcHighPriority;
 
     return(
         <>
@@ -112,6 +134,11 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                     )}
                 </div>
             </div>
+            {showInfoWronfFilePopup && (
+                <div className='modal-wrapper'>
+                    <InfoPopup handleContinue={handleCloseWrongFileType} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoWronfFilePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                </div>
+            )}
         </>
     );
 

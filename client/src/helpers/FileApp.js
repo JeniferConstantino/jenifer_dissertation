@@ -54,16 +54,16 @@ class FileApp {
   }
 
   // Determines the file type
-  defineFileType(fileName) {
+  static getFileType(fileName) {
     if(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif')){
       return FileApp.FileType.Image;
     } else if (fileName.endsWith('.docx') || fileName.endsWith('.odt') || fileName.endsWith('.pdf')) {
       return FileApp.FileType.File;
     } else {
-      throw new Error('File not supported. Supported types: .jpg, .jpeg, .png, .gif, .docx, .odt, .pdf');
+      return 'invalid';
     }
   }
 
 }
 
-export default FileApp;
+export {FileApp};

@@ -1,4 +1,4 @@
-import FileApp from "../FileApp";
+import { FileApp } from "../FileApp";
 
 class BlockchainWrapper {
     // Gets the public key of the given user
@@ -51,6 +51,31 @@ class BlockchainWrapper {
         return await fileRegisterContract.methods.getFileByIpfsCID(fileIpfsCid, state).call({from: selectedUserAccount});
     }
 
+    // Get previously edited files of a certain file, from the oldest to the most recent one
+    static getPrevEditedFiles = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
+        var result = await fileRegisterContract.methods.getEditedFilesByIpfsCid(fileIpfsCid).call({from: selectedUserAccount});
+        return result;
+    }
+
+    // Verifies if the user is elegibe to get a file shared with or get the permissions updated
+    static validUserShareUpdtPerm = async (fileRegisterContract, userAccount, fileIpfsCid, selectedUserAccount) => {
+        const userIsFileOwner = await  fileRegisterContract.methods.userIsFileOwner(userAccount, fileIpfsCid).call({from: selectedUserAccount});
+        if (userAccount === selectedUserAccount || userIsFileOwner) {
+            return false;
+        }
+        return true;
+    }
+
+    // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
+    static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
+        return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
+    }
+
+    // Gets the users with download permissions over a file
+    static getUsersWithDownloadPermissionsFile = async (accessControlContract, file, selectedUserAccount) => {
+        return accessControlContract.methods.getUsersWithDownloadPermissionsFile(file).call({from: selectedUserAccount});
+    }
+
     // Returns true if the user is already associated with a file with the given name
     static userAssociatedWithFileName = async (accessControlContract, userAccount, fileName, selectedUserAccount) => {
         return await accessControlContract.methods.userAssociatedWithFileName(userAccount, fileName).call({from: selectedUserAccount});
@@ -75,30 +100,9 @@ class BlockchainWrapper {
         return files;
     }
 
-    // Get previously edited files of a certain file, from the oldest to the most recent one
-    static getPrevEditedFiles = async (fileRegisterContract, fileIpfsCid, selectedUserAccount) => {
-        var result = await fileRegisterContract.methods.getEditedFileByIpfsCid(fileIpfsCid).call({from: selectedUserAccount});
-        return result;
-    }
-
-    // Get logs (concerning to the users' files - be it because the user uploaded or shared) from the Blockchain 
-    static getLogsUserFilesBlockchain = async (auditLogControlContract, filesIpfsCid, selectedUserAccount)  => {
-        return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
-    }
-
     // Returns true or false, according to if a user is already associated with a file or not
     static verifyUserAssociatedWithFile = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
         return await accessControlContract.methods.userAssociatedWithFile(userAccount, fileIpfsCid).call({from: selectedUserAccount});
-    }
-
-    // Returns the latest version of a file
-    static getLatestVersionOfFile = async (fileRegister, fileName, selectedUserAccount) => {
-        return await fileRegister.methods.getLatestVersionOfFile(fileName).call({from: selectedUserAccount});
-    }
-
-    // Returns the file owner of a given file
-    static getFileOwner = async (fileRegister, fileName, selectedUserAccount) => {
-        return await fileRegister.methods.getFileOwner(fileName).call({from: selectedUserAccount});
     }
 
     // Returns if a file is valid or not
@@ -137,18 +141,13 @@ class BlockchainWrapper {
     }
 
     // Edits the file (sets the selected file state to edited and adds the new file to the system)
-    static editFileUpl = async (accessControlContract, selectedFile, fileEdited, encSymmetricKey, selectedUserAccount) => {
-        return await accessControlContract.methods.editFile(selectedFile, fileEdited, encSymmetricKey).send({ from: selectedUserAccount });
+    static editFileUpl = async (accessControlContract, selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile, selectedUserAccount) => {
+        return await accessControlContract.methods.editFile(selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile).send({ from: selectedUserAccount });
     }
 
     // Share File: associates a file with a user given certain permissions
     static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, selectedUserAccount) => {
-        await accessControlContract.methods.shareFile(
-            userAccount, 
-            fileIpfCid, 
-            encryptedSymmetricKeyShared,
-            permissionsArray
-        ).send({ from: selectedUserAccount }) ;
+        await accessControlContract.methods.shareFile(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray).send({ from: selectedUserAccount }) ;
     }
 
     // Downloads the file

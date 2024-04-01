@@ -50,16 +50,13 @@ class UserApp {
       await fileManagerFacadeInstance.storeLocalSotrage(privateKey, publicKey, address);
       // Hash the mnemonic before storing it - using symmetric encryption
       const hashedMnemonic = await fileManagerFacadeInstance.hashMnemonicSymmetricEncryption(mnemonic);
+
+      // Because the usernames are going to be case insensitive, this is writing Maria = maria = MARIA and so it goes
+      userName = userName.toLowerCase();
+      console.log("username: ", userName);
+
       // Cretaes the user to be stored
       var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex'));
-      
-      // Verifies if the user is elegible to register
-      var existingAddress = await fileManagerFacadeInstance.existingAddress(userLogged.account);
-      var existingUserName = await fileManagerFacadeInstance.existingUserName(userLogged.userName);     
-      if (existingAddress || existingUserName) {
-        console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
-        return;
-      }
       
       // Stors the user in the blockchain
       const result = await fileManagerFacadeInstance.userRegistered(userLogged);
