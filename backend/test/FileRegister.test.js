@@ -88,7 +88,6 @@ describe("FileRegister", function () {
         return { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, userAnaPaula, file, fileEdited, fileAnaPaula, file1Wrong, signer1, signer2 };
     }
 
-
     // Tests canAddFile(), fileExists() and addFile() using the uploadFile() => the other cases are tested on the AccessControl.sol
     describe("addFile", function(){
         describe("when the transaction executer is the file owner", async function(){
@@ -345,7 +344,44 @@ describe("FileRegister", function () {
     });
 
     // method getIpfsCIDsByName() is already tested in the AccessControl.test by testing the userAssociatedWithFileName()
+    describe("getIpfsCIDsByName", async function(){
+        describe("when the transaction executer is not the AccessControl contract", async function(){
+            it("should return false and an empty string array", async function(){
+                // Arrange
+                const { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, file, signer1 } = await loadFixture(deployContractAndSetVariables);        
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
 
+                // Act
+                var result = await fileRegisterContract.connect(signer1).getIpfsCIDsByName(file.fileName);
+
+                // Assert
+                expect(result.success).to.equal(false);
+                expect(result.resultStrings).to.deep.equal([]);
+            });
+        });
+    });
+
+    // method getFileHash() is already tested in the AccessControl.test 
+    describe("getFileHash", async function(){
+        describe("when the transaction executer is not the AccessControl contract", async function(){
+            it("should return false and an empty string", async function(){
+                // Arrange
+                const { userRegisterContract, fileRegisterContract, accessControlContract, userAnaRita, file, signer1 } = await loadFixture(deployContractAndSetVariables);        
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                await accessControlContract.connect(signer1).uploadFile(userAnaRita.account, file, encSymmetricKey); // This executes the add file 
+
+                // Act
+                var result = await fileRegisterContract.connect(signer1).getFileHash(file.ipfsCID);
+
+                // Assert
+                expect(result.success).to.equal(false);
+                expect(result.resultString).to.deep.equal("");
+            });
+        });
+    });
     
     describe("getEditedFilesByIpfsCid", async function(){
         describe("when the file CID exists", async function(){

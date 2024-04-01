@@ -77,6 +77,7 @@ describe("AccessControl", function () {
     //        the auditLog verification is done on the AuditLog.test.js
     //        this test verifies if the association between the user and the file was well performed
     // Already tests: elegibleToUpload()
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("uploadFile", function(){
         describe("when the transaction executer is the same as the user account", async function(){
             describe("and the user is not associated with the file, the user exists, the file doesn't exist, and fields are valid", async function(){
@@ -161,6 +162,7 @@ describe("AccessControl", function () {
     });
 
     // Already tests the elegibleToShare
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("shareFile", function(){
         describe("when the user to share is not the file owner or the transaction executer, the user is not associated with the file, the transaction executer is associated with the file with share permissions, file and user exists, file is in the active state and its fields are valid", async function(){
             it("should share the file with the user and add the action to the audit log", async function(){
@@ -365,6 +367,7 @@ describe("AccessControl", function () {
     });
 
     // already tests the elegibleToUpdPermissions()
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("updateUserFilePermissions", function(){
         describe("when the transaction executer is not the user or the file owner, and the transaction executer has share permissions", async function(){
             it("should update the users' permissions and add the action to the Audit Log", async function(){
@@ -512,6 +515,7 @@ describe("AccessControl", function () {
         });
     });
 
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("deactivateFile", function(){
         describe("when the transaction executer has delete permitions over a file, and the file is in the active state", async function(){
             it("should deactivate the file", async function(){
@@ -612,6 +616,7 @@ describe("AccessControl", function () {
     });
 
     // Other cases of this method are tested on the FileReegister.test.js in the editFile method
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("editFile", async function(){
         describe("when the transaction executer has edit permissions over a file and the file is in the active state", async function(){
             it("should associate all users to this new edited file", async function(){
@@ -737,6 +742,7 @@ describe("AccessControl", function () {
         });
     });
 
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("downloadFileAudit", async function(){
         describe("when the transaction executer is the same as the user", async function(){
             describe("and the user has download permissions and the file is in the active state", async function(){
@@ -800,10 +806,30 @@ describe("AccessControl", function () {
             });
         });
         describe("when the transaction executer is not the same as the user", async function(){
+            // Arrange
+            const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+            const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+            await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+            await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // gives the download permissions
 
+            // Act
+            const tx = await accessControl.connect(signer2).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+            await tx.wait();
+
+            // Assert
+            const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+            expect(receipt.status).to.equal(1); // 1 = success
+
+            const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
+            const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
+
+            const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+            expect(result.success).to.equal(true);
+            expect(result.logs.length).to.equal(1); // Already has the upload on the audit log, but doesn't have the download
         });
     });
 
+    // Already tests the recordLogFromAccessControl() and the getLogs() from AuditLog.sol
     describe("removeUserFileAssociation", async function(){
         describe("when the transaction executer is not the same as the user", async function(){
             describe("and the user is not the file owner, the user has share permissions over the file, and the file is in the active state", async function(){
