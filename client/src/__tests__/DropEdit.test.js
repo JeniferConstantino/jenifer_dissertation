@@ -73,78 +73,84 @@ describe('DropEdit', () => {
     });
 
     describe('encryptedSymmetricKeys', () => { 
-        it('should return the encrypted symmetric keys of users with download permissions', async () => {
-            // Assert
-            const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-            fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
-                success: true,
-                resultAddresses: mockrResultAddresses
+        describe('when it executes everything properly', () => {
+            it('should return the encrypted symmetric keys of users with download permissions', async () => {
+                // Assert
+                const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
+                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                    success: true,
+                    resultAddresses: mockrResultAddresses
+                });
+    
+                const mockPubKeyUsers = "mocked_public_key";
+                fileManager.getPubKeyUser.mockResolvedValue({
+                    success: true,
+                    resultString: mockPubKeyUsers
+                });
+    
+                const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
+                fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
+    
+                // Act 
+                const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
+                console.log("encryptedSymmetricKeys: ", encryptedSymmetricKeys);
+    
+                // Arrange
+                expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
+                expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account");
+                expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account_2");
+                expect(fileManager.encryptSymmetricKey).toHaveBeenCalledWith(fileAsBuffer, mockPubKeyUsers);
+                expect(encryptedSymmetricKeys.size).toBe(2);
+                expect(encryptedSymmetricKeys.get("mocked_account")).toBe(mockEncSymmetricKey);
+                expect(encryptedSymmetricKeys.get("mocked_account_2")).toBe(mockEncSymmetricKey);
             });
-
-            const mockPubKeyUsers = "mocked_public_key";
-            fileManager.getPubKeyUser.mockResolvedValue({
-                success: true,
-                resultString: mockPubKeyUsers
-            });
-
-            const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
-            fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
-
-            // Act 
-            const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
-            console.log("encryptedSymmetricKeys: ", encryptedSymmetricKeys);
-
-            // Arrange
-            expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
-            expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account");
-            expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account_2");
-            expect(fileManager.encryptSymmetricKey).toHaveBeenCalledWith(fileAsBuffer, mockPubKeyUsers);
-            expect(encryptedSymmetricKeys.size).toBe(2);
-            expect(encryptedSymmetricKeys.get("mocked_account")).toBe(mockEncSymmetricKey);
-            expect(encryptedSymmetricKeys.get("mocked_account_2")).toBe(mockEncSymmetricKey);
         });
-        it('should handle errors gracefully', async () => {
-            // Arrange
-            fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
-                success: false,
-                resultAddresses: []
+        describe('when it fails in geting users with download permissions over a file', () => {
+            it('should handle errors gracefully', async () => {
+                // Arrange
+                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                    success: false,
+                    resultAddresses: []
+                });
+    
+                const mockPubKeyUsers = "mocked_public_key";
+                fileManager.getPubKeyUser.mockResolvedValue({
+                    success: true,
+                    resultString: mockPubKeyUsers
+                });
+    
+                const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
+                fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
+    
+                // Act
+                const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
+    
+                // Assert
+                expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
+                expect(encryptedSymmetricKeys).toEqual(new Map());
             });
-
-            const mockPubKeyUsers = "mocked_public_key";
-            fileManager.getPubKeyUser.mockResolvedValue({
-                success: true,
-                resultString: mockPubKeyUsers
-            });
-
-            const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
-            fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
-
-            // Act
-            const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
-
-            // Assert
-            expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
-            expect(encryptedSymmetricKeys).toEqual(new Map());
         });
-        it('should console log an error when it fails to get the public key', async () => {
-            // Assert
-            const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-            fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
-                success: true,
-                resultAddresses: mockrResultAddresses
-            });
-
-            fileManager.getPubKeyUser.mockResolvedValue({
-                success: false,
-                resultString: ''
-            });
-
-            // Act 
-            await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
-
-            // Arrange
-            expect(console.log).toHaveBeenCalledWith('something went wrong while trying to get the users public key.');
-        })
+        describe('when it fails to get the public key', () => {
+            it('should console log the error', async () => {
+                // Assert
+                const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
+                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                    success: true,
+                    resultAddresses: mockrResultAddresses
+                });
+    
+                fileManager.getPubKeyUser.mockResolvedValue({
+                    success: false,
+                    resultString: ''
+                });
+    
+                // Act 
+                await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
+    
+                // Arrange
+                expect(console.log).toHaveBeenCalledWith('something went wrong while trying to get the users public key.');
+            })
+        });
     });
 
     describe('storeFile', () => {

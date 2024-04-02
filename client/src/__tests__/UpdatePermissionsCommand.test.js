@@ -109,7 +109,6 @@ describe('UpdatePermissionsCommand', () => {
                 expect(fileManager.getPermissionsOverFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
                 expect(console.log).toHaveBeenCalledWith("Something went wrong while trying to associate the user with the file.");
             });
-        });
-        
+        });  
     });
 });
