@@ -753,7 +753,7 @@ describe("AccessControl", function () {
                 await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKeyAnaRita); // Ana Rita has all permissions over the file
 
                 // Act
-                const tx = await accessControl.downloadFileAudit.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+                const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
                 await tx.wait();
 
                 // Assert
@@ -773,7 +773,7 @@ describe("AccessControl", function () {
                 await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKeyAnaPaula, ["delete"]); // Ana Rita shares the fie with Ana Paula
 
                 // Act
-                const tx = await accessControl.downloadFileAudit.connect(signer2).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+                const tx = await accessControl.connect(signer2).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
                 await tx.wait();
 
                 // Assert
@@ -793,7 +793,7 @@ describe("AccessControl", function () {
                 await accessControl.connect(signer1).deactivateFile(userAnaRita.account, fileAnaRita.ipfsCID);  // deactivates the file => puts the file in the deactive state
 
                 // Act
-                const tx = await accessControl.downloadFileAudit.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+                const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
                 await tx.wait();
 
                 // Assert
