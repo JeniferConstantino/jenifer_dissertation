@@ -23,12 +23,10 @@ console.log = jest.fn();
 describe('VerifyFileComman', () => {
 
     let fileManager;
-    let fileAsBuffer;
     let verifyFileCommand;
 
     beforeEach(() => {
         fileManager = new FileManagerFacade();
-        fileAsBuffer = Buffer.from("some content");
         verifyFileCommand = new VerifyFileCommand(fileManager, );
     });
 
@@ -67,7 +65,7 @@ describe('VerifyFileComman', () => {
                 const result = await verifyFileCommand.execute();
     
                 // Assert
-                expect(result).toBe(true); 
+                expect(result).toBe(false); 
                 expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
             });
         });

@@ -44,6 +44,7 @@ FileApp.getFileType = jest.fn().mockImplementation((fileName) => {
 });
 
 console.error = jest.fn();
+console.log = jest.fn();
 
 describe('DropEdit', () => {
 
@@ -125,6 +126,25 @@ describe('DropEdit', () => {
             expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
             expect(encryptedSymmetricKeys).toEqual(new Map());
         });
+        it('should console log an error when it fails to get the public key', async () => {
+            // Assert
+            const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
+            fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                success: true,
+                resultAddresses: mockrResultAddresses
+            });
+
+            fileManager.getPubKeyUser.mockResolvedValue({
+                success: false,
+                resultString: ''
+            });
+
+            // Act 
+            await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
+
+            // Arrange
+            expect(console.log).toHaveBeenCalledWith('something went wrong while trying to get the users public key.');
+        })
     });
 
     describe('storeFile', () => {

@@ -20,6 +20,7 @@ jest.mock('../helpers/FileApp', () => ({
 }));
 
 console.error = jest.fn();
+console.log = jest.fn();
 
 describe('DownloadFileCommand', () => {
 
@@ -76,6 +77,19 @@ describe('DownloadFileCommand', () => {
 
             // Assert
             expect(console.error).toHaveBeenCalledWith('Error decrypting or downloading file: ', mockError);
+        });
+
+        describe('when it fails to get the encrypted symmetric key', () => {
+            it('should console.log the error', async () => {
+                // Arrange
+                fileManager.getEncSymmetricKeyFileUser.mockResolvedValue({ success: false, resultStrings: [] });
+    
+                // Act
+                await downloadFileCommand.execute();
+    
+                // Assert
+                expect(console.log).toHaveBeenCalledWith('Something went wrong while trying to get the encrypted symmetric key of the users file.');
+            });
         });
     });
 });

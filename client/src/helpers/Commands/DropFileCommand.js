@@ -20,34 +20,39 @@ class DropFileCommand extends Command {
     }
 
     async execute(){
-        // Generate symmetric key
-        const symmetricKey = this.fileManager.generateSymmetricKey(); 
-        // Encrypts the dropped file 
-        const {encryptedFile, iv} = await this.fileManager.encryptFileWithSymmetricKey(this.fileAsBuffer, symmetricKey);
-        
-        // Add the dropped file to IPFS
-        const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
-        console.log('File encrypted and added to IPFS', fileCID);
+        try {
+            // Generate symmetric key
+            const symmetricKey = this.fileManager.generateSymmetricKey(); 
+            // Encrypts the dropped file 
+            const {encryptedFile, iv} = await this.fileManager.encryptFileWithSymmetricKey(this.fileAsBuffer, symmetricKey);
 
-        // Generates the hash of the dropped file
-        const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
+            // Add the dropped file to IPFS
+            const fileCID = await this.fileManager.addFileToIPFS(encryptedFile);
+            console.log('File encrypted and added to IPFS', fileCID);
 
-        // Stores the file in the blockchain
-        const storedFile = await this.storeFile(symmetricKey, iv, fileHash, fileCID);
-        
-        // Verifies file correctly added
-        var resultGetFile = await this.fileManager.getFileByIpfsCID(storedFile.ipfsCID, "active");
-        if (!resultGetFile.success) {
-            console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", resultGetFile);
-            return; 
+            // Generates the hash of the dropped file
+            const fileHash = await this.fileManager.generateHash256(this.fileAsBuffer);
+
+            // Stores the file in the blockchain
+            const storedFile = await this.storeFile(symmetricKey, iv, fileHash, fileCID);
+
+            // Verifies file correctly added
+            var resultGetFile = await this.fileManager.getFileByIpfsCID(storedFile.ipfsCID, "active");
+            if (!resultGetFile.success) {
+                console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. result: ", resultGetFile);
+                return; 
+            }
+            // Verifies if the file is uploaded correctly
+            var result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, storedFile.ipfsCID);
+            if (!result.success) {
+                console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
+                return; 
+            }
+            console.log('Action performed');
+        } catch (error) {
+            console.log('Error storing the file:', error.message);
+            return;
         }
-        // Verifies if the file is uploaded correctly
-        var result = await this.fileManager.getPermissionsOverFile(this.fileManager.selectedUser.account, storedFile.ipfsCID);
-        if (!result.success) {
-            console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ", result);
-            return; 
-        }
-        console.log('Action performed');
     }
 }
 

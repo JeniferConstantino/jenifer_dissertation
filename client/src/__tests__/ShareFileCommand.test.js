@@ -98,5 +98,21 @@ describe('ShareFileCommand', () => {
             expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
             expect(console.log).toHaveBeenCalledWith("It was called 'ShareFileCommand' but the user: ", accountUserToShareFileWith, " is already associated with the file: ", selectedFile.fileName);
         });
+        it('should console log an error when it fails to get the public key', async () => {
+            // Assert
+            fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(false); 
+            fileManager.getEncSymmetricKeyFileUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_enc_symmetric_key' });
+            fileManager.decryptSymmetricKey.mockReturnValue("mocked_decrypted_symmetric_key");
+            fileManager.getPubKeyUser.mockResolvedValue({
+                success: false,
+                resultString: ''
+            });
+
+            // Act 
+            await shareFileCommand.execute();
+
+            // Arrange
+            expect(console.log).toHaveBeenCalledWith('Something went wrong while trying to get the public key of the user.');
+        })
     });
 });

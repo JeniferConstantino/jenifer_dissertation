@@ -55,6 +55,15 @@ describe('DropFileCommand', () => {
         jest.clearAllMocks();
     });
 
+    describe('storeFile', () => {
+        it('should throw an error when called directly', async () => {
+            const dropFileCommand = new DropFileCommand();
+
+            // Act & Assert
+            await expect(dropFileCommand.storeFile()).rejects.toThrow('Method uploadFileAndHandleResult must be implemented by subclasses');
+        });
+    });
+
     describe('execute', () => {
         it('should store the file', async () => {
             // Arrange
