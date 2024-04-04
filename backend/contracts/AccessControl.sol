@@ -111,14 +111,19 @@ contract AccessControl {
         ) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions, "");
             if (validFields) {
-                // Associates the given user with the file
-                User_Has_File memory userFileData = User_Has_File({
-                    userAccount: userAccount,
-                    ipfsCID: fileIpfsCID,
-                    encSymmetricKey: encSymmetricKey,
-                    permissions: permissions
-                });
-                user_Has_File.push(userFileData);
+                // Associates the given user with the file and the respective edited files
+                FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
+                for (uint256 i = 0; i < editedFiles.length; i++) {
+                    string memory editedFileIpfsCID = editedFiles[i].ipfsCID;
+                    // Performs the association between the user and the edited file
+                    User_Has_File memory editedUserFileData = User_Has_File({
+                        userAccount: userAccount,
+                        ipfsCID: editedFileIpfsCID,
+                        encSymmetricKey: encSymmetricKey,
+                        permissions: permissions
+                    });
+                    user_Has_File.push(editedUserFileData);
+                }
 
                 // Writes the audit log
                 auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, helper.stringArrayToString(permissions).resultString, "share");
