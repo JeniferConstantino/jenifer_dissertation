@@ -16,15 +16,12 @@ const Register = () => {
     const [mnemonic, setMnemonic] = useState();                // mnemonic to be set in the info popup
 
     const onNext = async (e) => {
-        if(username.trim() === ''){
-            alert('Please enter a username.');
-            return;
-        }
-
+        const words = username.trim().split(/\s+/);
+       
         // Verifies if there is a user with the same account or with the same name
         var existingAddress = await fileManagerFacadeInstance.current.existingAddress(fileManagerFacadeInstance.current.selectedAccount.current);
         var existingUserName = await fileManagerFacadeInstance.current.existingUserName(username.toLowerCase());     
-        if (existingAddress || existingUserName) {
+        if (existingAddress || existingUserName || words.length > 2 || username.trim() === '') {
             console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
             setShowInfoNamePopup(true);
             setTitleInfoNamePopup("Attention");
@@ -74,7 +71,7 @@ const Register = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome!</h1>
-                        <p>Good to see you arrive here! Set a unique name to use in the app.</p>
+                        <p>Welcome! Let's get started by setting a unique name for you to use in the app.</p>
                     </div>
                     <div className='login-column'>
                         <div className='input-button-container-welcome'>
@@ -101,7 +98,7 @@ const Register = () => {
                 )}
                 {showInfoNamePopup && (
                     <div className='modal-wrapper'>
-                        <InfoPopup handleContinue={handleContinueName} message={"Oops! It seems there's already a user with that name. Please note that capitalization doesn't matter, so try another variation or add something unique to differentiate."} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                        <InfoPopup handleContinue={handleContinueName} message={"Oops! It looks like there's an issue. Please make sure you've entered a unique name with a maximum of two words."} title={titleInfoNamePopup} showInfoPopup = {showInfoNamePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
                     </div>
                 )}
             </div>

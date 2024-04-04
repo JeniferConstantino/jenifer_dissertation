@@ -14,11 +14,7 @@ const Login = () => {
     const [mnemonic, setMnemonic] = useState('');
 
     const onNext = async (e) => {
-        if(mnemonic.trim() === ''){
-            alert('Please enter your mnemonic.');
-            return;
-        }
-
+        
         // Hashes the inserted mnemonic
         var hashedMnemonic = await fileManagerFacadeInstance.current.hashMnemonicSymmetricEncryption(mnemonic);
         // Verifies if the entered mnemonic belongs to a given user
@@ -30,9 +26,9 @@ const Login = () => {
                 handleContinue();
                 return;
             } 
-            // TODO: Shows error popup
+            
             setShowInfoNamePopup(true);
-            setMessage("Invalid Mnemonic");
+            setMessage("Oops! That doesn't look like the correct seed. Please make sure you've entered the seed given to you when you first logged in. Remember, it's private and should not be shared.");
             setTitleInfoNamePopup("Attention");
         }).catch(err=>{
             console.log(err);

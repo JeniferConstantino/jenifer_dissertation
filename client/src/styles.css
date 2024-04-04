@@ -213,7 +213,6 @@ h1 {
 }
 
 .message-popup{
-  margin-top: 18px;
   color: #2E231D;
 }
 
@@ -232,9 +231,9 @@ h1 {
 }
 
 .app-button__popup {
-  padding: 10%;
+  padding: 2%;
   margin-top: 10px;
-  margin-right: 10px;
+  margin-left: 40%;
 }
 
 .app-button__popup-width {
