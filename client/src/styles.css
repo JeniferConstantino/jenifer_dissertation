@@ -98,6 +98,10 @@ h1 {
 /*----------- Login Page -----------*/
 
 .nearfile-heading{
+  color: #2E231D;
+}
+
+.boltColor{
   color: #FF8F39;
 }
 
@@ -484,6 +488,11 @@ h1 {
 .auditlog-header {
   margin-right: auto; 
   padding-bottom: 4vh;
+  opacity: 90%;
+}
+
+.description{
+  opacity: 90%;
 }
 
 .log-entry {

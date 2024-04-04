@@ -38,7 +38,19 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
 
     return (
         <>
-            <h1 className='auditlog-header'>Audit Log</h1>
+            <div className="icon-text-container">
+                <h1 className='auditlog-header'>Audit Log</h1>
+                <FcReadingEbook className="icon" size={25}/>
+                <span className="description"><strong>User(s)</strong></span>
+                <FcDocument className="icon" size={25}/>
+                <span className="description"><strong>File Name</strong></span>
+                <FcExternal className="icon" size={25}/>
+                <span className="description"><strong>Action</strong></span>
+                <FcKey className="icon" size={25}/>
+                <span className="description"><strong>Permissions</strong></span>
+                <FcClock className="icon" size={23}/>
+                <span className="description"><strong>Date</strong></span>
+            </div>
             <div className="content-home-wrapper"> 
                 <div className="uploaded-files-container"> 
                     {logs.slice().reverse().map((log, index) => (

@@ -71,7 +71,7 @@ const Register = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome!</h1>
-                        <p>Welcome! Let's get started by setting a unique name for you to use in the app.</p>
+                        <p>Welcome! Let's get started by setting a <strong className='boltColor'>unique name</strong> for you to use in the app.</p>
                     </div>
                     <div className='login-column'>
                         <div className='input-button-container-welcome'>
