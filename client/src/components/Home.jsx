@@ -10,6 +10,7 @@ import InfoFilePopup from './ActionsOverFiles/InfoFilePopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
+import Menu from './HomeSections/Menu';
 import SharePopup from './ActionsOverFiles/SharePopup';
 import { FileApp } from '../helpers/FileApp';
 
@@ -235,8 +236,9 @@ const Home = () => {
         <>
             {selectedUser && (
                 <> 
-                    <div className={homeClassName}>
+                    <div id="files-section" className={homeClassName}>
                         <div className='menu-wrapper'>
+                            <Menu/>
                             <Logout selectedUser={selectedUser}/>
                         </div>
                         <div className='home-wrapper content-wrapper'>
@@ -246,7 +248,7 @@ const Home = () => {
                         </div>
                     </div>
                 
-                    <div className={homeClassName}>
+                    <div id="audit-log-section" className={homeClassName}>
                         <div className='home-wrapper content-wrapper'>
                             <AuditLog logs={logs} fileManagerFacadeInstance={fileManagerFacadeInstance.current}/>
                             <div className='shadow-overlay shadow-overlay-home'></div>

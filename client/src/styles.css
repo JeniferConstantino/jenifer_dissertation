@@ -19,7 +19,7 @@ html {
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  flex-direction: column; /* Stack the child components vertically */
+  flex-direction: column; 
 }
 
 .container {
@@ -62,8 +62,10 @@ h1 {
   display: flex;
   background-color: white;
   border-radius: 20px;
-  padding: 5%; /* Add horizontal padding */
-  padding-top: 2%;
+  padding-left: 5%;
+  padding-right: 3%;
+  padding-bottom: 3%;
+  padding-top: 3%;
   margin-top: 175px;
 }
 
@@ -78,21 +80,25 @@ h1 {
 }
 
 .app-button {
-  background-color: #FF812C;
+  background-color: #2E231D;
   color: white;
   border: none;
   border-radius: 10px; 
   cursor: pointer;
+  opacity: 90%;
+  font-weight: bold;
+
 }
 
 .app-button:hover {
-  background-color: #FF6600;
+  background-color: #FF8F39;
+  font-weight: bold;
 }
 
 /*----------- Login Page -----------*/
 
 .nearfile-heading{
-  color: #FF812C;
+  color: #FF8F39;
 }
 
 .login-wrapper {
@@ -129,10 +135,15 @@ h1 {
 .nearsoftLogo {
   position: fixed;
   top: 4vh;
-  left: 2vh;
-  width: 127px; 
-  height: 38px; 
+  left: 5vh;
+  width: 80px; 
+  height: 70px; 
   z-index: 1; 
+  border-radius: 100%;
+}
+
+.content-wallet-connection {
+  color: #2E231D;
 }
 
 /*----------- Welcome Page -----------*/
@@ -148,7 +159,11 @@ h1 {
 }
 
 .app-button__welcome:focus {
-  outline: 2px solid #FF812C; /* Adjust the width and color as needed */
+  outline: 1px solid #2E231D;
+}
+
+.app-button__welcome:hover {
+  outline: 0px;
 }
 
 .input-username {
@@ -158,7 +173,7 @@ h1 {
   margin-bottom: 10px; 
 }
 .input-username:focus {
-  outline: 2px solid #C0C0C0; /* Adjust the width and color as needed */
+  outline: 2px solid #C0C0C0;
 }
 
 .input-usernameWelcome {
@@ -172,7 +187,8 @@ h1 {
 /*----------- Popups -----------*/
 .popup-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;  
+  align-items: center;
   font-size: 15px;
   color: #2E231D;
   padding-top: 10px;
@@ -201,6 +217,16 @@ h1 {
   color: #2E231D;
 }
 
+.mnemonic-message{
+  border: 3px solid #ddd;
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.mnemonic-phrase {
+  margin-left: 30%;
+}
+
 .buttons-content {
   padding-right: 10px;
 }
@@ -214,12 +240,12 @@ h1 {
 .app-button__popup-width {
   padding: 2%;
   margin-top: 10px;
-  margin-right: 10px;
+  margin-left: 40%;
 }
 
 .modalPopup {
   position: relative;
-  z-index: 2; /* Ensure the modal appears above the background */
+  z-index: 2; 
   background-color: white;
   border-radius: 10px;
 }
@@ -243,7 +269,7 @@ h1 {
   width: 60%;
   height: 50%;
   padding-left: 40px;
-  flex-direction: column; /* Stack the child components vertically */
+  flex-direction: column; 
 }
 
 .shadow-overlay-home {
@@ -259,8 +285,33 @@ h1 {
 }
 
 .blurred {
-  filter: blur(1px); /* Apply blur effect to the Home component */
-  pointer-events: none; /* Disable interactions with elements in the Home component */
+  filter: blur(1px); 
+  pointer-events: none; 
+}
+
+/*----------- Home Page // Menu section -----------*/
+
+.menu-section {
+  position: absolute;
+  top: 4vh;
+  right: 43%;
+  display: flex;
+}
+
+.menu-section-display{
+  display: flex;
+  flex-direction: row;
+}
+
+.menu-option {
+  padding-top: 16px;
+  padding-right: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.menu-option:hover{
+  color: #FF8F39;
 }
 
 /*----------- Home Page // Logout section -----------*/
@@ -341,7 +392,7 @@ h1 {
   background-color: #C0C0C0;
   padding: 20px; 
   border-radius: 10px;
-  position: absolute; /* Position the background div relative to the content-home-wrapper */
+  position: absolute;
   top: 0; 
   left: 0; 
   right: 0; 
@@ -349,7 +400,7 @@ h1 {
 }
 
 .file-actions-wrapper {
-  margin-bottom: 20px; /* Add some space between the components */
+  margin-bottom: 20px; 
   margin-right: auto;
   display: flex;
   flex-direction: row;
@@ -400,7 +451,6 @@ h1 {
   scrollbar-width: thin; 
   scrollbar-color: transparent; 
 
-  /* WebKit (Chrome, Safari) */
   &::-webkit-scrollbar {
     width: 10px
   }
@@ -420,7 +470,7 @@ h1 {
 .content-home-wrapper {
   display: flex;
   flex-direction: row;
-  position: relative; /* Ensure relative positioning for absolute positioning of children */
+  position: relative;
   padding: 3vh;
 }
 
@@ -476,7 +526,6 @@ h1 {
   display: flex;
   align-items: center;
   z-index: 2; 
-  
   justify-content: center;
 }
 
@@ -486,21 +535,20 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(48, 48, 48, 0.2); /* Semi-transparent black background */
-  z-index: 1; /* Ensure the background appears behind the modal */
+  background-color: rgba(48, 48, 48, 0.2); 
+  z-index: 1; 
 }
 
 .modal {
   position: relative;
-  z-index: 2; /* Ensure the modal appears above the background */
+  z-index: 2; 
   background-color: white;
-  width: 300px;
   padding: 20px;
   border-radius: 10px;
 }
 
 .modal-info-popup {
-  width: 600px;
+  width: 400px;
 }
 
 .display-block {
@@ -604,7 +652,7 @@ h1 {
 }
 
 .column:last-child {
-  flex-basis: 90%; /* Adjust the width of the value column */
+  flex-basis: 90%; 
   max-width: 85%;
 }
 
@@ -660,7 +708,7 @@ h1 {
   content: '';
   display: block;
   width: 14px;
-  border-radius: 2px; /* Border radius of the checkbox */
+  border-radius: 2px;
 }
 
 .permissions-checkbox input[type="checkbox"]:checked::after {
@@ -668,11 +716,11 @@ h1 {
   display: block;
   width: 8px;
   height: 3px;
-  border-left: 2px solid #2E231D; /* Change the color of the checkmark */
-  border-bottom: 2px solid #2E231D; /* Change the color of the checkmark */
-  transform: rotate(-45deg); /* Rotate the checkmark */
-  margin-top: 3px; /* Adjust the position of the checkmark */
-  margin-left: 4px; /* Adjust the position of the checkmark */
+  border-left: 2px solid #2E231D;
+  border-bottom: 2px solid #2E231D; 
+  transform: rotate(-45deg); 
+  margin-top: 3px; 
+  margin-left: 4px;
 }
 
 .input-usernameShare {
@@ -693,7 +741,7 @@ h1 {
 }
 
 .app-button__share:focus {
-  outline: 2px solid #FF812C; /* Adjust the width and color as needed */
+  outline: 2px solid #FF812C; 
 }
 
 .readonly {

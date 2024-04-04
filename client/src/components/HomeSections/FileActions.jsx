@@ -121,7 +121,7 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions
                 <FcOk size={25} />
             </button>
             <button onClick={handlePopupOpenInfo} title="info">
-                <FcInfo size={25} />
+                <FcInfo className={!(selectedFile) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );
