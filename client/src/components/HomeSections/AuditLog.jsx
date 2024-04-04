@@ -43,7 +43,7 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
                 <div className="uploaded-files-container"> 
                     {logs.length > 0 ? (
                         logs.slice().reverse().map((log, index) => (
-                            <div className="audit-log-display"> 
+                            <div className="audit-log-display" key={index}> 
                                 <div key={index} className="log-entry">
                                     <div className="log-column content-padding">
                                         {log.action === 'share' || log.action === 'update permissions' || log.action === 'removed access'? (
