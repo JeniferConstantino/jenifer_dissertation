@@ -487,7 +487,8 @@ h1 {
 .audit-log-display{
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  margin-right: auto;
+
 }
 
 .auditlog-header {
@@ -538,6 +539,9 @@ h1 {
 
 .icon {
   margin-right: 5px; 
+  margin-right: auto;
+  display: flex;
+
 }
 
 /*----------- Home Page // POPUPups -----------*/
