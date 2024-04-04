@@ -778,6 +778,10 @@ h1 {
 }
 
 .app-button__share:focus {
+  outline: 2px solid #2E231D; 
+}
+
+.app-button__share:hover {
   outline: 2px solid #FF812C; 
 }
 

@@ -35,7 +35,7 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
             const blob = await fileManagerFacadeInstance.downloadFile(file); 
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = selectedFile.fileName;
+            downloadLink.download = file.fileName;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
