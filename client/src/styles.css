@@ -332,7 +332,7 @@ h1 {
 .logout-section {
   position: absolute;
   top: 4vh;
-  right: 1%;
+  right: 5vh;
   display: flex;
 }
 
@@ -488,14 +488,16 @@ h1 {
 
 .log-entry {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  padding-bottom: 20px;
 }
 
 .log-column {
   display: flex;
   flex-direction: column;
-  flex: 2; /* Each column takes equal space */
-  min-width: 0; /* Allow content to wrap */
+  flex: 2;
+  min-width: 0; 
 }
 
 .log-column > * {
@@ -512,6 +514,15 @@ h1 {
   justify-content: center;
   align-items: center; 
   margin-bottom: 5px;
+}
+
+.icon-text-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon {
+  margin-right: 5px; 
 }
 
 /*----------- Home Page // POPUPups -----------*/
