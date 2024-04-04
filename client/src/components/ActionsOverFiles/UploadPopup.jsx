@@ -48,6 +48,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                 }
                 await fileManagerFacadeInstance.uploadFile(fileUpl.name, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
+                handleFileUploaded("upload");
             } catch (error) {
                 console.error("Error uploading file:", error);
             }
@@ -80,7 +81,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     // Sets to close the popup to upload a file
     const handleCloseUploadPopup = () => {
         cleanFields();
-        handleClosePopup("upload"); 
+        handleFileUploaded("upload");
     }
 
     const handleCloseWrongFileType = () => {
@@ -90,7 +91,6 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     }
 
     const cleanFields = () => {
-        handleFileUploaded("upload");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
@@ -122,8 +122,8 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                            <button className="app-button__drop app-button" onClick={handleCloseUploadPopup}> Cancel </button>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <button className="app-button__drop app-button" onClick={cleanFields}> Cancel </button>
                                         </>
                                     ) : (
                                         <p> <FcPlus/> Drop your file</p>  

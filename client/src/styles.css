@@ -544,6 +544,7 @@ h1 {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
+  width: 35%;
 }
 
 .modal-info-popup {
@@ -559,6 +560,9 @@ h1 {
   display: none;
 }
 /*----------- Home Page // POPUP Upload + Edit  -----------*/
+.content-drop{
+  word-wrap: break-word;
+}
 
 .section-title-drop-popup {
   display: flex;

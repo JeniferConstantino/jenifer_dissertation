@@ -40,9 +40,9 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                 setShowInfoPopup(true);
                 setShowDragDrop(false);
                 if (validFile) {
-                    setMessage("Congrats! File is valid. Proceed with more verifications.");
+                    setMessage("Congrats! This file seems to be valid. Let's proceed with additional verifications.");
                 } else {
-                    setMessage("Ups. File is not valid. Proceed with more verifications.");
+                    setMessage("Oops! This file doesn't seem to be valid. Let's proceed with additional verifications.");
                 }
             } catch (error) {
                 console.error("Error verifying file:", error);
@@ -115,7 +115,7 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
                                             <button className="app-button__drop app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
                                         </>
                                     ) : (

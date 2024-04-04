@@ -48,6 +48,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                 }
                 await fileManagerFacadeInstance.editFile(fileUpl.name, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
+                handleClosePopup("edit"); 
             } catch (error) {
                 console.error("Error uploading file:", error);
             }
@@ -90,7 +91,6 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
     }
 
     const cleanFields = () => {
-        handleFileUploaded("edit");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
@@ -119,7 +119,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
                                             <button className="app-button__drop app-button" onClick={cleanFields}> Cancel </button>
                                         </>
                                     ) : (
