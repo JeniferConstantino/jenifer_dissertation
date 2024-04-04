@@ -61,6 +61,17 @@ contract AuditLogControl {
             }
         }
 
+        // Sort the logs based on their timestamps
+        for (uint i = 0; i < resultIndex - 1; i++) {
+            for (uint j = 0; j < resultIndex - i - 1; j++) {
+                if (auditLogFile[j].timestamp > auditLogFile[j + 1].timestamp) {
+                    AuditLog memory temp = auditLogFile[j];
+                    auditLogFile[j] = auditLogFile[j + 1];
+                    auditLogFile[j + 1] = temp;
+                }
+            }
+        }
+
         // Resize the result array to remove unused elements
         assembly {
             mstore(auditLogFile, resultIndex)

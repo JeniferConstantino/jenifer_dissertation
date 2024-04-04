@@ -92,7 +92,6 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
                     ):(
                         <p className="message-audit-log">No Audit Logs</p>
                     )}
-                    
                 </div>   
                 <div className="background"></div>
             </div>

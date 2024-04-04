@@ -161,6 +161,7 @@ const Home = () => {
         await getLogs();
         setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
         handleClosePopup(FileApp.FilePermissions.Delete);
+        setSelectedFile(null);
     }
 
     // Closes popup and updates logs
