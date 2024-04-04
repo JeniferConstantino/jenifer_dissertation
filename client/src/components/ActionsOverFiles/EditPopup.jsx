@@ -48,7 +48,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                 }
                 await fileManagerFacadeInstance.editFile(fileUpl.name, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
-                handleClosePopup("edit"); 
+                handleFileUploaded("edit"); 
             } catch (error) {
                 console.error("Error uploading file:", error);
             }

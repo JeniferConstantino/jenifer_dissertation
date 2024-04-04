@@ -5,7 +5,7 @@ import { FileApp } from "../../helpers/FileApp";
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loading, maxFilesPerColumn}) => {
 
     // Sends the file to be decrypt
-    const decryptAndDownload = async (file) => {
+    const select = async (file) => {
         if (selectedFile === file) {
             setSelectedFile(null);
         } else {
@@ -23,7 +23,7 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loa
                     <div 
                         key={index} 
                         className={`uploaded-docs ${selectedFile === file ? 'selected' : ''}`} 
-                        onClick={() => decryptAndDownload(file)}
+                        onClick={() => select(file)}
                     >
                         {file.fileType === FileApp.FileType.Image ? (
                             <>

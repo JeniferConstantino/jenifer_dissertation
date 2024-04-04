@@ -144,6 +144,7 @@ const Home = () => {
             await getLogs();
             setRefreshPage(prevState => !prevState);
             handleClosePopup(popupToClose);
+            setSelectedFile(null);
         } catch (error) {
             console.log("error: ", error);
         }
