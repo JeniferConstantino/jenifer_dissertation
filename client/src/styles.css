@@ -484,11 +484,15 @@ h1 {
 
 
 /*----------- Home Page // Audit Log -----------*/
+.message-audit-log{
+  display: flex;
+  justify-content: space-around;
+}
+
 .audit-log-display{
   display: flex;
   flex-direction: column;
   margin-right: auto;
-
 }
 
 .auditlog-header {

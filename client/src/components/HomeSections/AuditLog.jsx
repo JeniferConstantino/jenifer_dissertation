@@ -41,53 +41,58 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
             <h1 className='auditlog-header'>Audit Log</h1>
             <div className="content-home-wrapper"> 
                 <div className="uploaded-files-container"> 
-                    <div className="audit-log-display"> 
-                        {logs.slice().reverse().map((log, index) => (
-                            <div key={index} className="log-entry">
-                                <div className="log-column content-padding">
-                                    {log.action === 'share' || log.action === 'update permissions' || log.action === 'removed access'? (
-                                        <>
-                                            <div className="icon-text-container">
-                                                <FcReadingEbook className="icon" size={25} />
-                                                <span>{userNamesFrom[log.executer]} -&gt; {userNamesTo[log.userAccount]}</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="icon-text-container">
-                                                <FcReadingEbook className="icon" size={25} />
-                                                <span>{userNamesTo[log.userAccount]}</span> 
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                                <div className="log-column content-padding">
-                                    <div className="icon-text-container">
-                                        <FcDocument className="icon" size={25}/>
-                                        <span>{fileNames[log.fileIpfsCid]}</span>
+                    {logs.length > 0 ? (
+                        logs.slice().reverse().map((log, index) => (
+                            <div className="audit-log-display"> 
+                                <div key={index} className="log-entry">
+                                    <div className="log-column content-padding">
+                                        {log.action === 'share' || log.action === 'update permissions' || log.action === 'removed access'? (
+                                            <>
+                                                <div className="icon-text-container">
+                                                    <FcReadingEbook className="icon" size={25} />
+                                                    <span>{userNamesFrom[log.executer]} -&gt; {userNamesTo[log.userAccount]}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="icon-text-container">
+                                                    <FcReadingEbook className="icon" size={25} />
+                                                    <span>{userNamesTo[log.userAccount]}</span> 
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
-                                </div>
-                                <div className="log-column content-padding">
-                                    <div className="icon-text-container">
-                                        <FcExternal className="icon" size={25}/>
-                                        <span>{log.action}</span>
+                                    <div className="log-column content-padding">
+                                        <div className="icon-text-container">
+                                            <FcDocument className="icon" size={25}/>
+                                            <span>{fileNames[log.fileIpfsCid]}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="log-column content-padding">
-                                    <div className="icon-text-container"> 
-                                        <FcKey className="icon" size={25}/>
-                                        <span>{log.permissions}</span>
+                                    <div className="log-column content-padding">
+                                        <div className="icon-text-container">
+                                            <FcExternal className="icon" size={25}/>
+                                            <span>{log.action}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="log-column content-padding">
-                                    <div className="icon-text-container"> 
-                                        <FcClock className="icon" size={23}/>
-                                        <span>{FileManagerFacade.formatTimestamp(log.timestamp)}</span>
+                                    <div className="log-column content-padding">
+                                        <div className="icon-text-container"> 
+                                            <FcKey className="icon" size={25}/>
+                                            <span>{log.permissions}</span>
+                                        </div>
+                                    </div>
+                                    <div className="log-column content-padding">
+                                        <div className="icon-text-container"> 
+                                            <FcClock className="icon" size={23}/>
+                                            <span>{FileManagerFacade.formatTimestamp(log.timestamp)}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        ))
+                    ):(
+                        <p className="message-audit-log">No Audit Logs</p>
+                    )}
+                    
                 </div>   
                 <div className="background"></div>
             </div>
