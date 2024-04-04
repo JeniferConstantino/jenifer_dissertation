@@ -49,7 +49,6 @@ class ShareFileCommand extends Command {
         
         // Verifies if the file was successfully shared with the user
         var resultUserAssociatedFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
-        console.log("resultUserAssociatedFile: ", resultUserAssociatedFile);
         if (!resultUserAssociatedFile) {
             console.log("Something went wrong while trying to associate the user with the file.");
         } else {

@@ -37,29 +37,32 @@ describe('DeleteFileCommand', () => {
     });
 
     describe('execute', () => { 
-        it('should delete the file and call handleFileDeleted', async () => {
-            // Arrange
-            const deleteFileCommand = new DeleteFileCommand(fileManager, selectedFile, handleFileDeletedMock, uploadedFiles);
-
-            // Act
-            await deleteFileCommand.execute();
-
-            // Assert
-            expect(fileManager.deactivateFile).toHaveBeenCalledWith('mocked_account', 'mocked_ipfsCID_1');
-            expect(handleFileDeletedMock).toHaveBeenCalledWith([{ ipfsCID: 'mocked_ipfsCID_2' }]);
+        describe('when there are no errors while trying too delete the file', () => {
+            it('should delete the file and call handleFileDeleted', async () => {
+                // Arrange
+                const deleteFileCommand = new DeleteFileCommand(fileManager, selectedFile, handleFileDeletedMock, uploadedFiles);
+    
+                // Act
+                await deleteFileCommand.execute();
+    
+                // Assert
+                expect(fileManager.deactivateFile).toHaveBeenCalledWith('mocked_account', 'mocked_ipfsCID_1');
+                expect(handleFileDeletedMock).toHaveBeenCalledWith([{ ipfsCID: 'mocked_ipfsCID_2' }]);
+            });
         });
-
-        it('should handle errors gracefully', async () => {
-            // Arrange
-            const mockError = new Error('Mock error while deactivating file');
-            fileManager.deactivateFile.mockRejectedValueOnce(mockError);
-            const deleteFileCommand = new DeleteFileCommand(fileManager, selectedFile, handleFileDeletedMock, uploadedFiles);
-
-            // Act
-            await deleteFileCommand.execute();
-
-            // Assert
-            expect(console.error).toHaveBeenCalledWith('Error while trying to delete the file: ', mockError);
+        describe('when it fails on deleting a file', () => {
+            it('should console log the error', async () => {
+                // Arrange
+                const mockError = new Error('Mock error while deactivating file');
+                fileManager.deactivateFile.mockRejectedValueOnce(mockError);
+                const deleteFileCommand = new DeleteFileCommand(fileManager, selectedFile, handleFileDeletedMock, uploadedFiles);
+    
+                // Act
+                await deleteFileCommand.execute();
+    
+                // Assert
+                expect(console.error).toHaveBeenCalledWith('Error while trying to delete the file: ', mockError);
+            });
         });
     });
 });

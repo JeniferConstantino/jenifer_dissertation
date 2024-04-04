@@ -20,6 +20,7 @@ jest.mock('../helpers/FileApp', () => ({
 }));
 
 console.error = jest.fn();
+console.log = jest.fn();
 
 describe('DownloadFileCommand', () => {
 
@@ -53,29 +54,44 @@ describe('DownloadFileCommand', () => {
     });
 
     describe('execute', () => { 
-        it('should download the file', async () => {
-            // Arrange
-            
-            // Act
-            await downloadFileCommand.execute();
-
-            // Assert
-            expect(fileManager.getFileFromIPFS).toHaveBeenCalledWith(selectedFile.ipfsCID);
-            expect(fileManager.getEncSymmetricKeyFileUser).toHaveBeenCalledWith(fileManager.selectedUser.account, selectedFile.ipfsCID);
-            expect(fileManager.decryptFileWithSymmetricKey).toHaveBeenCalledWith(selectedFile, expect.any(Buffer), mockFileContent);
-            expect(fileManager.downloadFileAudit).toHaveBeenCalledWith(selectedFile.ipfsCID, fileManager.selectedUser.account);
+        describe('when it executes everything properly', () => {
+            it('should download the file', async () => {
+                // Arrange
+                
+                // Act
+                await downloadFileCommand.execute();
+    
+                // Assert
+                expect(fileManager.getFileFromIPFS).toHaveBeenCalledWith(selectedFile.ipfsCID);
+                expect(fileManager.getEncSymmetricKeyFileUser).toHaveBeenCalledWith(fileManager.selectedUser.account, selectedFile.ipfsCID);
+                expect(fileManager.decryptFileWithSymmetricKey).toHaveBeenCalledWith(selectedFile, expect.any(Buffer), mockFileContent);
+                expect(fileManager.downloadFileAudit).toHaveBeenCalledWith(selectedFile.ipfsCID, fileManager.selectedUser.account);
+            });
         });
-
-        it('should handle errors gracefully', async () => {
-            // Arrange
-            const mockError = new Error('Mock error while downloading file');
-            fileManager.downloadFileAudit.mockRejectedValueOnce(mockError);
-
-            // Act
-            await downloadFileCommand.execute();
-
-            // Assert
-            expect(console.error).toHaveBeenCalledWith('Error decrypting or downloading file: ', mockError);
+        describe('when it fails on executing the download', () => {
+            it('should console log the error', async () => {
+                // Arrange
+                const mockError = new Error('Mock error while downloading file');
+                fileManager.downloadFileAudit.mockRejectedValueOnce(mockError);
+    
+                // Act
+                await downloadFileCommand.execute();
+    
+                // Assert
+                expect(console.error).toHaveBeenCalledWith('Error decrypting or downloading file: ', mockError);
+            });
+        });
+        describe('when it fails to get the encrypted symmetric key', () => {
+            it('should console log the error', async () => {
+                // Arrange
+                fileManager.getEncSymmetricKeyFileUser.mockResolvedValue({ success: false, resultStrings: [] });
+    
+                // Act
+                await downloadFileCommand.execute();
+    
+                // Assert
+                expect(console.log).toHaveBeenCalledWith('Something went wrong while trying to get the encrypted symmetric key of the users file.');
+            });
         });
     });
 });

@@ -1,7 +1,12 @@
 {
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "eth-gas-reporter": "^0.2.27",
     "hardhat": "^2.22.2",
-    "hardhat-deploy": "^0.11.45"
+    "hardhat-deploy": "^0.11.45",
+    "solidity-coverage": "^0.8.11"
+  },
+  "scripts": {
+    "slither": "slither ./contracts --solc-remaps=@openzeppelin=node_modules/@openzeppelin,@chainlink=node_modules/@chainlink --exclude naming-convention,external-function,low-level-calls --buidler-ignore-compile"
   }
 }

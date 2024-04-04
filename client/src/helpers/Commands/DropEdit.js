@@ -32,7 +32,8 @@ class DropEdit extends DropFileCommand {
             // Gets the user public key
             const res = await this.fileManager.getPubKeyUser(userAddress);
             if (!res.success) {
-                console.log("something went wrong while trying to get the users' public key.");
+                console.log("something went wrong while trying to get the users public key.");
+                return '';
             }
             const userPublicKey = res.resultString;
 

@@ -16,7 +16,7 @@ class DownloadFileCommand extends Command {
             // Gets the file encrypted symmetric key
             const result = await this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);
             if (!result.success) {
-                console.log("Something went wrong while trying to get the encrypted symmetric key of the users' file.");
+                console.log("Something went wrong while trying to get the encrypted symmetric key of the users file.");
                 return;
             }
             const fileUserEncryptedSymmetricKey = result.resultString;

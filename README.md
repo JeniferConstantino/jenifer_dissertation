@@ -13,6 +13,8 @@
 4. cd backend < npx hardhat test => to run the tests in the backend
 5. cd client < npm test => to run the tests in the front end
 
+6. cd backend < npx hardhat coverage => to get the report on the test coverage in the backend
+
 # Frequent Problems:
 
 ## CORS Problems

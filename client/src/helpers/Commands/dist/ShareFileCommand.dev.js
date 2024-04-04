@@ -144,7 +144,6 @@ function (_Command) {
 
             case 30:
               resultUserAssociatedFile = _context.sent;
-              console.log("resultUserAssociatedFile: ", resultUserAssociatedFile);
 
               if (!resultUserAssociatedFile) {
                 console.log("Something went wrong while trying to associate the user with the file.");
@@ -152,7 +151,7 @@ function (_Command) {
                 console.log("File Shared.");
               }
 
-            case 33:
+            case 32:
             case "end":
               return _context.stop();
           }

@@ -151,7 +151,7 @@ contract FileRegister {
             }
             return Helper.ResultStringArray(true, ipfsCIDs, "");
         }
-        return Helper.ResultStringArray(true, new string[](0), "Only the AccessControl.sol contract is able to execute this method.");
+        return Helper.ResultStringArray(false, new string[](0), "Only the AccessControl.sol contract is able to execute this method.");
     }
 
     // Returns the state of a file if: the transaction executer is the AccessControl contract

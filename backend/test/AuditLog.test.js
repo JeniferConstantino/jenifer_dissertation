@@ -14,12 +14,11 @@ describe("AuditLog", function () {
         const AccessControl = await ethers.getContractFactory("AccessControl");
         const accessControl = await AccessControl.deploy(helperContract.target);
 
-        const fileRegisterAddress = await accessControl.getFileRegisterAddress();
-        const fileRegisterContract = await hre.ethers.getContractAt("FileRegister", fileRegisterAddress);
-        await fileRegisterContract.setAccessControlAddress(accessControl.target); // Already testing the setAccessControlAddress()
-
         const userRegisterAddress = await accessControl.getUserRegisterAddress();
         const userRegisterContract = await hre.ethers.getContractAt("UserRegister", userRegisterAddress);
+
+        const auditLofControlAddress = await accessControl.getAuditLogControlAddress();
+        const auditLogControlContract = await hre.ethers.getContractAt("AuditLogControl", auditLofControlAddress);
 
         const [signer1, signer2] = await ethers.getSigners(); // Get the first signer 
 
@@ -48,170 +47,73 @@ describe("AuditLog", function () {
             state: "",
             fileHash: "hashFile"
         };
-        return { userRegisterContract, fileRegisterContract,  accessControl, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 };
+        return { userRegisterContract,  auditLogControlContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 };
     }
 
+    describe("recordLogFromAccessControl", async function(){
+        describe("when the transaction executer is not the AccessControl contract", async function(){
+            it("should NOT record the log", async function(){
+                // Arrange
+                const { auditLogControlContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+
+                // Act
+                const tx = await auditLogControlContract.connect(signer1).recordLogFromAccessControl(userAnaRita.account, fileAnaRita.ipfsCID, userAnaRita.account, "download", "download");
+                await tx.wait();
+
+                // Assert
+                const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+                expect(receipt.status).to.equal(1); // 1 = success
+
+                const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+                expect(result.success).to.equal(false);
+                expect(result.logs.length).to.equal(0);
+            });
+        });
+    });
+
+    describe("getLogs", async function(){
+        describe("when the transaction is not associated with the file", async function(){
+            it("should NOT return the file logs", async function(){
+                // Arrange
+                const { userRegisterContract, accessControl, auditLogControlContract, fileAnaRita, userAnaRita, userAnaPaula, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
+                await userRegisterContract.connect(signer2).userRegistered(userAnaPaula); // Register the user
+                await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // Ana Rita owner of the file
+
+                // Act
+                const res = await auditLogControlContract.connect(signer2).getLogs([fileAnaRita.ipfsCID]);
+                
+                // Asset
+                expect(res.success).to.equal(false);
+                expect(res.logs.length).to.equal(0);
+            });
+        });
+    });
+
     // Already tests the recordLogFromAccessControl() and the getLogs()
-    it("Should store on the audit log when a user uploads a file", async function() {
-        // Arrange
-        const { userRegisterContract, accessControl, userAnaRita, fileAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        userRegisterContract.connect(signer1).userRegistered(userAnaRita);
+    // Other tests of this method are in the AccessControl.test.js
+    describe("getLogs + recordLogFromAccessControl", async function(){
+        describe("when the transaction executer is the AccessControl contract", async function(){
+            describe("and the action was well performed, and no previous action was executed", async function(){
+                it("should return false and no logs", async function(){
+                    // Arrange
+                    const { accessControl, userRegisterContract, auditLogControlContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
+                    await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
 
-        // Act
-        const tx = await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // executes the recordLogFromAccessControl
-        await tx.wait();
+                    // Act
+                    const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
+                    await tx.wait();
 
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-        
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress(); 
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-        
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]); // executes the getLogs()
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(1); // It has the upload
-    });
+                    // Assert
+                    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+                    expect(receipt.status).to.equal(1); // 1 = success
 
-    it("Should store on the audit log when a user shares a file", async function() {
-        // Arrange
-        const { userRegisterContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        userRegisterContract.connect(signer1).userRegistered(userAnaRita);
-        userRegisterContract.connect(signer2).userRegistered(userAnaPaula);
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // executes the recordLogFromAccessControl
-
-        // Act
-        const tx = await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["share, delete"]);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-        
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress(); 
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-        
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]); // executes the getLogs()
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(2); // It has the upload and the share
-    });
-
-    it("Should store on the audit log when a user updates the users' permissions over file", async function() {
-        // Arrange
-        const { userRegisterContract, accessControl, userAnaRita, userAnaPaula, fileAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        userRegisterContract.connect(signer1).userRegistered(userAnaRita);
-        userRegisterContract.connect(signer2).userRegistered(userAnaPaula);
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // executes the recordLogFromAccessControl
-        await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["share, delete"]);
-
-        // Act
-        const tx = await accessControl.connect(signer1).updateUserFilePermissions(userAnaPaula.account, fileAnaRita.ipfsCID, ["share"]);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-        
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress(); 
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-        
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]); // executes the getLogs()
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(3); // It has the upload, the share, and the update permissions
-    });
-
-    it("Should store on the audit log when a user downloads a file if the transaction executer is the same as the user and the user has download permissions over the file", async function() {
-        // Arrange
-        const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // gives the download permissions
-
-        // Act
-        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-        
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-        
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(2); // It has the upload and download in the log
-    });
-
-    it("Shouldn't store the download in the audit log if the transaction executer is different from the user and the user has download permissions over the file", async function() {
-        // Arrange
-        const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // gives the download permissions
-
-        // Act
-        const tx = await accessControl.connect(signer2).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(1); // Already has the upload on the audit log, but doesn't have the download 
-    });
-
-    it("Shouldn't store the download in the audit log if the transaction executer is the same as the  user and the user doesn't have permissions over the file", async function(){
-        // Arrange
-        const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
-        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
-
-        // Act
-        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
-        expect(result.success).to.equal(false);
-        expect(result.logs.length).to.equal(0); 
-    });
-
-    // Already tests the delete() action being stored in the audit log
-    it("Shouldn't store the download in the audit log if the file is not in the active state", async function(){
-        // Arrange
-        const { accessControl, userRegisterContract, fileAnaRita, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);
-        const encSymmetricKey = "encSymmetricKeyFileAnaRita";
-        await userRegisterContract.connect(signer1).userRegistered(userAnaRita); // Register the user
-        await accessControl.connect(signer1).uploadFile(userAnaRita.account, fileAnaRita, encSymmetricKey); // gives the download permissions
-        await accessControl.connect(signer1).deactivateFile(userAnaRita.account, fileAnaRita.ipfsCID); // Eliminates the file by deactivating it
-
-        // Act
-        const tx = await accessControl.connect(signer1).downloadFileAudit(fileAnaRita.ipfsCID, userAnaRita.account);
-        await tx.wait();
-
-        // Assert
-        const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-        expect(receipt.status).to.equal(1); // 1 = success
-
-        const auditLogControlAddress = await accessControl.connect(signer1).getAuditLogControlAddress();
-        const auditLogControlContract = await ethers.getContractAt("AuditLogControl", auditLogControlAddress);
-
-        const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
-        expect(result.success).to.equal(true);
-        expect(result.logs.length).to.equal(2); // It has the upload and delete in the log, it didn't store the download
+                    const result = await auditLogControlContract.connect(signer1).getLogs([fileAnaRita.ipfsCID]);
+                    expect(result.success).to.equal(false);
+                    expect(result.logs.length).to.equal(0); 
+                });
+            });
+        });
     });
 });

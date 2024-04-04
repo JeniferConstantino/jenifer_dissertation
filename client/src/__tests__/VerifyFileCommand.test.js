@@ -23,12 +23,10 @@ console.log = jest.fn();
 describe('VerifyFileComman', () => {
 
     let fileManager;
-    let fileAsBuffer;
     let verifyFileCommand;
 
     beforeEach(() => {
         fileManager = new FileManagerFacade();
-        fileAsBuffer = Buffer.from("some content");
         verifyFileCommand = new VerifyFileCommand(fileManager, );
     });
 
@@ -37,20 +35,39 @@ describe('VerifyFileComman', () => {
     });
 
     describe('execute', () => { 
-        it('should verify the file', async () => {
-            // Arrange
-            const mockFileHash = 'mockedHash';
-            const mockValidFile = true;
-
-            fileManager.generateHash256.mockResolvedValue(mockFileHash);
-            fileManager.verifyValidFile.mockResolvedValue(mockValidFile);
-
-            // Act
-            const result = await verifyFileCommand.execute();
-
-            // Assert
-            expect(result).toBe(true); 
-            expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
+        describe('when the file exists in the blockchain, associated to the user and in the active state', () => {
+            it('should return true', async () => {
+                // Arrange
+                const mockFileHash = 'mockedHash';
+                const mockValidFile = true;
+    
+                fileManager.generateHash256.mockResolvedValue(mockFileHash);
+                fileManager.verifyValidFile.mockResolvedValue(mockValidFile);
+    
+                // Act
+                const result = await verifyFileCommand.execute();
+    
+                // Assert
+                expect(result).toBe(true); 
+                expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
+            });
+        });
+        describe('when the file does not exists in the blockchain, associated to the user and in the active state', () => {
+            it('should return false', async () => {
+                // Arrange
+                const mockFileHash = 'mockedHash';
+                const mockValidFile = false;
+    
+                fileManager.generateHash256.mockResolvedValue(mockFileHash);
+                fileManager.verifyValidFile.mockResolvedValue(mockValidFile);
+    
+                // Act
+                const result = await verifyFileCommand.execute();
+    
+                // Assert
+                expect(result).toBe(false); 
+                expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
+            });
         });
     });
 });
