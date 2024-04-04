@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {useWeb3} from '../helpers/web3Client';
 import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
-import AuditLog from './HomeSections/AuditLog/AuditLog';
+import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
 import EditPopup from './ActionsOverFiles/EditPopup';
 import VeifyPopup from './ActionsOverFiles/VeifyPopup';
@@ -249,12 +249,13 @@ const Home = () => {
                         </div>
                     </div>
                 
+
                     <div id="audit-log-section" className={homeClassName}>
                         <div className='home-wrapper content-wrapper'>
                             <AuditLog logs={logs} fileManagerFacadeInstance={fileManagerFacadeInstance.current}/>
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
-                    </div>
+                    </div>                    
                     
                     <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
                     <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
