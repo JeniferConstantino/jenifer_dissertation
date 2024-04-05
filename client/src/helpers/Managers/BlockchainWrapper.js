@@ -72,8 +72,8 @@ class BlockchainWrapper {
     }
 
     // Gets the users associated with the file
-    static getUsersAssociatedWithFile = async (accessControlContract, file, selectedUserAccount) => {
-        return accessControlContract.methods.getUsersAssociatedWithFile(file).call({from: selectedUserAccount});
+    static getUsersAssociatedWithFile = async (accessControlContract, fileIpfsCID, selectedUserAccount) => {
+        return accessControlContract.methods.getUsersAssociatedWithFile(fileIpfsCID).call({from: selectedUserAccount});
     }
 
     // Returns true if the user is already associated with a file with the given name

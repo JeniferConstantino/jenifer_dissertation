@@ -245,8 +245,8 @@ class FileManagerFacade {
   }
 
   // Gets the users associated with the file 
-  async getUsersAssociatedWithFile(file) {
-    return await BlockchainWrapper.getUsersAssociatedWithFile(this.accessControlContract, file, this.selectedUser.account);
+  async getUsersAssociatedWithFile(fileIpfsCID) {
+    return await BlockchainWrapper.getUsersAssociatedWithFile(this.accessControlContract, fileIpfsCID, this.selectedUser.account);
   }
 
   // Hashes the mnemonic using symmetric encryption

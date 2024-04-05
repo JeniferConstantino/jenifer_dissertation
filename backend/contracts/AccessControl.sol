@@ -299,14 +299,14 @@ contract AccessControl {
     }
 
     // Returns all users that have download permissions over a file
-    function getUsersAssociatedWithFile(FileRegister.File memory file) external view returns (Helper.ResultAddressArray memory) {
-        if (messageSenderAssociatedToFile(file.ipfsCID) && 
-            keccak256(abi.encodePacked(fileRegister.getFileState(file.ipfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
+    function getUsersAssociatedWithFile(string memory fileIpfsCID) external view returns (Helper.ResultAddressArray memory) {
+        if (messageSenderAssociatedToFile(fileIpfsCID) && 
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
         ) {
             address[] memory usersAssociatedFile = new address[](user_Has_File.length);
             uint resultIndex = 0;
             for (uint256 i=0; i<user_Has_File.length; i++) {
-                if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)) &&
+                if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(fileIpfsCID)) &&
                     keccak256(abi.encodePacked(fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString)) == keccak256(abi.encodePacked("active"))
                 ) {
                     usersAssociatedFile[resultIndex] = user_Has_File[i].userAccount;
