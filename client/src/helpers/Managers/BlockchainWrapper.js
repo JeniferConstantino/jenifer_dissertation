@@ -81,9 +81,14 @@ class BlockchainWrapper {
         return await accessControlContract.methods.userAssociatedWithFileName(userAccount, fileName).call({from: selectedUserAccount});
     }
 
-    // Get the encrypted symmetric key of a file associated with a given user
+    // Get the encrypted symmetric key of one singel file associated with a given user
     static getEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
         return await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
+    }
+
+    // Get the all the encrypted symmetric keys of a file (including passed editings) associated with a given user 
+    static getAllEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
+        return await accessControlContract.methods.getAllEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
     }
 
     // Get active files from the Blockchain given a user
@@ -146,8 +151,8 @@ class BlockchainWrapper {
     }
 
     // Share File: associates a file with a user given certain permissions
-    static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, selectedUserAccount) => {
-        await accessControlContract.methods.shareFile(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray).send({ from: selectedUserAccount }) ;
+    static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray, selectedUserAccount) => {
+        await accessControlContract.methods.shareFile(userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray).send({ from: selectedUserAccount }) ;
     }
 
     // Downloads the file

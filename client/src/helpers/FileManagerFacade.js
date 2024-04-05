@@ -129,9 +129,14 @@ class FileManagerFacade {
     return await BlockchainWrapper.getUserUserName(this.userRegisterContract, userAccount, this.selectedUser.account);
   }
 
-  // Gets the encrypted symmetric key of a given file and associated with a given user
+  // Get the symmetric key of a single file asociated with a given user
   async getEncSymmetricKeyFileUser(userAccount, fileIpfscid){
     return await BlockchainWrapper.getEncSymmetricKeyFileUser(this.accessControlContract, userAccount, fileIpfscid);
+  }
+
+  // Get the all the encrypted symmetric keys of a file (including passed editings) associated with a given user 
+  async getAllEncSymmetricKeyFileUser(userAccount, fileIpfscid){
+    return await BlockchainWrapper.getAllEncSymmetricKeyFileUser(this.accessControlContract, userAccount, fileIpfscid);
   }
 
   // Gets the permissions a given user has over a file
@@ -190,8 +195,8 @@ class FileManagerFacade {
   }
 
   // Associates a user with a file, given certain permissions
-  fileShare(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray) {
-    return BlockchainWrapper.fileShare(this.accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, this.selectedUser.account);
+  fileShare(userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray) {
+    return BlockchainWrapper.fileShare(this.accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray, this.selectedUser.account);
   }
 
   // Downloads the users' file
@@ -275,14 +280,19 @@ class FileManagerFacade {
     return EncryptionWrapper.storeLocalSotrage(privateKey, publicKey, address);
   }
 
-  // Decrypts a symmetric key using a private key
-  decryptSymmetricKey(encSymmetricKeyBuffer, privateKey) {
-    return EncryptionWrapper.decryptSymmetricKey(encSymmetricKeyBuffer, privateKey);
+  // Decrypts a group of symmetric keys using a private key
+  decryptSymmetricKeys(encSymmetricKeys, privateKey) {
+    return EncryptionWrapper.decryptSymmetricKeys(encSymmetricKeys, privateKey);
   }
 
-  // Encrypts a symmetric key using a public key
+  // Encrypts a single symmetric key using a public key 
   encryptSymmetricKey(symmetricKey, userPublicKey) {
     return EncryptionWrapper.encryptSymmetricKey(symmetricKey, userPublicKey);
+  }
+
+  // Encrypts symmetric keys using a public key
+  encryptSymmetricKeys(symmetricKeys, userPublicKey) {
+    return EncryptionWrapper.encryptSymmetricKeys(symmetricKeys, userPublicKey);
   }
 
   // Decrypts a file uising a symmetric key

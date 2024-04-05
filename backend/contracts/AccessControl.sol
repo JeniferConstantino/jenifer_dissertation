@@ -42,7 +42,7 @@ contract AccessControl {
             permissionsOwner[1] = "download";
             permissionsOwner[2] = "delete";
             permissionsOwner[3] = "edit";
-            bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, encSymmetricKey, permissionsOwner, file.state); // Validates if the file and the user exist
+            bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, permissionsOwner, file.state); // Validates if the file and the user exist
             if (validFields){
                 // Adds the file
                 fileRegister.addFile(file);
@@ -105,11 +105,12 @@ contract AccessControl {
     //             userAccount is not already associated with the file
     //             file exists with "active" state
     //             user exists
-    function shareFile (address userAccount, string memory fileIpfsCID, string memory encSymmetricKey, string[] memory permissions) external {
+    // NOTE: the encrypted symmetric keys order has to be accordingly with the edited files received
+    function shareFile (address userAccount, string memory fileIpfsCID, string[] memory encSymmetricKeys, string[] memory permissions) external {
         if (elegibleToShare(userAccount, fileIpfsCID) &&
             keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
         ) {
-            bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, encSymmetricKey, permissions, "");
+            bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, permissions, "");
             if (validFields) {
                 // Associates the given user with the file and the respective edited files
                 FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
@@ -119,7 +120,7 @@ contract AccessControl {
                     User_Has_File memory editedUserFileData = User_Has_File({
                         userAccount: userAccount,
                         ipfsCID: editedFileIpfsCID,
-                        encSymmetricKey: encSymmetricKey,
+                        encSymmetricKey: encSymmetricKeys[i],
                         permissions: permissions
                     });
                     user_Has_File.push(editedUserFileData);
@@ -203,7 +204,7 @@ contract AccessControl {
     // The user can only get the symmetric key if: he is associated with the file 
     //                                             the transaction executer is the same as the account user
     //                                             the file is in the active state
-    function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) external view returns (Helper.ResultString memory) {
+    function getEncSymmetricKeyFileUser (address accountUser, string memory fileIpfsCID) public view returns (Helper.ResultString memory) {
         if ((msg.sender == accountUser) && 
              userAssociatedWithFile(accountUser, fileIpfsCID) &&
              (keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) ||
@@ -217,6 +218,31 @@ contract AccessControl {
         } 
         return Helper.ResultString(false, "", "Make sure the transaction executer as to be the same as the user, the user has to be associated with the file, and the file has to be in the active or edited state.");
     }
+
+    // Returns the enncrypted symmetric key of a given user and the file (including all the file editings)
+    // The user can only get the symmetric keys of the files and the past edited files if: he is associated with the file
+    //                                                                                     the transaction executer is the same as the user account
+    //                                                                                     the file is in the active state
+    function getAllEncSymmetricKeyFileUser(address accountUser, string memory fileIpfsCID) external view returns (Helper.ResultStringArray memory) {
+        if ((msg.sender == accountUser) && 
+        userAssociatedWithFile(accountUser, fileIpfsCID) &&
+        (keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) ||
+        keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("edited")) 
+        )) 
+        {
+            // Get all the past file editings, including the current file
+            FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
+            string[] memory encSymmetricKeysFiles = new string[](editedFiles.length);
+
+            for(uint256 i=0; i<editedFiles.length; i++) {
+                string memory encSymmetricKeyFile = getEncSymmetricKeyFileUser(accountUser, editedFiles[i].ipfsCID).resultString;
+                encSymmetricKeysFiles[i] = encSymmetricKeyFile;
+            }
+            return Helper.ResultStringArray(true, encSymmetricKeysFiles, "");
+        }
+        return Helper.ResultStringArray(false, new string[](0), "Make sure the transaction executer as to be the same as the user, the user has to be associated with the file, and the file has to be in the active or edited state.");
+    }
+
 
     // Returns the permissions of a given user over a given file if: mesg.sender is associated with the file
     //                                                               the file is in the active state

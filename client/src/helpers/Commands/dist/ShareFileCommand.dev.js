@@ -7,8 +7,6 @@ exports["default"] = void 0;
 
 var _Command2 = _interopRequireDefault(require("./Command"));
 
-var _buffer = require("buffer");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -58,7 +56,7 @@ function (_Command) {
   _createClass(ShareFileCommand, [{
     key: "execute",
     value: function execute() {
-      var permissionsArray, userIsAssociatedWithFile, result, encSymmetricKey, encSymmetricKeyBuffer, decryptedSymmetricKey, publicKeyUserToShareFileWith, encryptedSymmetricKeyShared, resultUserAssociatedFile;
+      var permissionsArray, userIsAssociatedWithFile, result, encSymmetricKeys, decSymmetricKeys, publicKeyUserToShareFileWith, encryptedSymmetricKeysShared, resultUserAssociatedFile;
       return regeneratorRuntime.async(function execute$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -94,7 +92,7 @@ function (_Command) {
 
             case 7:
               _context.next = 9;
-              return regeneratorRuntime.awrap(this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID));
+              return regeneratorRuntime.awrap(this.fileManager.getAllEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID));
 
             case 9:
               result = _context.sent;
@@ -104,45 +102,47 @@ function (_Command) {
                 break;
               }
 
-              console.log("something went wrong while trying to get the encrypted symmetric key of the user");
+              console.log("something went wrong while trying to get the encrypted symmetric keys of the given file and user");
               return _context.abrupt("return");
 
             case 13:
-              encSymmetricKey = result.resultString; // Decrypts symmetric key using the users' private key
+              encSymmetricKeys = result.resultStrings; // Decrypts the given symmetric keys, using the Users' public key
 
-              encSymmetricKeyBuffer = _buffer.Buffer.from(encSymmetricKey, 'base64');
-              decryptedSymmetricKey = this.fileManager.decryptSymmetricKey(encSymmetricKeyBuffer, localStorage.getItem('privateKey')); // Get the public key of the user to share file with
+              _context.next = 16;
+              return regeneratorRuntime.awrap(this.fileManager.decryptSymmetricKeys(encSymmetricKeys, localStorage.getItem('privateKey')));
 
-              _context.next = 18;
+            case 16:
+              decSymmetricKeys = _context.sent;
+              _context.next = 19;
               return regeneratorRuntime.awrap(this.fileManager.getPubKeyUser(this.accountUserToShareFileWith));
 
-            case 18:
+            case 19:
               result = _context.sent;
 
               if (result.success) {
-                _context.next = 22;
+                _context.next = 23;
                 break;
               }
 
               console.log("Something went wrong while trying to get the public key of the user.");
               return _context.abrupt("return");
 
-            case 22:
-              publicKeyUserToShareFileWith = result.resultString; // Encrypts the symmetric key with the users' public key
+            case 23:
+              publicKeyUserToShareFileWith = result.resultString; // Encrypts the symmetric keys with the users' public key
 
-              _context.next = 25;
-              return regeneratorRuntime.awrap(this.fileManager.encryptSymmetricKey(decryptedSymmetricKey, publicKeyUserToShareFileWith));
+              _context.next = 26;
+              return regeneratorRuntime.awrap(this.fileManager.encryptSymmetricKeys(decSymmetricKeys, publicKeyUserToShareFileWith));
 
-            case 25:
-              encryptedSymmetricKeyShared = _context.sent;
-              _context.next = 28;
-              return regeneratorRuntime.awrap(this.fileManager.fileShare(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, encryptedSymmetricKeyShared.toString('base64'), permissionsArray));
+            case 26:
+              encryptedSymmetricKeysShared = _context.sent;
+              _context.next = 29;
+              return regeneratorRuntime.awrap(this.fileManager.fileShare(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, encryptedSymmetricKeysShared, permissionsArray));
 
-            case 28:
-              _context.next = 30;
+            case 29:
+              _context.next = 31;
               return regeneratorRuntime.awrap(this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID));
 
-            case 30:
+            case 31:
               resultUserAssociatedFile = _context.sent;
 
               if (!resultUserAssociatedFile) {
@@ -151,7 +151,7 @@ function (_Command) {
                 console.log("File Shared.");
               }
 
-            case 32:
+            case 33:
             case "end":
               return _context.stop();
           }

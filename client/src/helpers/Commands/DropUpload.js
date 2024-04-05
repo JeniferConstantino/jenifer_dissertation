@@ -21,7 +21,7 @@ class DropUpload extends DropFileCommand {
         
         let fileUploaded = new FileApp(this.fileUplName, fileVersion, "" , fileOwner, fileCID, iv.toString('base64'), "", fileHash);
         fileUploaded.fileType = FileApp.getFileType(this.fileUplName);
-        let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey')).toString('base64');
+        let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey'));
 
         // Associates the current user with the uploaded file 
         await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
