@@ -92,7 +92,6 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) =
 
     const iconComponent = titleInfoPopup === "Valid" ? FcCheckmark : FcCancel;
 
-
     return(
         <>
             <div className={showHideClassName}>

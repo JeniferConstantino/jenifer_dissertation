@@ -1,11 +1,13 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
+import { FcDown } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
 
 const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, handleOpenPopup, show, permissions, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [uploadedFiles, setUploadedFiles ] = useState([]);
+    const [ownerName, setOwnerName ] = useState("");
 
     // Get all edited files of the current selected file
     const fetchFiles = useCallback(async () => {
@@ -24,9 +26,25 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
         }
     }, [fileManagerFacadeInstance, selectedFile]);
 
+    const fetchOwner = useCallback(async () => {
+        if (selectedFile != null) {
+            await fileManagerFacadeInstance.getUserUserName(selectedFile.owner).then((result) => {
+                if (result.success) {   
+                    setOwnerName(result.resultString);
+                } else {
+                    console.log("Something went wrong while trying to get the name of the file owner.");
+                }
+            });
+        }
+    }, [fileManagerFacadeInstance, selectedFile]);
+
     useEffect(() => {
         fetchFiles();
     }, [fetchFiles]);
+
+    useEffect(() => {
+        fetchOwner();
+    }, [fetchOwner]);
 
     // Preforms the file download
     const handleDownload = async (file) => {
@@ -88,7 +106,7 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                                             <strong>Owner</strong>
                                         </div>
                                         <div className='column'>
-                                            {selectedFile.owner}
+                                            {ownerName}
                                         </div>
                                     </div>
                                     <div className='row'>
@@ -113,7 +131,10 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                                     <div className="edit-list">
                                         <ul>
                                             {uploadedFiles.map((file, index) => (
-                                                <li key={index} onClick={() => handleDownload(file)}>v.{file[2]} {file[1]}</li>
+                                                <div className='div-pre-edits' key={index}>
+                                                    <FcDown className='icon-info' size={19}/>
+                                                    <li key={index} onClick={() => handleDownload(file)}>  v.{file[2]} {file[1]}</li>
+                                                </div>
                                             ))}
                                         </ul>
                                     </div>

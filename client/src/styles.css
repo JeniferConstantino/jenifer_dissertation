@@ -699,6 +699,15 @@ h1 {
   display: flex;
 }
 
+.div-pre-edits{
+  display: flex;
+  flex-direction: row;
+}
+
+.icon-info{
+  padding-top: 5px;
+}
+
 /*----------- Home Page // POPUP Share Document -----------*/
 .share-file-header {
   color: #FF812C;
