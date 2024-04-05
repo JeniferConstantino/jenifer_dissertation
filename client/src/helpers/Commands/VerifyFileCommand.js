@@ -17,6 +17,8 @@ class VerifyFileCommand extends Command {
         const validFile = await this.fileManager.verifyValidFile(this.fileManager.selectedUser.account, fileHash);
 
         if (validFile) {
+            // Records the file verification
+            await this.fileManager.recordFileVerification(this.fileManager.selectedUser.account, fileHash);
             return true;
         } 
         return false;

@@ -6,7 +6,7 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
     const [userNamesTo, setUserNamesTo] = useState({});
     const [userNamesFrom, setUserNamesFrom] = useState({});
     const [fileNames, setFileNames] = useState({});
-
+    
     useEffect(() => {
         const fetchUserNames = async () => {
             const namesTo = {};

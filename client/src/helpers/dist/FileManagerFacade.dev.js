@@ -681,17 +681,17 @@ function () {
           }
         }
       }, null, this);
-    } // Verifies if a mnemonic belongs to a given user
+    } // Records the file verification
 
   }, {
-    key: "verifyUserAssociatedMnemonic",
-    value: function verifyUserAssociatedMnemonic(mnemonic, user) {
-      return regeneratorRuntime.async(function verifyUserAssociatedMnemonic$(_context28) {
+    key: "recordFileVerification",
+    value: function recordFileVerification(userAccount, fileHash) {
+      return regeneratorRuntime.async(function recordFileVerification$(_context28) {
         while (1) {
           switch (_context28.prev = _context28.next) {
             case 0:
               _context28.next = 2;
-              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].verifyUserAssociatedMnemonic(this.userRegisterContract, mnemonic, user, this.selectedUser.account));
+              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].recordFileVerification(this.accessControlContract, userAccount, fileHash, this.selectedUser.account));
 
             case 2:
               return _context28.abrupt("return", _context28.sent);
@@ -702,17 +702,17 @@ function () {
           }
         }
       }, null, this);
-    } // Returns the user
+    } // Verifies if a mnemonic belongs to a given user
 
   }, {
-    key: "getUser",
-    value: function getUser(user) {
-      return regeneratorRuntime.async(function getUser$(_context29) {
+    key: "verifyUserAssociatedMnemonic",
+    value: function verifyUserAssociatedMnemonic(mnemonic, user) {
+      return regeneratorRuntime.async(function verifyUserAssociatedMnemonic$(_context29) {
         while (1) {
           switch (_context29.prev = _context29.next) {
             case 0:
               _context29.next = 2;
-              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].getUser(this.userRegisterContract, user, this._selectedAccount.current));
+              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].verifyUserAssociatedMnemonic(this.userRegisterContract, mnemonic, user, this.selectedUser.account));
 
             case 2:
               return _context29.abrupt("return", _context29.sent);
@@ -723,17 +723,17 @@ function () {
           }
         }
       }, null, this);
-    } // Gets the users with download permissions over a file 
+    } // Returns the user
 
   }, {
-    key: "getUsersWithDownloadPermissionsFile",
-    value: function getUsersWithDownloadPermissionsFile(file) {
-      return regeneratorRuntime.async(function getUsersWithDownloadPermissionsFile$(_context30) {
+    key: "getUser",
+    value: function getUser(user) {
+      return regeneratorRuntime.async(function getUser$(_context30) {
         while (1) {
           switch (_context30.prev = _context30.next) {
             case 0:
               _context30.next = 2;
-              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].getUsersWithDownloadPermissionsFile(this.accessControlContract, file, this.selectedUser.account));
+              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].getUser(this.userRegisterContract, user, this._selectedAccount.current));
 
             case 2:
               return _context30.abrupt("return", _context30.sent);
@@ -744,17 +744,17 @@ function () {
           }
         }
       }, null, this);
-    } // Hashes the mnemonic using symmetric encryption
+    } // Gets the users with download permissions over a file 
 
   }, {
-    key: "hashMnemonicSymmetricEncryption",
-    value: function hashMnemonicSymmetricEncryption(mnemonic) {
-      return regeneratorRuntime.async(function hashMnemonicSymmetricEncryption$(_context31) {
+    key: "getUsersWithDownloadPermissionsFile",
+    value: function getUsersWithDownloadPermissionsFile(file) {
+      return regeneratorRuntime.async(function getUsersWithDownloadPermissionsFile$(_context31) {
         while (1) {
           switch (_context31.prev = _context31.next) {
             case 0:
               _context31.next = 2;
-              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].hashMnemonicSymmetricEncryption(mnemonic));
+              return regeneratorRuntime.awrap(_BlockchainWrapper["default"].getUsersWithDownloadPermissionsFile(this.accessControlContract, file, this.selectedUser.account));
 
             case 2:
               return _context31.abrupt("return", _context31.sent);
@@ -764,18 +764,18 @@ function () {
               return _context31.stop();
           }
         }
-      });
-    } // Generates a hash using SHA-256
+      }, null, this);
+    } // Hashes the mnemonic using symmetric encryption
 
   }, {
-    key: "generateHash256",
-    value: function generateHash256(fileAsBuffer) {
-      return regeneratorRuntime.async(function generateHash256$(_context32) {
+    key: "hashMnemonicSymmetricEncryption",
+    value: function hashMnemonicSymmetricEncryption(mnemonic) {
+      return regeneratorRuntime.async(function hashMnemonicSymmetricEncryption$(_context32) {
         while (1) {
           switch (_context32.prev = _context32.next) {
             case 0:
               _context32.next = 2;
-              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].generateHash256(fileAsBuffer));
+              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].hashMnemonicSymmetricEncryption(mnemonic));
 
             case 2:
               return _context32.abrupt("return", _context32.sent);
@@ -783,6 +783,27 @@ function () {
             case 3:
             case "end":
               return _context32.stop();
+          }
+        }
+      });
+    } // Generates a hash using SHA-256
+
+  }, {
+    key: "generateHash256",
+    value: function generateHash256(fileAsBuffer) {
+      return regeneratorRuntime.async(function generateHash256$(_context33) {
+        while (1) {
+          switch (_context33.prev = _context33.next) {
+            case 0:
+              _context33.next = 2;
+              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].generateHash256(fileAsBuffer));
+
+            case 2:
+              return _context33.abrupt("return", _context33.sent);
+
+            case 3:
+            case "end":
+              return _context33.stop();
           }
         }
       });
@@ -799,25 +820,25 @@ function () {
     value: function encryptFileWithSymmetricKey(file, symmetricKey) {
       var _ref, encryptedFile, iv;
 
-      return regeneratorRuntime.async(function encryptFileWithSymmetricKey$(_context33) {
+      return regeneratorRuntime.async(function encryptFileWithSymmetricKey$(_context34) {
         while (1) {
-          switch (_context33.prev = _context33.next) {
+          switch (_context34.prev = _context34.next) {
             case 0:
-              _context33.next = 2;
+              _context34.next = 2;
               return regeneratorRuntime.awrap(_EncryptionWrapper["default"].encryptFileWithSymmetricKey(file, symmetricKey));
 
             case 2:
-              _ref = _context33.sent;
+              _ref = _context34.sent;
               encryptedFile = _ref.encryptedFile;
               iv = _ref.iv;
-              return _context33.abrupt("return", {
+              return _context34.abrupt("return", {
                 encryptedFile: encryptedFile,
                 iv: iv
               });
 
             case 6:
             case "end":
-              return _context33.stop();
+              return _context34.stop();
           }
         }
       });
@@ -832,15 +853,15 @@ function () {
   }, {
     key: "generateKeysFromMnemonic",
     value: function generateKeysFromMnemonic(mnemonic) {
-      return regeneratorRuntime.async(function generateKeysFromMnemonic$(_context34) {
+      return regeneratorRuntime.async(function generateKeysFromMnemonic$(_context35) {
         while (1) {
-          switch (_context34.prev = _context34.next) {
+          switch (_context35.prev = _context35.next) {
             case 0:
-              return _context34.abrupt("return", _EncryptionWrapper["default"].generateKeysFromMnemonic(mnemonic));
+              return _context35.abrupt("return", _EncryptionWrapper["default"].generateKeysFromMnemonic(mnemonic));
 
             case 1:
             case "end":
-              return _context34.stop();
+              return _context35.stop();
           }
         }
       });
@@ -849,15 +870,15 @@ function () {
   }, {
     key: "storeLocalSotrage",
     value: function storeLocalSotrage(privateKey, publicKey, address) {
-      return regeneratorRuntime.async(function storeLocalSotrage$(_context35) {
+      return regeneratorRuntime.async(function storeLocalSotrage$(_context36) {
         while (1) {
-          switch (_context35.prev = _context35.next) {
+          switch (_context36.prev = _context36.next) {
             case 0:
-              return _context35.abrupt("return", _EncryptionWrapper["default"].storeLocalSotrage(privateKey, publicKey, address));
+              return _context36.abrupt("return", _EncryptionWrapper["default"].storeLocalSotrage(privateKey, publicKey, address));
 
             case 1:
             case "end":
-              return _context35.stop();
+              return _context36.stop();
           }
         }
       });
@@ -884,33 +905,12 @@ function () {
   }, {
     key: "decryptFileWithSymmetricKey",
     value: function decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent) {
-      return regeneratorRuntime.async(function decryptFileWithSymmetricKey$(_context36) {
-        while (1) {
-          switch (_context36.prev = _context36.next) {
-            case 0:
-              _context36.next = 2;
-              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent));
-
-            case 2:
-              return _context36.abrupt("return", _context36.sent);
-
-            case 3:
-            case "end":
-              return _context36.stop();
-          }
-        }
-      });
-    } // Retursn all files in IPFS
-
-  }, {
-    key: "getFileFromIPFS",
-    value: function getFileFromIPFS(ipfsCID) {
-      return regeneratorRuntime.async(function getFileFromIPFS$(_context37) {
+      return regeneratorRuntime.async(function decryptFileWithSymmetricKey$(_context37) {
         while (1) {
           switch (_context37.prev = _context37.next) {
             case 0:
               _context37.next = 2;
-              return regeneratorRuntime.awrap(_IPFSWrapper["default"].getFileFromIPFS(ipfsCID));
+              return regeneratorRuntime.awrap(_EncryptionWrapper["default"].decryptFileWithSymmetricKey(selectedFile, encryptedSymmetricKeyBuffer, fileContent));
 
             case 2:
               return _context37.abrupt("return", _context37.sent);
@@ -921,17 +921,17 @@ function () {
           }
         }
       });
-    } // Adds a file to IPFS
+    } // Retursn all files in IPFS
 
   }, {
-    key: "addFileToIPFS",
-    value: function addFileToIPFS(file) {
-      return regeneratorRuntime.async(function addFileToIPFS$(_context38) {
+    key: "getFileFromIPFS",
+    value: function getFileFromIPFS(ipfsCID) {
+      return regeneratorRuntime.async(function getFileFromIPFS$(_context38) {
         while (1) {
           switch (_context38.prev = _context38.next) {
             case 0:
               _context38.next = 2;
-              return regeneratorRuntime.awrap(_IPFSWrapper["default"].addFileToIPFS(file));
+              return regeneratorRuntime.awrap(_IPFSWrapper["default"].getFileFromIPFS(ipfsCID));
 
             case 2:
               return _context38.abrupt("return", _context38.sent);
@@ -939,6 +939,27 @@ function () {
             case 3:
             case "end":
               return _context38.stop();
+          }
+        }
+      });
+    } // Adds a file to IPFS
+
+  }, {
+    key: "addFileToIPFS",
+    value: function addFileToIPFS(file) {
+      return regeneratorRuntime.async(function addFileToIPFS$(_context39) {
+        while (1) {
+          switch (_context39.prev = _context39.next) {
+            case 0:
+              _context39.next = 2;
+              return regeneratorRuntime.awrap(_IPFSWrapper["default"].addFileToIPFS(file));
+
+            case 2:
+              return _context39.abrupt("return", _context39.sent);
+
+            case 3:
+            case "end":
+              return _context39.stop();
           }
         }
       });

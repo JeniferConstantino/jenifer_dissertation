@@ -170,6 +170,12 @@ const Home = () => {
         handleClosePopup(FileApp.FilePermissions.Share);
     }
 
+    // Closes verify popup
+    const handleVerify = async () => {
+        await getLogs();
+        handleClosePopup(FileApp.FilePermissions.Verify);
+    }
+
     // Placeholder functions for file actions (upload, delete, share)
     const handleOpenPopup = (chosenAction) => {
         switch (chosenAction) {
@@ -260,7 +266,7 @@ const Home = () => {
                     
                     <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
                     <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
-                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
+                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleVerify={handleVerify} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>

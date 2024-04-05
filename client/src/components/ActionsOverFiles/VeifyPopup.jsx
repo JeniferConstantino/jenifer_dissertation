@@ -5,7 +5,7 @@ import { FcPlus } from "react-icons/fc";
 import InfoPopup from '../Infos/InfoPopup';
 import { FcCheckmark, FcCancel } from "react-icons/fc";
 
-const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children}) => {
+const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
@@ -75,11 +75,10 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
     // Sets to close the popup to verify a file
     const handleCloseVerifyPopup = () => {
         cleanFields();
-        handleClosePopup("verify"); 
+        handleVerify(); 
     }
 
     const handleContinue = () => {
-        // file version is -1, indicating that is a reupload of an existing file
         cleanFields();
     }
 

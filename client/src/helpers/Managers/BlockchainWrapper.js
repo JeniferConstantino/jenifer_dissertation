@@ -115,6 +115,11 @@ class BlockchainWrapper {
         return await accessControlContract.methods.verifyValidFile(userAccount, fileHash).call({from: selectedUserAccount});
     }
 
+    // Records the file verification
+    static recordFileVerification = async (accessControlContract, userAccount, fileHash, selectedUserAccount) => {
+        return await accessControlContract.methods.recordFileVerification(userAccount, fileHash).send({from: selectedUserAccount});
+    }
+
     // Gets the permissions a user has over a file
     static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, fileIpfsCid, selectedUserAccount) => {
         return await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, fileIpfsCid).call({from: selectedUserAccount}); 

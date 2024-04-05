@@ -169,6 +169,42 @@ contract AccessControl {
         }
     }
 
+    // Verifies if a file is valid and stores in the audit log
+    function recordFileVerification (address userAccount, string memory fileHash) external {
+        // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
+        for (uint256 i=0; i<user_Has_File.length; i++) {
+            string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
+            string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
+            if ( user_Has_File[i].userAccount == userAccount &&
+                (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
+                (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
+            ){
+                // Writes to the Audit Log
+                auditLogControl.recordLogFromAccessControl(msg.sender, user_Has_File[i].ipfsCID, userAccount, "-", "success verification");
+                return;
+            }
+        }
+    }
+
+    // Verifies if a file is valid or not. 
+    // A file is valid if: the user has a file (is associated with a file)
+    //                     in the active state 
+    //                     with the same file hash
+    function verifyValidFile (address userAccount, string memory fileHash) external view returns (bool) {
+        // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
+        for (uint256 i=0; i<user_Has_File.length; i++) {
+            string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
+            string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
+            if ( user_Has_File[i].userAccount == userAccount &&
+                (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
+                (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
+            ){
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Deletes a file if: the transaction executer as "Delete" permissions over the file
     //                    the file exists in the active state
     function deactivateFile(address userAccount, string memory fileIpfsCid) external {
@@ -440,25 +476,6 @@ contract AccessControl {
             selectedFile.owner != address(0)
         ) {
             return true;
-        }
-        return false;
-    }
-
-    // Verifies if a file is valid or not. 
-    // A file is valid if: the user has a file (is associated with a file)
-    //                     in the active state 
-    //                     with the same file hash
-    function verifyValidFile (address userAccount, string memory fileHash) external view returns (bool) {
-        // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
-        for (uint256 i=0; i<user_Has_File.length; i++) {
-            string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
-            string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
-            if ( user_Has_File[i].userAccount == userAccount &&
-                (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
-                (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
-            ){
-                return true;
-            }
         }
         return false;
     }

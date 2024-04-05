@@ -229,6 +229,11 @@ class FileManagerFacade {
     return await BlockchainWrapper.verifyValidFile(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
   }
 
+  // Records the file verification
+  async recordFileVerification(userAccount, fileHash) {
+    return await BlockchainWrapper.recordFileVerification(this.accessControlContract, userAccount, fileHash, this.selectedUser.account);
+  }
+
   // Verifies if a mnemonic belongs to a given user
   async verifyUserAssociatedMnemonic(mnemonic, user) {
     return await BlockchainWrapper.verifyUserAssociatedMnemonic(this.userRegisterContract, mnemonic, user, this.selectedUser.account);
