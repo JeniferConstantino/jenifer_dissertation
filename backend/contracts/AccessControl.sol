@@ -182,21 +182,24 @@ contract AccessControl {
         }
     }
 
-    // Remove the relationship between a user and a file
+    // Remove the relationship between a user and a file (inlcuding his past editings)
     function removeUserFileAssociation(address userAccount, string memory fileIpfsCID) external {
         if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
-            for (uint i=0; i<user_Has_File.length; i++) {
-                if (user_Has_File[i].userAccount == userAccount && 
-                    keccak256(bytes(user_Has_File[i].ipfsCID)) == keccak256(bytes(fileIpfsCID))) {
-                    // Remove the entry by swapping it with the last element and then reducing the array length
-                    user_Has_File[i] = user_Has_File[user_Has_File.length - 1];
-                    user_Has_File.pop();
-
-                    // Writes to the Audit Log
-                    auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, "-", "removed access");
-                    return;
+            // Gets the file and the respetive file editings
+            FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
+            for (uint256 j = 0; j < editedFiles.length; j++) {
+                for (uint i=0; i<user_Has_File.length; i++) {
+                    if (user_Has_File[i].userAccount == userAccount && 
+                        keccak256(bytes(user_Has_File[i].ipfsCID)) == keccak256(bytes(editedFiles[j].ipfsCID))) {
+                        // Remove the entry by swapping it with the last element and then reducing the array length
+                        user_Has_File[i] = user_Has_File[user_Has_File.length - 1];
+                        user_Has_File.pop();
+                    }
                 }
-            }
+            }            
+            // Writes to the Audit Log
+            auditLogControl.recordLogFromAccessControl(msg.sender, fileIpfsCID, userAccount, "-", "removed access");
+            return;
         }
     }
 

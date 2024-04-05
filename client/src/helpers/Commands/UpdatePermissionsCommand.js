@@ -51,7 +51,7 @@ class UpdatePermissionsCommand extends Command {
                     console.log("File Shared."); 
                 }     
             } else {
-                // remove the relationship between the user and the file
+                // remove the relationship between the user and the file (inlcuding all the files past editions)
                 await this.fileManager.removeUserFileAssociation(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
 
                 // Verifies if the relationship was well removed
