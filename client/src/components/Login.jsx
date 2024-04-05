@@ -65,7 +65,7 @@ const Login = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome back!</h1>
-                        <p>Please enter your secret seed phrase.</p>
+                        <p>Please enter your  <strong className='boltColor'>secret</strong> seed phrase.</p>
                     </div>
                     <div className='login-column'>
                         <div className='input-button-container-welcome'>
