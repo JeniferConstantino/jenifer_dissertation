@@ -1111,7 +1111,7 @@ describe("AccessControl", function () {
         });
     });
 
-    describe("getUsersWithDownloadPermissionsFile", async function(){
+    describe("getUsersAssociatedWithFile", async function(){
         describe("when the message sender is associated with the file", async function(){
             describe("and the file is in the active state", async function(){
                 it("should return the users' addresses that are associated with download permissions", async function(){
@@ -1124,7 +1124,7 @@ describe("AccessControl", function () {
                     await accessControl.connect(signer1).shareFile(userAnaPaula.account, fileAnaRita.ipfsCID, encSymmetricKey, ["download", "delete"]); // Ana Rita shares the fie with Ana Paula
 
                     // Act
-                    const result = await accessControl.connect(signer1).getUsersWithDownloadPermissionsFile(fileAnaRita);
+                    const result = await accessControl.connect(signer1).getUsersAssociatedWithFile(fileAnaRita);
 
                     // Assert
                     expect(result.success).to.equal(true);
@@ -1142,7 +1142,7 @@ describe("AccessControl", function () {
                     await accessControl.connect(signer1).deactivateFile(userAnaRita.account, fileAnaRita.ipfsCID);  // deactivates the file => puts the file in the deactive state
 
                     // Act
-                    const result = await accessControl.connect(signer1).getUsersWithDownloadPermissionsFile(fileAnaRita);
+                    const result = await accessControl.connect(signer1).getUsersAssociatedWithFile(fileAnaRita);
 
                     // Assert
                     expect(result.success).to.equal(false);

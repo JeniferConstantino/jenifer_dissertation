@@ -298,26 +298,26 @@ contract AccessControl {
         return Helper.ResultStringArray(false, new string[](0), "The transaction executer has to be associated with the file, and the file should be in the active state.");
     }
 
-    // Returns all user that have download permissions over a file
-    function getUsersWithDownloadPermissionsFile(FileRegister.File memory file) external view returns (Helper.ResultAddressArray memory) {
+    // Returns all users that have download permissions over a file
+    function getUsersAssociatedWithFile(FileRegister.File memory file) external view returns (Helper.ResultAddressArray memory) {
         if (messageSenderAssociatedToFile(file.ipfsCID) && 
             keccak256(abi.encodePacked(fileRegister.getFileState(file.ipfsCID).resultString)) ==  keccak256(abi.encodePacked("active"))
         ) {
-            address[] memory usersWithDownloadPermFile = new address[](user_Has_File.length);
+            address[] memory usersAssociatedFile = new address[](user_Has_File.length);
             uint resultIndex = 0;
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(file.ipfsCID)) &&
                     keccak256(abi.encodePacked(fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString)) == keccak256(abi.encodePacked("active"))
                 ) {
-                    usersWithDownloadPermFile[resultIndex] = user_Has_File[i].userAccount;
+                    usersAssociatedFile[resultIndex] = user_Has_File[i].userAccount;
                     resultIndex++;
                 }
             }
             // Resize the result array to remove unused elements
             assembly {
-                mstore(usersWithDownloadPermFile, resultIndex)
+                mstore(usersAssociatedFile, resultIndex)
             }
-            return Helper.ResultAddressArray(true, usersWithDownloadPermFile, "");
+            return Helper.ResultAddressArray(true, usersAssociatedFile, "");
         }
         return Helper.ResultAddressArray(false, new address[](0), "Something went wrong while trying to get the users with download permissions over the file.");
     }

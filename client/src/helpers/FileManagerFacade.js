@@ -244,9 +244,9 @@ class FileManagerFacade {
     return await BlockchainWrapper.getUser(this.userRegisterContract, user, this._selectedAccount.current);
   }
 
-  // Gets the users with download permissions over a file 
-  async getUsersWithDownloadPermissionsFile(file) {
-    return await BlockchainWrapper.getUsersWithDownloadPermissionsFile(this.accessControlContract, file, this.selectedUser.account);
+  // Gets the users associated with the file 
+  async getUsersAssociatedWithFile(file) {
+    return await BlockchainWrapper.getUsersAssociatedWithFile(this.accessControlContract, file, this.selectedUser.account);
   }
 
   // Hashes the mnemonic using symmetric encryption

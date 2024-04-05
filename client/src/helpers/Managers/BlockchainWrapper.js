@@ -71,9 +71,9 @@ class BlockchainWrapper {
         return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
     }
 
-    // Gets the users with download permissions over a file
-    static getUsersWithDownloadPermissionsFile = async (accessControlContract, file, selectedUserAccount) => {
-        return accessControlContract.methods.getUsersWithDownloadPermissionsFile(file).call({from: selectedUserAccount});
+    // Gets the users associated with the file
+    static getUsersAssociatedWithFile = async (accessControlContract, file, selectedUserAccount) => {
+        return accessControlContract.methods.getUsersAssociatedWithFile(file).call({from: selectedUserAccount});
     }
 
     // Returns true if the user is already associated with a file with the given name

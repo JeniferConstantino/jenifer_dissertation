@@ -18,7 +18,7 @@ class DropEdit extends DropFileCommand {
     // Gets the encrypted symmetric key for each user that has download permissions over a file
     async encryptedSymmetricKeys(selectedFile, symmetricKey) {
         // Gets the users that have download permissions of the file to be edited
-        const result = await this.fileManager.getUsersWithDownloadPermissionsFile(selectedFile);
+        const result = await this.fileManager.getUsersAssociatedWithFile(selectedFile);
         if (!result.success) {
             console.log("Error: ", result.message);
         }
