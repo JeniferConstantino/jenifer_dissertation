@@ -6,6 +6,7 @@ jest.mock('../helpers/FileManagerFacade', () => ({
     FileManagerFacade: jest.fn().mockImplementation(() => ({
         generateHash256: jest.fn(),
         verifyValidFile: jest.fn(),
+        recordFileVerification: jest.fn(),
         selectedUser: { account: 'mocked_account' },
     }))
 }));

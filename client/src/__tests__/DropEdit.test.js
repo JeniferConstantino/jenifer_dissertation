@@ -9,6 +9,7 @@ jest.mock('../helpers/FileManagerFacade', () => ({
         getPubKeyUser: jest.fn(),
         encryptSymmetricKey: jest.fn(),
         editFileUpl: jest.fn(),
+        getUsersAssociatedWithFile: jest.fn(),
         selectedUser: { account: 'mocked_account' }
     }))
 }));
@@ -77,7 +78,7 @@ describe('DropEdit', () => {
             it('should return the encrypted symmetric keys of users with download permissions', async () => {
                 // Assert
                 const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
                     success: true,
                     resultAddresses: mockrResultAddresses
                 });
@@ -96,7 +97,7 @@ describe('DropEdit', () => {
                 console.log("encryptedSymmetricKeys: ", encryptedSymmetricKeys);
     
                 // Arrange
-                expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
+                expect(fileManager.getUsersAssociatedWithFile).toHaveBeenCalledWith("mocked_ipfsCID_1");
                 expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account");
                 expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account_2");
                 expect(fileManager.encryptSymmetricKey).toHaveBeenCalledWith(fileAsBuffer, mockPubKeyUsers);
@@ -108,7 +109,7 @@ describe('DropEdit', () => {
         describe('when it fails in geting users with download permissions over a file', () => {
             it('should handle errors gracefully', async () => {
                 // Arrange
-                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
                     success: false,
                     resultAddresses: []
                 });
@@ -126,7 +127,7 @@ describe('DropEdit', () => {
                 const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
     
                 // Assert
-                expect(fileManager.getUsersWithDownloadPermissionsFile).toHaveBeenCalledWith(selectedFile);
+                expect(fileManager.getUsersAssociatedWithFile).toHaveBeenCalledWith("mocked_ipfsCID_1");
                 expect(encryptedSymmetricKeys).toEqual(new Map());
             });
         });
@@ -134,7 +135,7 @@ describe('DropEdit', () => {
             it('should console log the error', async () => {
                 // Assert
                 const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-                fileManager.getUsersWithDownloadPermissionsFile.mockResolvedValue({
+                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
                     success: true,
                     resultAddresses: mockrResultAddresses
                 });

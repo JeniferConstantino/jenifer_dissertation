@@ -16,10 +16,12 @@ jest.mock('../helpers/FileManagerFacade', () => ({
     FileManagerFacade: jest.fn().mockImplementation(() => ({
         verifyUserAssociatedWithFile: jest.fn(),
         getEncSymmetricKeyFileUser: jest.fn(),
-        decryptSymmetricKey: jest.fn(),
         getPubKeyUser: jest.fn(),
+        encryptSymmetricKeys: jest.fn(),
         encryptSymmetricKey: jest.fn(),
         fileShare: jest.fn(),
+        getAllEncSymmetricKeyFileUser: jest.fn(),
+        decryptSymmetricKeys: jest.fn(),
         selectedUser: { account: 'mocked_account' },
     }))
 }));
@@ -59,10 +61,10 @@ describe('ShareFileCommand', () => {
             it('should share the file', async () => {
                 // Arrange
                 fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(false); 
-                fileManager.getEncSymmetricKeyFileUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_enc_symmetric_key' });
-                fileManager.decryptSymmetricKey.mockReturnValue("mocked_decrypted_symmetric_key");
+                fileManager.getAllEncSymmetricKeyFileUser.mockResolvedValueOnce({success: true, resultStrings: ['mocked_enc_symmetric_key']});
+                fileManager.decryptSymmetricKeys.mockResolvedValueOnce(['mocked_decrypted_symmetric_key']);                
                 fileManager.getPubKeyUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_public_key' });
-                fileManager.encryptSymmetricKey.mockResolvedValueOnce('mocked_encrypted_symmetric_key');
+                fileManager.encryptSymmetricKeys.mockResolvedValueOnce(['mocked_encrypted_symmetric_key']);
                 fileManager.fileShare.mockResolvedValueOnce(); 
                 fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(true); 
     
@@ -71,10 +73,10 @@ describe('ShareFileCommand', () => {
     
                 // Assert
                 expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(fileManager.getEncSymmetricKeyFileUser).toHaveBeenCalledWith(fileManager.selectedUser.account, selectedFile.ipfsCID);
+                expect(fileManager.getAllEncSymmetricKeyFileUser).toHaveBeenCalledWith(fileManager.selectedUser.account, selectedFile.ipfsCID);
                 expect(fileManager.getPubKeyUser).toHaveBeenCalledWith(accountUserToShareFileWith);
-                expect(fileManager.encryptSymmetricKey).toHaveBeenCalledWith('mocked_decrypted_symmetric_key', 'mocked_public_key');
-                expect(fileManager.fileShare).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, 'mocked_encrypted_symmetric_key', ['edit']);
+                expect(fileManager.encryptSymmetricKeys).toHaveBeenCalledWith(['mocked_decrypted_symmetric_key'], 'mocked_public_key');
+                expect(fileManager.fileShare).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, ['mocked_encrypted_symmetric_key'], ['edit']);
                 expect(console.log).toHaveBeenCalledWith("File Shared.");
             });
         });
@@ -82,13 +84,15 @@ describe('ShareFileCommand', () => {
             it('should return error', async () => {
                 // Arrange
                 fileManager.getEncSymmetricKeyFileUser.mockResolvedValueOnce({ success: false, resultString: '' });
+                fileManager.getAllEncSymmetricKeyFileUser.mockResolvedValueOnce({success: true, resultStrings: ['mocked_enc_symmetric_key']});
+                fileManager.getPubKeyUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_public_key' });
     
                 // Act
                 await shareFileCommand.execute();
     
                 // Assert
                 expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(console.log).toHaveBeenCalledWith("something went wrong while trying to get the encrypted symmetric key of the user");
+                expect(console.log).toHaveBeenCalledWith("Something went wrong while trying to associate the user with the file.");
             });
         });
         describe('when the suer is already associated with the file', () => {
@@ -108,8 +112,8 @@ describe('ShareFileCommand', () => {
             it('should console log an error', async () => {
                 // Assert
                 fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(false); 
-                fileManager.getEncSymmetricKeyFileUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_enc_symmetric_key' });
-                fileManager.decryptSymmetricKey.mockReturnValue("mocked_decrypted_symmetric_key");
+                fileManager.getAllEncSymmetricKeyFileUser.mockResolvedValueOnce({ success: true, resultString: 'mocked_enc_symmetric_key' });
+                fileManager.decryptSymmetricKeys.mockReturnValue("mocked_decrypted_symmetric_key");
                 fileManager.getPubKeyUser.mockResolvedValue({
                     success: false,
                     resultString: ''
