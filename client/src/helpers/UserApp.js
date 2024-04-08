@@ -70,6 +70,7 @@ class UserApp {
       console.log("Something went wrong when trying to add the user to the blockchain.");       
     } catch (error) {
         console.error("Transaction error: ", error.message);
+        throw error;
     }
   }
 

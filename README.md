@@ -26,6 +26,7 @@ In this report, only transactions are ilustrated, this is, get methods aren't be
 
 ## Front-end 
 cd client < npm test 
+cd client < npx jest --coverage => to run with test coverage ( a folder called coverage is created. Open in chrome file: "index.html")
 
 ## Back-end
 cd backend < npx hardhat test < npx hardhat coverage => a folder called "coverage" is generated. Open index.html in browser
