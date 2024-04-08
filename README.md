@@ -11,13 +11,24 @@
 2. cd backend < npx hardhat compile < npx hardhat node and, in a seperate powershell: npx hardhat run scripts/deploy_all.js --network localhost
 3. cd client < npm run start
 
+# Eth Gas Reporter
+cd backend < npx hardhat test
+
+**To be correctly executed:**
+1. It was necessary to install: npm install –save-dev eth-gas-reporter and add a configuration in the hardhat.config.js.
+    1.1. It is necesary to create an account in: https://pro.coinmarketcap.com/account/ and get the API key 
+    1.2. Create a .env file and past: COINMARKETCAP_API_KEY="{your_api_key}" 
+2. To **generate report** uncomment lines in hardhat.config.js.
+
+In this report, only transactions are ilustrated, this is, get methods aren't because they don't use gas.
+
 # Test Coverage
 
 ## Front-end 
 cd client < npm test 
 
 ## Back-end
-cd backend < npx hardhat test < npx hardhat coverage
+cd backend < npx hardhat test < npx hardhat coverage => a folder called "coverage" is generated. Open index.html in browser
 
 # Security Analysis
 
