@@ -1,4 +1,4 @@
-/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("FileRegister", function () {
@@ -473,4 +473,4 @@ describe("FileRegister", function () {
             });
         });
     });
-});*/
+});
