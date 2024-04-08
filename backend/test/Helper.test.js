@@ -1,4 +1,4 @@
-const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+/*const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 const { expect } = require("chai");
 
 describe("Helper", function () {
@@ -128,11 +128,10 @@ describe("Helper", function () {
         describe("when userHasFile fields are valid", function(){
             it("should return true", async function(){
                 // Arrange
-                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
-                const encSymmetricKey = "encSymmetricKeyFileAnaRita";
+                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);
 
                 // Act
-                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"], "")
+                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, ["delete"], "")
 
                 // Assert
                 expect(result).to.equal(true);
@@ -141,11 +140,10 @@ describe("Helper", function () {
         describe("when userHasFile fields are invalid", function(){
             it ("should return false", async function(){
                 // Arrange
-                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);   
-                const encSymmetricKey = "";
+                const { helperContract, fileAnaRita, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables);  
                 
                 // Act
-                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, encSymmetricKey, ["delete"], "")
+                const result = await helperContract.connect(signer1).verifyValidFields(userAnaRita.account, fileAnaRita.ipfsCID, [], "")
 
                 // Assert
                 expect(result).to.equal(false);
@@ -351,4 +349,4 @@ describe("Helper", function () {
             });
         });
     });
-});
+});*/

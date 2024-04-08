@@ -106,12 +106,13 @@ contract AccessControl {
     //             file exists with "active" state
     //             user exists
     // NOTE: the encrypted symmetric keys order has to be accordingly with the edited files received
-    function shareFile (address userAccount, string memory fileIpfsCID, string[] memory encSymmetricKeys, string[] memory permissions) external {
+    function shareFile (address userAccount, string memory fileIpfsCID, string[] memory encSymmetricKeys, string[] memory permissions) external{
         if (elegibleToShare(userAccount, fileIpfsCID) &&
             keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
         ) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, permissions, "");
             if (validFields) {
+                
                 // Associates the given user with the file and the respective edited files
                 FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
                 for (uint256 i = 0; i < editedFiles.length; i++) {
@@ -258,7 +259,7 @@ contract AccessControl {
         return Helper.ResultString(false, "", "Make sure the transaction executer as to be the same as the user, the user has to be associated with the file, and the file has to be in the active or edited state.");
     }
 
-    // Returns the enncrypted symmetric key of a given user and the file (including all the file editings)
+    // Returns the encrypted symmetric key of a given user and the file (including all the file editings)
     // The user can only get the symmetric keys of the files and the past edited files if: he is associated with the file
     //                                                                                     the transaction executer is the same as the user account
     //                                                                                     the file is in the active state
