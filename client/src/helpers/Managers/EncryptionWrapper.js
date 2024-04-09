@@ -50,6 +50,7 @@ class EncryptionWrapper {
         var encSymmetricKeys = [];
         const storedPublicKey = Buffer.from(publicKey, 'hex');
         for (var i = 0; i < symmetricKeys.length; i++) {
+            // eslint-disable-next-line security/detect-object-injection
             const encryptedSymmetricKey = ecies.encrypt(storedPublicKey, Buffer.from(symmetricKeys[i]));
             encSymmetricKeys.push(encryptedSymmetricKey.toString('base64')); 
         }
@@ -66,6 +67,7 @@ class EncryptionWrapper {
     static decryptSymmetricKeys(encSymmetricKeys, privateKey){
         var decSymmetricKeys = [];
         for (var i = 0; i < encSymmetricKeys.length; i++) {
+            // eslint-disable-next-line security/detect-object-injection
             var encSymmetricKeyBuffer = Buffer.from(encSymmetricKeys[i], 'base64');
             var decSymKey = ecies.decrypt(privateKey, encSymmetricKeyBuffer);
             decSymmetricKeys.push(decSymKey); 

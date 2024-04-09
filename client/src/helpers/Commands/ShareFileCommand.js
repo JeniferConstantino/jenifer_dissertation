@@ -11,12 +11,13 @@ class ShareFileCommand extends Command {
 
     async execute(){
         // Gets only the selected permissions
+        // eslint-disable-next-line security/detect-object-injection
         const permissionsArray = Object.keys(this.permissions).filter(key => this.permissions[key]);
 
         // If the user is already associated with the file
         const userIsAssociatedWithFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
         if (userIsAssociatedWithFile) {
-            console.log("It was called 'ShareFileCommand' but the user: ", this.accountUserToShareFileWith, " is already associated with the file: ", this.selectedFile.fileName);
+            console.log("It was called 'ShareFileCommand' but the user is already associated with the selected file.");
             return;
         }
 

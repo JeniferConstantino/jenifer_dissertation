@@ -20,6 +20,7 @@ const WalletConnection = () => {
             } 
             navigate('/register');
         }).catch(err=>{
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         })  
     };

@@ -10,7 +10,6 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loa
         if (selectedFile === file) {
             setSelectedFile(null);
         } else {
-            console.log("selected file: ", file);
             setSelectedFile(file);
         }
     }

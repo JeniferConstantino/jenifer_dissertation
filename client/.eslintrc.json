@@ -1,5 +1,5 @@
 {
-    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:security-node/recommended", "plugin:security/recommended-legacy"],
     "parserOptions": {
       "sourceType": "module",
       "ecmaVersion": 2022,
@@ -11,10 +11,14 @@
     "globals": {
       "Map": "readonly"
     },
-    "plugins": ["no-unsanitized"],
+    "plugins": ["no-unsanitized", "xss", "security-node", "react-hooks"],
     "rules": {
       "no-unsanitized/method": "error",
-      "no-unsanitized/property": "error"
+      "no-unsanitized/property": "error",
+      "xss/no-mixed-html": "error",
+      "xss/no-location-href-assign": "error",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
     },
     "env": {
       "browser": true,

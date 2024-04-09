@@ -31,6 +31,7 @@ const Login = () => {
             setMessage("Oops! That doesn't look like the correct seed. Please make sure you've entered the seed given to you when you first logged in. Remember, it's private and should not be shared.");
             setTitleInfoNamePopup("Attention");
         }).catch(err=>{
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         })   
 

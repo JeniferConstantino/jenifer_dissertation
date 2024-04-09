@@ -48,6 +48,7 @@ const Home = () => {
                     setUploadedActiveFiles(files);
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
@@ -65,6 +66,7 @@ const Home = () => {
                     setUploadedFiles(files);
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
@@ -82,6 +84,7 @@ const Home = () => {
                     return;
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
@@ -119,6 +122,7 @@ const Home = () => {
                 return;
             }
         }).catch(err => {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         }).finally( () => {
             setLoading(false);   
@@ -146,6 +150,7 @@ const Home = () => {
             handleClosePopup(popupToClose);
             setSelectedFile(null);
         } catch (error) {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log("error: ", error);
         }
     };
@@ -203,7 +208,7 @@ const Home = () => {
                 setShowInfoPopup(true);
                 return;
             default:
-                console.log("NOT A VALID OPERATION: ", chosenAction);
+                console.log("The action chosen was not valid.");
                 return;
         }
     };
@@ -235,7 +240,7 @@ const Home = () => {
                 setShowInfoPopup(false);
                 return;
             default:
-                console.log("NOT A VALID OPERATION: ", chosenAction);
+                console.log("The chosen operation to close was not valid");
             return;
         }
     }

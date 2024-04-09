@@ -53,7 +53,6 @@ class UserApp {
 
       // Because the usernames are going to be case insensitive, this is writing Maria = maria = MARIA and so it goes
       userName = userName.toLowerCase();
-      console.log("username: ", userName);
 
       // Cretaes the user to be stored
       var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex'));

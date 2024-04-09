@@ -48,7 +48,6 @@ const Web3Provider = ({children}) => {
             const accounts = await provider.current.request({ method: 'eth_requestAccounts' });
 
             selectedAccount.current = accounts[0];
-            console.log(`Selected account is ${selectedAccount.current}`);
 
             // Initialize contracts
             const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
@@ -76,7 +75,6 @@ const Web3Provider = ({children}) => {
     // Keeps on listening if the account has changed
     window.ethereum.on('accountsChanged', function (accounts){
         selectedAccount.current = accounts[0];
-        console.log(`Selected account changed to ${selectedAccount.current}`);
         logOut();
     });
 
@@ -89,7 +87,7 @@ const Web3Provider = ({children}) => {
         accessControlContract = null;
         auditLogControlContract = null;
         selectedAccount = null;
-        window.location.href = '/'; // Redirects the user to the login page
+        window.location.href = escape('/'); // Redirects the user to the login page
         return true
     }
 

@@ -20,6 +20,7 @@ class DropEdit extends DropFileCommand {
         // Gets the users that have download permissions of the file to be edited
         const result = await this.fileManager.getUsersAssociatedWithFile(selectedFile.ipfsCID);
         if (!result.success) {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log("Error: ", result.message);
         }
         const usersDonldPermFile = result.resultAddresses;

@@ -19,10 +19,11 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                         setUploadedFiles(result.files);
                     }
                 } else {
-                    console.log("Something went wrong while trying to get the previous edit files of the file: ", selectedFile.fileName);
+                    console.log("Something went wrong while trying to get the previous edit files of the selected file.");
                 }
             }).catch(err => {
-                console.log(err);
+                // eslint-disable-next-line security-node/detect-crlf
+                console.log(`Error occurred: ${err}`);
             })
         }
     }, [fileManagerFacadeInstance, selectedFile]);

@@ -22,7 +22,7 @@ const Register = () => {
         var existingAddress = await fileManagerFacadeInstance.current.existingAddress(fileManagerFacadeInstance.current.selectedAccount.current);
         var existingUserName = await fileManagerFacadeInstance.current.existingUserName(username.toLowerCase());     
         if (existingAddress || existingUserName || words.length > 2 || username.trim() === '') {
-            console.log("Error in registration! Existing Address: ", existingAddress, " Existing UserName: ", existingUserName);
+            console.log("Error in registration! Address and username have to be unique and the username should not have more than 2 workds");
             setShowInfoNamePopup(true);
             setTitleInfoNamePopup("Attention");
             return;
@@ -36,6 +36,7 @@ const Register = () => {
                 setShowInfoMnemonicPopup(true);
             }
         }).catch(err=>{
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         })      
     };

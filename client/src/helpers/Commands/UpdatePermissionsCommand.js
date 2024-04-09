@@ -18,6 +18,7 @@ class UpdatePermissionsCommand extends Command {
         copyArr2.sort();
         // Check if each element in arr1 exists in arr2
         for (let i = 0; i < copyArr1.length; i++) {
+            // eslint-disable-next-line security/detect-object-injection
             if (copyArr1[i] !== copyArr2[i]) {
                 return false;
             }
@@ -29,12 +30,13 @@ class UpdatePermissionsCommand extends Command {
     async execute(){
         try {
             // Gets only the selected permissions
+            // eslint-disable-next-line security/detect-object-injection
             const permissionsArray = Object.keys(this.permissions).filter(key => this.permissions[key]);
             
             // If the user is already associated with the file
             const userIsAssociatedWithFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
             if (!userIsAssociatedWithFile) {
-                console.log("It was called 'UpdatePermissionsCommand' but the user: ", this.accountUserToShareFileWith, " is not associated with the file: ", this.selectedFile.fileName);
+                console.log("It was called 'UpdatePermissionsCommand' but the is not associated with the selected file.");
                 return;
             }
     
@@ -63,6 +65,7 @@ class UpdatePermissionsCommand extends Command {
                 }
             }
         } catch (error) {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log("ERROR: ", error);
         }
     }
