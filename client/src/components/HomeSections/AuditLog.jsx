@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import FileManagerFacade from "../../helpers/FileManagerFacade";
 import { FcExternal, FcClock, FcReadingEbook, FcDocument, FcKey} from 'react-icons/fc';
+import PropTypes from 'prop-types';
 
 const AuditLog = ({logs, fileManagerFacadeInstance}) => {
     const [userNamesTo, setUserNamesTo] = useState({});
@@ -98,5 +99,10 @@ const AuditLog = ({logs, fileManagerFacadeInstance}) => {
         </>
     );
 }
+
+AuditLog.propTypes = {
+    logs: PropTypes.array.isRequired,
+    fileManagerFacadeInstance: PropTypes.object.isRequired
+};
 
 export default AuditLog;

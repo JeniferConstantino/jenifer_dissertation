@@ -13,7 +13,7 @@ const Login = () => {
     const {fileManagerFacadeInstance} = useWeb3();
     const [mnemonic, setMnemonic] = useState('');
 
-    const onNext = async (e) => {
+    const onNext = async () => {
         
         // Hashes the inserted mnemonic
         var hashedMnemonic = await fileManagerFacadeInstance.current.hashMnemonicSymmetricEncryption(mnemonic);
@@ -52,7 +52,7 @@ const Login = () => {
         setTitleInfoNamePopup("");
     }
 
-    const handleBack = async (e) => {
+    const handleBack = async () => {
         navigate('/');
     }
 

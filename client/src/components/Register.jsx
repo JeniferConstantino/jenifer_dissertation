@@ -15,7 +15,7 @@ const Register = () => {
     const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");  // title to be used in the info name popup
     const [mnemonic, setMnemonic] = useState();                // mnemonic to be set in the info popup
 
-    const onNext = async (e) => {
+    const onNext = async () => {
         const words = username.trim().split(/\s+/);
        
         // Verifies if there is a user with the same account or with the same name
@@ -58,7 +58,7 @@ const Register = () => {
         setTitleInfoNamePopup("");
     }
 
-    const handleBack = async (e) => {
+    const handleBack = async () => {
         navigate('/');
     }
 
@@ -71,7 +71,7 @@ const Register = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome!</h1>
-                        <p>Welcome! Let's get started by setting a <strong className='boltColor'>unique name</strong> for you to use in the app.</p>
+                        <p>Welcome! Let`&apos;s get started by setting a <strong className='boltColor'>unique name</strong> for you to use in the app.</p>
                     </div>
                     <div className='login-column'>
                         <div className='input-button-container-welcome'>

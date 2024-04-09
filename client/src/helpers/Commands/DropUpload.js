@@ -1,5 +1,5 @@
-import { FileApp } from '../FileApp';
-import DropFileCommand from "./DropFileCommand";
+import { FileApp } from '../FileApp.js';
+import DropFileCommand from "./DropFileCommand.js";
 
 // Concrete command for uploading a file
 class DropUpload extends DropFileCommand {

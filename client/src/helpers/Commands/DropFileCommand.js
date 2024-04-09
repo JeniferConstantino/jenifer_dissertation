@@ -1,4 +1,4 @@
-import Command from "./Command";
+import Command from "./Command.js";
 
 // Concrete command for uploading a file
 class DropFileCommand extends Command {

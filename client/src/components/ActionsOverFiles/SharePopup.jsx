@@ -3,6 +3,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
 const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile, children}) => {
     const [usernameToShare, setUsernameToShare] = useState('');
@@ -143,8 +144,8 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                                 <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseSharePermissionsPopup}/>
                                                 <h2 className='share-file-header'>Share File - Permissions</h2>
                                             </div>
-                                            <p className='share-file-description note'>You're about to share the file <strong><em>"{selectedFile.fileName}"</em></strong>.</p>
-                                            <p className='share-file-description'>Edit the user's permissions.</p>
+                                            <p className='share-file-description note'>You&apos;re about to share the file <strong><em>&quot;{selectedFile.fileName}&quot;</em></strong>.</p>
+                                            <p className='share-file-description'>Edit the user&apos;s permissions.</p>
                                         </>
                                     ) : (
                                         <>
@@ -152,7 +153,7 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
                                                 <FaAngleLeft size={18} className="app-button_back" onClick={handleCloseShareNamePopup}/>
                                                 <h2 className='share-file-header'>Share File - Name</h2>
                                             </div>
-                                            <p className='share-file-description note'>You're about to share the file <strong><em>"{selectedFile.fileName}"</em></strong>.</p>
+                                            <p className='share-file-description note'>You&apos;re about to share the file <strong><em>&quot;{selectedFile.fileName}&quot;</em></strong>.</p>
                                             <p className='share-file-description'>Input the name of the user to share the file with.</p>
                                         </>
                                     )}
@@ -207,5 +208,13 @@ const SharePopup = ({fileManagerFacadeInstance, handleShare, show, selectedFile,
         </div>
     );    
 }
+
+SharePopup.propTypes = {
+    fileManagerFacadeInstance:PropTypes.object.isRequired,
+    handleShare: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    selectedFile: PropTypes.object,
+    children: PropTypes.object,
+};
 
 export default SharePopup;

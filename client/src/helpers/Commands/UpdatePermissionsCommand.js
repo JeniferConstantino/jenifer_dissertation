@@ -1,4 +1,4 @@
-import Command from "./Command";
+import Command from "./Command.js";
 
 class UpdatePermissionsCommand extends Command {
     constructor(fileManager, selectedFile, permissions, accountUserToShareFileWith){
@@ -29,7 +29,7 @@ class UpdatePermissionsCommand extends Command {
     async execute(){
         try {
             // Gets only the selected permissions
-            const permissionsArray = Object.entries(this.permissions).filter(([key, value]) => value===true).map(([key, value]) => key);
+            const permissionsArray = Object.keys(this.permissions).filter(key => this.permissions[key]);
             
             // If the user is already associated with the file
             const userIsAssociatedWithFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);

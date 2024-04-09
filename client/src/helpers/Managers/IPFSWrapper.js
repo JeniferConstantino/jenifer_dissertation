@@ -1,6 +1,6 @@
-import {ipfs} from '../../../ipfs';
+import {ipfs} from '../../../ipfs.jsx';
 import axios from 'axios';
-import { IPFS_BASE_URL } from '../../../ipfs';
+import { IPFS_BASE_URL } from '../../../ipfs.jsx';
 
 class IPFSWrapper {
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { FcDocument , FcImageFile} from "react-icons/fc";
 import { FileApp } from "../../helpers/FileApp";
+import PropTypes from 'prop-types';
 
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loading, maxFilesPerColumn}) => {
 
@@ -68,5 +69,13 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loa
         </>
     );
 }
+
+DisplayUplDocs.propTypes = {
+    selectedFile: PropTypes.object,
+    setSelectedFile: PropTypes.func,
+    uploadedActiveFiles: PropTypes.array.isRequired,
+    loading: PropTypes.bool.isRequired,
+    maxFilesPerColumn: PropTypes.number.isRequired
+};
 
 export default DisplayUplDocs;

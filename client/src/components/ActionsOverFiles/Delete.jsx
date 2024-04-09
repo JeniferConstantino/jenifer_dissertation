@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const Delete = ({show, fileManagerFacadeInstance, handleFileDeleted, selectedFile, uploadedActiveFiles}) => {
     
     // Delets the selected file
     useEffect(() => {
-        const handleDeleteFile = async (e) => {
+        const handleDeleteFile = async () => {
             if (show) {
                 console.log('Deleting file ...');
                 try {
@@ -20,5 +21,13 @@ const Delete = ({show, fileManagerFacadeInstance, handleFileDeleted, selectedFil
 
     return null;
 }
+
+Delete.propTypes = {
+    show: PropTypes.bool.isRequired,
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleFileDeleted: PropTypes.func.isRequired,
+    selectedFile: PropTypes.object,
+    uploadedActiveFiles: PropTypes.array.isRequired
+};
 
 export default Delete;

@@ -1,4 +1,4 @@
-import { FileApp } from "../FileApp";
+import { FileApp } from "../FileApp.js";
 
 class BlockchainWrapper {
     // Gets the public key of the given user
@@ -33,7 +33,7 @@ class BlockchainWrapper {
 
     // Verifies if a uer is associated with a mnemonic
     static verifyUserAssociatedMnemonic = async (userRegisterContract, mnemonic, userAccount, selectedUserAccount) => {
-        return await userRegisterContract.methods.verifyUserAssociatedMnemonic(mnemonic, userAccount).call({from: selectedUserAccount});;
+        return await userRegisterContract.methods.verifyUserAssociatedMnemonic(mnemonic, userAccount).call({from: selectedUserAccount});
     }
 
     // Returns the user

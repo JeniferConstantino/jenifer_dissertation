@@ -1,13 +1,13 @@
-import BlockchainWrapper from './Managers/BlockchainWrapper';
-import EncryptionWrapper from './Managers/EncryptionWrapper';
-import IPFSWrapper from './Managers/IPFSWrapper';
-import DropUpload from './Commands/DropUpload';
-import DropEdit from './Commands/DropEdit'
-import VerifyFileCommand from './Commands/VerifyFileCommand';
-import DownloadFileCommand from './Commands/DownloadFileCommand';
-import ShareFileCommand from './Commands/ShareFileCommand';
-import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand';
-import DeleteFileCommand from './Commands/DeleteFileCommand';
+import BlockchainWrapper from './Managers/BlockchainWrapper.js';
+import EncryptionWrapper from './Managers/EncryptionWrapper.js';
+import IPFSWrapper from './Managers/IPFSWrapper.js';
+import DropUpload from './Commands/DropUpload.js';
+import DropEdit from './Commands/DropEdit.js'
+import VerifyFileCommand from './Commands/VerifyFileCommand.js';
+import DownloadFileCommand from './Commands/DownloadFileCommand.js';
+import ShareFileCommand from './Commands/ShareFileCommand.js';
+import UpdatePermissionsCommand from './Commands/UpdatePermissionsCommand.js';
+import DeleteFileCommand from './Commands/DeleteFileCommand.js';
 
 class FileManagerFacade {
 

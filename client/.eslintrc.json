@@ -1,0 +1,43 @@
+{
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "parserOptions": {
+      "sourceType": "module",
+      "ecmaVersion": 2022,
+      "ecmaFeatures": {
+        "jsx": true,
+        "staticClassProperty": true
+      }
+    },
+    "globals": {
+      "Map": "readonly"
+    },
+    "plugins": ["no-unsanitized"],
+    "rules": {
+      "no-unsanitized/method": "error",
+      "no-unsanitized/property": "error"
+    },
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    },
+    "overrides": [
+      {
+        "files": ["src/**/*.js", "src/**/*.jsx"],
+        "excludedFiles": "*.test.js",
+        "rules": {
+          "no-unsanitized/method": ["error", {
+            "additionalTags": ["<MyCustomTag>"]
+          }],
+          "no-unsanitized/property": ["error", {
+            "additionalTags": ["<MyCustomTag>"]
+          }]
+        }
+      }
+    ]
+  }
+  

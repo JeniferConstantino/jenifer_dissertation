@@ -4,6 +4,7 @@ import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
 import InfoPopup from '../Infos/InfoPopup';
 import { FcCheckmark, FcCancel } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
 const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) => {
 
@@ -24,7 +25,7 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) =
         setIsDragOver(true);
     }
 
-    const handleDragLeave = (e) => {
+    const handleDragLeave = () => {
         setIsDragOver(false);
     }
 
@@ -133,7 +134,13 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) =
             </div>
         </>
     );
-
 }
+
+VeifyPopup.propTypes = {
+    fileManagerFacadeInstance:PropTypes.object.isRequired,
+    handleVerify: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    children: PropTypes.object,
+};
 
 export default VeifyPopup;

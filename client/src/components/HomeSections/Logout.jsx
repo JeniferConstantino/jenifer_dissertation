@@ -1,6 +1,7 @@
 import React from "react";
 import { GoPerson   } from "react-icons/go";
 import {useWeb3} from '../../helpers/web3Client';
+import PropTypes from 'prop-types';
 
 const Logout = ({selectedUser}) => {
 
@@ -23,5 +24,9 @@ const Logout = ({selectedUser}) => {
         </div>
     );
 }
+
+Logout.propTypes = {
+    selectedUser: PropTypes.array.isRequired
+};
 
 export default Logout;

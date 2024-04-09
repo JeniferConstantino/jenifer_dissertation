@@ -5,8 +5,9 @@ import { FcPlus } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
-const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
+const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
@@ -27,7 +28,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         setIsDragOver(true);
     }
 
-    const handleDragLeave = (e) => {
+    const handleDragLeave = () => {
         setIsDragOver(false);
     }
 
@@ -146,5 +147,14 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     );
 
 }
+
+UploadPopup.propTypes = {
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleFileUploaded: PropTypes.func.isRequired,
+    uploadedActiveFiles: PropTypes.array.isRequired,
+    uploadedFiles: PropTypes.array.isRequired,
+    show: PropTypes.bool.isRequired,
+    children: PropTypes.object,
+};
 
 export default UploadPopup;

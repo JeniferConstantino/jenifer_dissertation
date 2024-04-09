@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const Download = ({show, fileManagerFacadeInstance, handleDownloaded, selectedFile}) => {
     
     // Downloads the selected file
     useEffect(() => {
-        const handleDownload = async (e) => {
+        const handleDownload = async () => {
             if (show) {
                 console.log('Download file ...');
                 try {
@@ -30,5 +31,12 @@ const Download = ({show, fileManagerFacadeInstance, handleDownloaded, selectedFi
 
     return null;
 }
+
+Download.propTypes = {
+    show: PropTypes.bool.isRequired,
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleDownloaded: PropTypes.func.isRequired,
+    selectedFile: PropTypes.object
+};
 
 export default Download;

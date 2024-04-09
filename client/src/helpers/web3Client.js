@@ -7,7 +7,8 @@ import UserRegister_ContractAddress from '../contracts/UserRegister_ContractAddr
 import FileRegister_ContractAddress from '../contracts/FileRegister_ContractAddress.json'
 import AccessControl_ContractAddress from '../contracts/AccessControl_ContractAddress.json'
 import AuditLogControl_ContractAddress from '../contracts/AuditLogControl_ContractAddress.json'
-import FileManagerFacade from './FileManagerFacade'
+import FileManagerFacade from './FileManagerFacade.js'
+import PropTypes from 'prop-types';
 
 import React, { createContext, useContext, useCallback, useRef } from 'react';
 
@@ -100,5 +101,9 @@ const Web3Provider = ({children}) => {
 
     return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>
 }
+
+Web3Provider.propTypes = {
+    children: PropTypes.object.isRequired
+};
 
 export default Web3Provider;

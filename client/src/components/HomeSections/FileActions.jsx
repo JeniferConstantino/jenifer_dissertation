@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk, FcInfo } from 'react-icons/fc';
 import { MdOutlineEdit } from "react-icons/md";
 import { FileApp } from '../../helpers/FileApp';
+import PropTypes from 'prop-types';
 
 const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions, permissions, selectedFile}) => {
 
@@ -126,5 +127,13 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions
         </div>
     );
 }
+
+FileActions.propTypes = {
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleOpenPopup: PropTypes.func.isRequired,
+    setPermissions: PropTypes.func.isRequired,
+    permissions: PropTypes.array.isRequired,
+    selectedFile: PropTypes.object,
+};
 
 export default FileActions;

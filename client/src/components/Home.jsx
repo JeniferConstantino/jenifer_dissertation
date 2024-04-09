@@ -264,13 +264,13 @@ const Home = () => {
                         </div>
                     </div>                    
                     
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup}/> 
                     <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
                     <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleVerify={handleVerify} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
-                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} handleOpenPopup={handleOpenPopup} permissions={permissions} show={showInfoPopup}/>
+                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} permissions={permissions} show={showInfoPopup}/>
                 </>
             )}
         </>

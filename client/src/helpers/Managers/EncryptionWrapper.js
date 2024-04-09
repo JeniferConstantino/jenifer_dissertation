@@ -2,7 +2,7 @@ import ecies from 'eth-ecies';
 import { generateMnemonic, mnemonicToSeedSync } from 'bip39';
 import * as ethUtil from 'ethereumjs-util';
 import HDKey from 'hdkey';
-const crypto = require('crypto-browserify');
+import crypto from 'crypto-browserify';
 
 class EncryptionWrapper {
 

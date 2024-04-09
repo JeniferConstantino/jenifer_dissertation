@@ -2,8 +2,9 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
 import { FcDown } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
+import PropTypes from 'prop-types';
 
-const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, handleOpenPopup, show, permissions, children}) => {
+const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, show, permissions, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [uploadedFiles, setUploadedFiles ] = useState([]);
@@ -147,5 +148,15 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
         </>
     );
 }
+
+InfoFilePopup.propTypes = {
+    fileManagerFacadeInstance:PropTypes.object.isRequired,
+    selectedFile:PropTypes.object,
+    handleClosePopup:PropTypes.func.isRequired,
+    handleOpenPopup: PropTypes.func,
+    show: PropTypes.bool.isRequired,
+    permissions: PropTypes.array.isRequired,
+    children: PropTypes.object,
+};
 
 export default InfoFilePopup;
