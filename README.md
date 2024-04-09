@@ -33,6 +33,18 @@ cd backend < npx hardhat test < npx hardhat coverage => a folder called "coverag
 
 # Security Analysis
 
+## Front-end
+
+## Back-end
+cd backend < npm run slither
+
+**To install slither:**
+1. Install Python
+2. Install pip2: python -m ensurepip --default-pip
+3. pip3 install slither-analyzer (slither —helps to ensure good installation)
+4. On the package.json added “scripts”<”slither”
+5. Executed solc-slect install 0.8.0 < solc-select use 0.8.0 < npm run slither 
+
 # Frequent Problems:
 
 ## CORS Problems
