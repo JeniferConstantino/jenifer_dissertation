@@ -26,7 +26,10 @@ const Logout = ({selectedUser}) => {
 }
 
 Logout.propTypes = {
-    selectedUser: PropTypes.array.isRequired
+    selectedUser: PropTypes.oneOfType([
+        PropTypes.array,
+        PropTypes.object
+    ]).isRequired
 };
 
 export default Logout;
