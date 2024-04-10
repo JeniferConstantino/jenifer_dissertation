@@ -1,20 +1,24 @@
 import Command from "./Command.js";
 
 class DownloadFileCommand extends Command {
-    constructor(fileManager, selectedFile){
+    constructor(selectedUserAccount, selectedFile, getFileFromIPFS, getEncSymmetricKeyFileUser, decryptFileWithSymmetricKey, downloadFileAudit){
         super();
-        this.fileManager = fileManager;
+        this.selectedUserAccount = selectedUserAccount;
         this.selectedFile = selectedFile;
+        this.getFileFromIPFS = getFileFromIPFS;
+        this.getEncSymmetricKeyFileUser = getEncSymmetricKeyFileUser;
+        this.decryptFileWithSymmetricKey = decryptFileWithSymmetricKey;
+        this.downloadFileAudit = downloadFileAudit;
     }
 
     async execute(){
         try {
             // Gets the file from IPFS
-            const fileContent = await this.fileManager.getFileFromIPFS(this.selectedFile.ipfsCID);
+            const fileContent = await this.getFileFromIPFS(this.selectedFile.ipfsCID);
             console.log("Accessed file in IPFS.");
         
             // Gets the file encrypted symmetric key
-            const result = await this.fileManager.getEncSymmetricKeyFileUser(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);
+            const result = await this.getEncSymmetricKeyFileUser(this.selectedUserAccount, this.selectedFile.ipfsCID);
             if (!result.success) {
                 console.log("Something went wrong while trying to get the encrypted symmetric key of the users file.");
                 return;
@@ -23,12 +27,12 @@ class DownloadFileCommand extends Command {
             const encryptedSymmetricKeyBuffer = Buffer.from(fileUserEncryptedSymmetricKey, 'base64');
 
             // Decrypts the file
-            const decryptedFileBuffer = await this.fileManager.decryptFileWithSymmetricKey(this.selectedFile, encryptedSymmetricKeyBuffer, fileContent);
+            const decryptedFileBuffer = await this.decryptFileWithSymmetricKey(this.selectedFile, encryptedSymmetricKeyBuffer, fileContent);
             const blob = new Blob([decryptedFileBuffer]);
             console.log("File Decrypted.");
 
             // Makes the treatment of the download in the backend and stores on the audit log
-            await this.fileManager.downloadFileAudit(this.selectedFile.ipfsCID, this.fileManager.selectedUser.account);
+            await this.downloadFileAudit(this.selectedFile.ipfsCID, this.selectedUserAccount);
             
             return blob;
         } catch (error) {

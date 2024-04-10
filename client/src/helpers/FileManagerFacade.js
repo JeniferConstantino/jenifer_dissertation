@@ -40,45 +40,45 @@ class FileManagerFacade {
     this._selectedAccount = selectedAccount;
   }
 
-  // Uploads File into the system
-  async uploadFile(fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const uploadCommand = new DropUpload(this, fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  // Uploads File into the system  
+  async uploadFile(fileUplName, fileAsBuffer) {
+    const uploadCommand = new DropUpload(fileUplName, fileAsBuffer, this.generateSymmetricKey.bind(this), this.encryptFileWithSymmetricKey.bind(this), this.addFileToIPFS.bind(this), this.generateHash256.bind(this), this.getFileByIpfsCID.bind(this), this.getPermissionsOverFile.bind(this), this.uploadFileUser.bind(this), this.encryptSymmetricKey.bind(this), this.selectedUser.account);
     await uploadCommand.execute();
   }
-
+ 
   // Edits an existing file 
-  async editFile(fileUplName, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-    const editCommand = new DropEdit(this, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+  async editFile(fileUplName, fileAsBuffer, selectedFile) {
+    const editCommand = new DropEdit(fileUplName, selectedFile, this.getUsersAssociatedWithFile.bind(this), this.getPubKeyUser.bind(this), this.encryptSymmetricKey.bind(this), this.editFileUpl.bind(this), fileAsBuffer, this.generateSymmetricKey.bind(this), this.encryptFileWithSymmetricKey.bind(this), this.addFileToIPFS.bind(this), this.generateHash256.bind(this), this.getFileByIpfsCID.bind(this), this.getPermissionsOverFile.bind(this), this.selectedUser.account);
     await editCommand.execute();
   }
   
   // Gets the file from IPFS, decryts and downloads
   async downloadFile(selectedFile) {
-    const downloadCommand = new DownloadFileCommand(this, selectedFile);
+    const downloadCommand = new DownloadFileCommand(this.selectedUser.account, selectedFile, this.getFileFromIPFS.bind(this), this.getEncSymmetricKeyFileUser.bind(this), this.decryptFileWithSymmetricKey.bind(this), this.downloadFileAudit.bind(this));
     return await downloadCommand.execute(); 
   }
 
   // Deletes the file from IPFS and the association between the user and the file
   async deleteFile(selectedFile, handleFileDeleted, uploadedFiles) {
-    const deleteCommand = new DeleteFileCommand(this, selectedFile, handleFileDeleted, uploadedFiles);
+    const deleteCommand = new DeleteFileCommand(selectedFile, handleFileDeleted, uploadedFiles, this.deactivateFile.bind(this));
     await deleteCommand.execute(); 
   }
 
   // Shares the file with a given user that was not already associated with a file
-  async shareFileCommand(selectedFile, permissions, accountUserShareFileWith) {
-    const shareCommand = new ShareFileCommand(this, selectedFile, permissions, accountUserShareFileWith);
+  async shareFileCommand(selectedFile, permissions, accountUserToShareFileWith) {
+    const shareCommand = new ShareFileCommand(selectedFile, permissions, accountUserToShareFileWith, this.verifyUserAssociatedWithFile.bind(this), this.getAllEncSymmetricKeyFileUser.bind(this), this.decryptSymmetricKeys.bind(this), this.getPubKeyUser.bind(this), this.encryptSymmetricKeys.bind(this), this.fileShare.bind(this), this.selectedUser.account);
     await shareCommand.execute();
   }
 
   // Updates permissions of a given user over a file
-  async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserShareFileWith) {
-    const updatePermissionsCommand = new UpdatePermissionsCommand(this, selectedFile, permissions, accountUserShareFileWith);
+  async updateUserFilePermissionsCommand(selectedFile, permissions, accountUserToShareFileWith) {
+    const updatePermissionsCommand = new UpdatePermissionsCommand(selectedFile, permissions, accountUserToShareFileWith, this.verifyUserAssociatedWithFile.bind(this), this.updateUserFilePermissions.bind(this), this.getPermissionsOverFile.bind(this), this.removeUserFileAssociation.bind(this));
     await updatePermissionsCommand.execute();
   }
 
   // Verifies if a file already exists in the app
   async verifyFile(fileAsBuffer) {
-    const verifyFileCommand = new VerifyFileCommand(this, fileAsBuffer);
+    const verifyFileCommand = new VerifyFileCommand(fileAsBuffer, this.generateHash256.bind(this), this.verifyValidFile.bind(this), this.recordFileVerification.bind(this), this.selectedUser.account);
     return await verifyFileCommand.execute();
   }
 
@@ -185,8 +185,8 @@ class FileManagerFacade {
   }
 
   // Deletes the files' association with the users, and deletes the file
-  async deactivateFile(userAccount, fileIpfsCid) {
-    return await BlockchainWrapper.deactivateFile(this.accessControlContract, userAccount, fileIpfsCid, this.selectedUser.account);
+  async deactivateFile(fileIpfsCid) {
+    return await BlockchainWrapper.deactivateFile(this.accessControlContract, fileIpfsCid, this.selectedUser.account);
   }
 
   // Deletes permanently the file

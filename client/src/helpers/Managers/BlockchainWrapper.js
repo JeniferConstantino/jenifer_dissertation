@@ -136,8 +136,8 @@ class BlockchainWrapper {
     } 
 
     // Delete the association of the file with the users and deletes the file
-    static deactivateFile = async (accessControlContract, userAccount, fileIpfsCid, selectedUserAccount) => {
-        return await accessControlContract.methods.deactivateFile(userAccount, fileIpfsCid).send({from: selectedUserAccount});
+    static deactivateFile = async (accessControlContract, fileIpfsCid, selectedUserAccount) => {
+        return await accessControlContract.methods.deactivateFile(selectedUserAccount, fileIpfsCid).send({from: selectedUserAccount});
     }
 
     // Returns the permissions of a user over a file

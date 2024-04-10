@@ -4,27 +4,26 @@ import DropFileCommand from "./DropFileCommand.js";
 // Concrete command for uploading a file
 class DropUpload extends DropFileCommand {
 
-    constructor(fileManager, fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-        super();
-        this.fileManager = fileManager;
+    constructor(fileUplName, fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey,  addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, uploadFileUser, encryptSymmetricKey, selectedUserAccount) {
+        super(fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey, addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, selectedUserAccount);
         this.fileUplName = fileUplName;
         this.fileAsBuffer = fileAsBuffer;
-        this.handleFileUploaded = handleFileUploaded;
-        this.uploadedActiveFiles = uploadedActiveFiles;
-        this.uploadedFiles = uploadedFiles;
+        this.uploadFileUser = uploadFileUser;
+        this.encryptSymmetricKey = encryptSymmetricKey;
+        this.selectedUserAccount = selectedUserAccount;
     }
 
     async storeFile(symmetricKey, iv, fileHash, fileCID){
         // Prepares the file to be stored
-        var fileOwner = this.fileManager.selectedUser.account;
+        var fileOwner = this.selectedUserAccount;
         var fileVersion = 0; // 1st upload
         
         let fileUploaded = new FileApp(this.fileUplName, fileVersion, "" , fileOwner, fileCID, iv.toString('base64'), "", fileHash);
         fileUploaded.fileType = FileApp.getFileType(this.fileUplName);
-        let encryptedSymmetricKey = this.fileManager.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey'));
+        let encryptedSymmetricKey = this.encryptSymmetricKey(symmetricKey, localStorage.getItem('publicKey'));
 
         // Associates the current user with the uploaded file 
-        await this.fileManager.uploadFileUser(this.fileManager.selectedUser.account, fileUploaded, encryptedSymmetricKey);
+        await this.uploadFileUser(this.selectedUserAccount, fileUploaded, encryptedSymmetricKey);
         
         return fileUploaded;
     }

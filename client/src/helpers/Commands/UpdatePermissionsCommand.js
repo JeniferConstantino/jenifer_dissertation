@@ -1,12 +1,15 @@
 import Command from "./Command.js";
 
 class UpdatePermissionsCommand extends Command {
-    constructor(fileManager, selectedFile, permissions, accountUserToShareFileWith){
+    constructor(selectedFile, permissions, accountUserToShareFileWith, verifyUserAssociatedWithFile, updateUserFilePermissions, getPermissionsOverFile, removeUserFileAssociation){
         super();
-        this.fileManager = fileManager;
         this.selectedFile = selectedFile;
         this.permissions = permissions;
         this.accountUserToShareFileWith = accountUserToShareFileWith;
+        this.verifyUserAssociatedWithFile = verifyUserAssociatedWithFile;
+        this.updateUserFilePermissions = updateUserFilePermissions;
+        this.getPermissionsOverFile = getPermissionsOverFile;
+        this.removeUserFileAssociation = removeUserFileAssociation;
     }
 
     arraysHaveSameContent(arr1, arr2) {
@@ -34,7 +37,7 @@ class UpdatePermissionsCommand extends Command {
             const permissionsArray = Object.keys(this.permissions).filter(key => this.permissions[key]);
             
             // If the user is already associated with the file
-            const userIsAssociatedWithFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
+            const userIsAssociatedWithFile = await this.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
             if (!userIsAssociatedWithFile) {
                 console.log("It was called 'UpdatePermissionsCommand' but the is not associated with the selected file.");
                 return;
@@ -42,10 +45,10 @@ class UpdatePermissionsCommand extends Command {
     
             if (permissionsArray.length !== 0) {
                 // update users' permissions
-                await this.fileManager.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, permissionsArray);
+                await this.updateUserFilePermissions(this.accountUserToShareFileWith, this.selectedFile.ipfsCID, permissionsArray);
                 
                 // Verifies if the updateUserFilPermissions was successfull
-                var result = await this.fileManager.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);    
+                var result = await this.getPermissionsOverFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);    
                 if (!this.arraysHaveSameContent(result.resultStrings, permissionsArray)) {
                     console.log("Something went wrong while trying to associate the user with the file.");
                     return;
@@ -54,10 +57,10 @@ class UpdatePermissionsCommand extends Command {
                 }     
             } else {
                 // remove the relationship between the user and the file (inlcuding all the files past editions)
-                await this.fileManager.removeUserFileAssociation(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
+                await this.removeUserFileAssociation(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
 
                 // Verifies if the relationship was well removed
-                var userAssociatedFile = await this.fileManager.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
+                var userAssociatedFile = await this.verifyUserAssociatedWithFile(this.accountUserToShareFileWith, this.selectedFile.ipfsCID);
                 if (userAssociatedFile) {
                     console.log("Something went wrong while trying to remove the relationship between the user and the file.");
                 } else {
