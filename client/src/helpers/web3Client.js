@@ -25,7 +25,7 @@ export const useWeb3 = () => {
 
 const Web3Provider = ({children}) => {
 
-    let selectedAccount = useRef();         // keeps track of wallet account change
+    let selectedAccount = useRef(null);     // keeps track of wallet account change
     let fileRegisterContract = useRef();    // keeps the File Register Contract so its functions can be executed
     let userRegisterContract = useRef();    // keeps the User Register Contract so its functions can be executed
     let accessControlContract = useRef();   // keeps the Access Control Contract so its functions can be executed
@@ -78,6 +78,48 @@ const Web3Provider = ({children}) => {
         logOut();
     });
 
+    // Initializes the FileManagerFacade with the needed contracts 
+    const initializeFileManagerFacadeWContracts = useCallback(async () => {
+        try {
+            provider.current = window.ethereum; 
+            // MetaMask is not installed
+            if(typeof provider.current === 'undefined'){ 
+                return "MetaMask not intsalled";
+            }
+            const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
+            contractInitialization(UserRegister, UserRegister_ContractAddress, userRegisterContract, web3);
+            contractInitialization(FileRegister, FileRegister_ContractAddress, fileRegisterContract, web3);
+            contractInitialization(AccessControl, AccessControl_ContractAddress, accessControlContract, web3);
+            contractInitialization(AuditLogControl, AuditLogControl_ContractAddress, auditLogControlContract, web3);
+            fileManagerFacadeInstance.current = new FileManagerFacade(fileRegisterContract.current, userRegisterContract.current, accessControlContract.current, auditLogControlContract.current);
+            console.log("Contracts initialized");
+        } catch (error) {
+            return "Something went wrong while trying to initialize contracts.";
+        }
+    }, []);
+
+    // Initializes selectedAccount attribute of the FileManagerFacadeInstance
+    const setFileManagerFacadeWSelectedAccount = useCallback(async () => {
+        try {
+            // Ask the user to connect is wallet to the website
+            const accounts = await provider.current.request({ method: 'eth_requestAccounts' });
+
+            selectedAccount.current = accounts[0];
+            fileManagerFacadeInstance.current._selectedAccount = selectedAccount;
+        } catch (error) {
+            return "Something went wrong while trying to get the selected account.";
+        }
+    }, []);
+
+    // Returns the complete FileManagerFacadeInstance
+    const setsFileManagerFacadeWSelectedUser = useCallback(async (user) => {
+        try {
+            fileManagerFacadeInstance.current._selectedUser = user;
+        } catch (error) {
+            return "Something went wrong while trying to set the selectedUser in the fileManagerFacadeInstance.";
+        }
+    }, []);
+
     // Logs Out the user - clean variables
     const logOut = () => {
         provider = null;
@@ -94,6 +136,9 @@ const Web3Provider = ({children}) => {
     const value = {
         setup,
         logOut,
+        setFileManagerFacadeWSelectedAccount,
+        initializeFileManagerFacadeWContracts, 
+        setsFileManagerFacadeWSelectedUser,
         fileManagerFacadeInstance,
     }
 

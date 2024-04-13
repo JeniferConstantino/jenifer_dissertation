@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp';
@@ -14,6 +14,16 @@ const Register = () => {
     const [titleInfoMnemonicPopup, setTitleInfoMnemonicPopup] = useState("");  // title to be used in the info mnemonic popup
     const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");  // title to be used in the info name popup
     const [mnemonic, setMnemonic] = useState();                // mnemonic to be set in the info popup
+
+    // On page refresh redirects the user to the WalletConnection page
+    useEffect(() => {
+        async function fetchData() {
+            if (fileManagerFacadeInstance.current == null) {
+                navigate("/");
+            }
+        }
+        fetchData();
+    }, [fileManagerFacadeInstance, navigate]);
 
     const onNext = async () => {
         const words = username.trim().split(/\s+/);

@@ -13,6 +13,11 @@ import Logout from './HomeSections/Logout';
 import Menu from './HomeSections/Menu';
 import SharePopup from './ActionsOverFiles/SharePopup';
 import { FileApp } from '../helpers/FileApp';
+import UserApp from '../helpers/UserApp';
+import { useNavigate } from 'react-router-dom';
+import SessionExpirationHandler from './SessionExpirationHandler';
+import InfoPopup from './Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const Home = () => {
     const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);
@@ -32,12 +37,17 @@ const Home = () => {
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
     const [showInfoPopup, setShowInfoPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [showInfoFilePopup, setShowInfoFilePopup] = useState(false);
+    const [message, setMessage] = useState("");
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");
 
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const [refreshPage, setRefreshPage] = useState(false);
-    const { fileManagerFacadeInstance } = useWeb3();
+    const { initializeFileManagerFacadeWContracts, setFileManagerFacadeWSelectedAccount, setsFileManagerFacadeWSelectedUser, fileManagerFacadeInstance, logOut } = useWeb3();
+
+    const navigate = useNavigate();
 
     // Get Active Files
     const fetchActiveFiles = useCallback(async () => {
@@ -55,7 +65,6 @@ const Home = () => {
                 setLoading(false);   
             });
         }
-        
     }, [fileManagerFacadeInstance, selectedUser]);
 
     // Get all files (be them active or deactive)
@@ -92,6 +101,33 @@ const Home = () => {
             });
         }
     }, [uploadedActiveFiles, selectedUser, fileManagerFacadeInstance, uploadedFiles]);
+
+    useEffect(() => {
+        async function fetchData() {
+            // Initializes FileManagerFacadeInstance with contracts
+            await initializeFileManagerFacadeWContracts();
+
+            // Sets the FileManagerFacadeInstance with the selectedAccount
+            await setFileManagerFacadeWSelectedAccount();
+
+            // Verifies if the account exists  in the dApp
+            await UserApp.getUserWithAccount(fileManagerFacadeInstance.current).then( async (resultUser) => {
+                if (resultUser.success == false) {
+                    console.log("User first time in the app");
+                    navigate('/register');
+                    return;
+                }
+                console.log("User already in the app.");
+                await setsFileManagerFacadeWSelectedUser(resultUser.user);
+                setSelectedUser(fileManagerFacadeInstance.current.selectedUser.current);
+                navigate('/home');
+            }).catch( err => {
+                // eslint-disable-next-line security-node/detect-crlf
+                console.log(err);
+            });
+        }
+        fetchData();
+    }, [fileManagerFacadeInstance, initializeFileManagerFacadeWContracts, navigate, setFileManagerFacadeWSelectedAccount, setsFileManagerFacadeWSelectedUser]);
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -245,8 +281,23 @@ const Home = () => {
         }
     }
 
+    // handles the session expiration
+    const handleSessionExpired = async () => {
+        setShowInfoFilePopup(true);
+        setMessage("Oops! It looks like your session has timed out. Please log in again.");
+        setTitleInfoNamePopup("Attention");
+    }
+
+    // Redirects the user to the sign in, once the session has expired
+    const handleContinueSessionEnd = async () => {
+        logOut();
+    }
+
+    const iconComponent = FcHighPriority;
+
     return (
         <>
+            <SessionExpirationHandler handleSessionExpire={handleSessionExpired}/>
             {selectedUser && (
                 <> 
                     <div id="files-section" className={homeClassName}>
@@ -276,6 +327,11 @@ const Home = () => {
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
                     <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} permissions={permissions} show={showInfoPopup}/>
+                    {showInfoFilePopup && (
+                        <div className='modal-wrapper'>
+                            <InfoPopup handleContinue={handleContinueSessionEnd} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoFilePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                        </div>
+                    )}
                 </>
             )}
         </>

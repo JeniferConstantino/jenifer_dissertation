@@ -8,22 +8,12 @@ class UserApp {
     this.publicKey = publicKey;   // Stores the users' public key
   }
 
-  // Sees if the user already exists in the app by seeing if the account is already stored in the blockchain
-  static async verifyIfAccountExists(fileManagerFacadeInstance) {
-    try {
-      // Verifies if the user exist
-      var result = await fileManagerFacadeInstance.getUser(fileManagerFacadeInstance._selectedAccount.current);
-      if (result.success === false) {
-          console.log("User first time in the app");
-          return null;
-      } 
-
-      console.log("User already in the app.");
-      // --------- Registration setup ---------------------
-      fileManagerFacadeInstance._selectedUser = result.user;
-      // --------------------------------------------------
-      return result.user;
-    } catch (error) {
+  // Sees if the user already exist in the app by seeing if the account is already stored in the blockchain
+  static async getUserWithAccount(fileManagerFacadeInstance) {
+    try{
+      var resultUser = await fileManagerFacadeInstance.getUser(fileManagerFacadeInstance._selectedAccount.current);
+      return resultUser;
+    } catch(error){
       console.error("Error storing user on the blockchain:", error);
       throw error; 
     }

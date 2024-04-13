@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp'
@@ -13,8 +13,17 @@ const Login = () => {
     const {fileManagerFacadeInstance} = useWeb3();
     const [mnemonic, setMnemonic] = useState('');
 
+    // On page refresh redirects the user to the WalletConnection page
+    useEffect(() => {
+        async function fetchData() {
+            if (fileManagerFacadeInstance.current == null) {
+                navigate("/");
+            }
+        }
+        fetchData();
+    }, [fileManagerFacadeInstance, navigate]);
+
     const onNext = async () => {
-        
         // Hashes the inserted mnemonic
         var hashedMnemonic = await fileManagerFacadeInstance.current.hashMnemonicSymmetricEncryption(mnemonic);
         // Verifies if the entered mnemonic belongs to a given user
@@ -34,7 +43,6 @@ const Login = () => {
             // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         })   
-
     };
 
     const handleContinue = () => {
