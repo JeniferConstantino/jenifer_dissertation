@@ -4,7 +4,7 @@ import "./UserRegister.sol";
 
 contract LoginRegister {
 
-    uint constant TIMEOUT_LIMIT = 20; // time limit in which the user is able to execute methods in seconds
+    uint constant TIMEOUT_LIMIT = 10000; // time limit in which the user is able to execute methods in seconds
     mapping(address => uint) private loginTime; // stores the time in which the user logged in the application
     mapping(address => bool) private loggedIn; // Tracks the login status
     UserRegister userRegister;

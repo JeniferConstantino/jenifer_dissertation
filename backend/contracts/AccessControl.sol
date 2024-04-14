@@ -41,6 +41,8 @@ contract AccessControl {
     //              the transaction executer is not already associate with the file 
     //              the file and the user exist
     //              fields are valid
+    //              user is logged 
+    //              session hasn't reached timeout
     function uploadFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey) external {  
         if (elegibleToUpload(userAccount, file.ipfsCID) && loginRegister.userLoggedIn(userAccount) && loginRegister.noTimeOut(userAccount)) {
             string[] memory permissionsOwner = new string[](4); // because the file owner has all permissions
@@ -71,9 +73,13 @@ contract AccessControl {
     // Edit file if: the transaction executer as "Edit" permissions over a file
     //               the file exists in the active state (and for so the transaction executer cannot edit an old version of the file - because old versions are always in the state edited or deactive)
     //               usersWithDownlodPermSelectFile and pubKeyUsersWithDownloadPermSelectFile work as a map. Because solidity doesn't allow to pass them as arguments that has to be received seperately
+    //               the user is logged in
+    //               session timeout hasn't been reached
     function editFile(FileRegister.File memory selectedFile, FileRegister.File memory newFile, address[] memory usersWithDownlodPermSelectFile, string[] memory pubKeyUsersWithDownloadPermSelectFile) external {
         if (elegibleToEdit(selectedFile.ipfsCID) &&
-            validFieldsForEdit(selectedFile, newFile, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile)
+            validFieldsForEdit(selectedFile, newFile, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile) && 
+            loginRegister.userLoggedIn(msg.sender) && 
+            loginRegister.noTimeOut(msg.sender)
         ) {
             // Adds the file
             fileRegister.editFile(selectedFile, newFile);
@@ -111,10 +117,14 @@ contract AccessControl {
     //             userAccount is not already associated with the file
     //             file exists with "active" state
     //             user exists
+    //             user is logged in
+    //             session timeout hasn't been reached
     // NOTE: the encrypted symmetric keys order has to be accordingly with the edited files received
     function shareFile (address userAccount, string memory fileIpfsCID, string[] memory encSymmetricKeys, string[] memory permissions) external{
         if (elegibleToShare(userAccount, fileIpfsCID) &&
-            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active"))
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCID).resultString)) == keccak256(abi.encodePacked("active")) && 
+            loginRegister.userLoggedIn(userAccount) && 
+            loginRegister.noTimeOut(userAccount)
         ) {
             bool validFields = helper.verifyValidFields(userAccount, fileIpfsCID, permissions, "");
             if (validFields) {
@@ -144,9 +154,13 @@ contract AccessControl {
     //              userAccound cannot be the file owner account: the file owner permissions cannot change - should always be all permissions
     //              the transaction executer has to have share permissions over the file
     //              the file is in the active state
+    //              the user is logged in
+    //              session timeout hasn't been reached
     function updateUserFilePermissions(address userAccount, string memory fileIpfsCID, string[] memory permissions) external {
         if (elegibleToUpdPermissions(userAccount, fileIpfsCID) &&
-            helper.validPermissions(permissions)
+            helper.validPermissions(permissions) && 
+            loginRegister.userLoggedIn(userAccount) && 
+            loginRegister.noTimeOut(userAccount)
         ) {
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (helper.isKeyEqual(userAccount, user_Has_File[i].userAccount, fileIpfsCID, user_Has_File[i].ipfsCID)) {
@@ -164,10 +178,14 @@ contract AccessControl {
     // Downloads the file, if: the transaction executer is the same as the user
     //                         the user has download permissions over the file
     //                         the file is active
+    //                         the user is logged in 
+    //                         session timeout hasn't been reached
     function downloadFileAudit(string memory fileIpfsCid, address userAccount) external {
         if (msg.sender == userAccount &&
             userHasPermissionOverFile(userAccount, fileIpfsCid, "download") &&
-            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCid).resultString)) == keccak256(abi.encodePacked("active"))
+            keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCid).resultString)) == keccak256(abi.encodePacked("active")) && 
+            loginRegister.userLoggedIn(userAccount) && 
+            loginRegister.noTimeOut(userAccount)
         ) {
             // No precessing is done (as it happens with updateUserFilePermissions or shareFile or updateFile)
 
@@ -176,19 +194,22 @@ contract AccessControl {
         }
     }
 
-    // Verifies if a file is valid and stores in the audit log
+    // Verifies if a file is valid and stores in the audit log  if: the user is logged in
+    //                                                              session timeout hasn't been reached
     function recordFileVerification (address userAccount, string memory fileHash) external {
-        // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
-        for (uint256 i=0; i<user_Has_File.length; i++) {
-            string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
-            string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
-            if ( user_Has_File[i].userAccount == userAccount &&
-                (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
-                (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
-            ){
-                // Writes to the Audit Log
-                auditLogControl.recordLogFromAccessControl(msg.sender, user_Has_File[i].ipfsCID, userAccount, "-", "success verification");
-                return;
+        if(loginRegister.userLoggedIn(userAccount) && loginRegister.noTimeOut(userAccount)){
+            // Look for a file, that belongs to the user and has the same fileHash, and is in the active state
+            for (uint256 i=0; i<user_Has_File.length; i++) {
+                string memory fileHashFile = fileRegister.getFileHash(user_Has_File[i].ipfsCID).resultString;
+                string memory stateFile = fileRegister.getFileState(user_Has_File[i].ipfsCID).resultString;
+                if ( user_Has_File[i].userAccount == userAccount &&
+                    (keccak256(abi.encodePacked(fileHashFile)) == keccak256(abi.encodePacked(fileHash))) &&
+                    (keccak256(abi.encodePacked(stateFile)) == keccak256(abi.encodePacked("active")))
+                ){
+                    // Writes to the Audit Log
+                    auditLogControl.recordLogFromAccessControl(msg.sender, user_Has_File[i].ipfsCID, userAccount, "-", "success verification");
+                    return;
+                }
             }
         }
     }
@@ -214,9 +235,13 @@ contract AccessControl {
 
     // Deletes a file if: the transaction executer as "Delete" permissions over the file
     //                    the file exists in the active state
+    //                    the user is logged in
+    //                    session timeout hasn't been reached
     function deactivateFile(address userAccount, string memory fileIpfsCid) external {
         if( userHasPermissionOverFile(msg.sender, fileIpfsCid, "delete") && 
-           keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCid).resultString)) == keccak256(abi.encodePacked("active"))
+           keccak256(abi.encodePacked(fileRegister.getFileState(fileIpfsCid).resultString)) == keccak256(abi.encodePacked("active")) && 
+           loginRegister.userLoggedIn(userAccount) && 
+           loginRegister.noTimeOut(userAccount)
         ) {
             fileRegister.deactivateFile(fileIpfsCid);
 
@@ -225,9 +250,12 @@ contract AccessControl {
         }
     }
 
-    // Remove the relationship between a user and a file (inlcuding his past editings)
+    // Remove the relationship between a user and a file (inlcuding his past editings) if: the user is logged in
+    //                                                                                     session timeout hasn't been reached
     function removeUserFileAssociation(address userAccount, string memory fileIpfsCID) external {
-        if (elegibleToUpdPermissions(userAccount, fileIpfsCID)) {
+        if (elegibleToUpdPermissions(userAccount, fileIpfsCID) && 
+            loginRegister.userLoggedIn(userAccount) && 
+            loginRegister.noTimeOut(userAccount)) {
             // Gets the file and the respetive file editings
             FileRegister.File[] memory editedFiles = fileRegister.getEditedFilesByIpfsCid(fileIpfsCID).files;
             for (uint256 j = 0; j < editedFiles.length; j++) {

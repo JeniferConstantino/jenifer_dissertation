@@ -40,13 +40,13 @@ class DropFileCommand extends Command {
             // Verifies file correctly added
             var resultGetFile = await this.getFileByIpfsCID(storedFile.ipfsCID, "active");
             if (!resultGetFile.success) {
-                console.log("Upload file error: Something went wrong while trying to store the file in the blockchain.");
+                console.log("Upload file error: Something went wrong while trying to store the file in the blockchain. Ensure you haven't reached session timeout.");
                 return; 
             }
             // Verifies if the file is uploaded correctly
             var result = await this.getPermissionsOverFile(this.selectedUserAccount, storedFile.ipfsCID);
             if (!result.success) {
-                console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file.");
+                console.log("Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file. Ensure you haven't reached session timeout.");
                 return; 
             }
             console.log('Action performed');
