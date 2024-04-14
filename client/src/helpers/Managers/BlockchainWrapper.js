@@ -27,8 +27,8 @@ class BlockchainWrapper {
     }
 
     // Stores the user in the blockchain
-    static userRegistered = async (userRegisterContract, user, selectedAccount) => {
-        return userRegisterContract.methods.userRegistered(user).send({from: selectedAccount});
+    static registerUser = async (loginRegisterContract, user, selectedAccount) => {
+        return await loginRegisterContract.methods.registerUser(user).send({from: selectedAccount});
     }
 
     // Verifies if a uer is associated with a mnemonic
@@ -164,7 +164,16 @@ class BlockchainWrapper {
     static downloadFileAudit = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
         return await accessControlContract.methods.downloadFileAudit(fileIpfsCid, userAccount).send({ from: selectedUserAccount });
     }
-    
+
+    // Logs the given user 
+    static logsInUser = async (loginRegisterContract, selectedUserAccount) => {
+        return await loginRegisterContract.methods.logsInUser().send({from: selectedUserAccount});
+    }
+
+    // Logs out the given user
+    static logOutUser = async (loginRegisterContract, selectedUserAccount) => {
+        return await loginRegisterContract.methods.logOutUser().send({from: selectedUserAccount});
+    }
 }
 
 export default BlockchainWrapper;

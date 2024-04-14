@@ -4,6 +4,7 @@ import "./UserRegister.sol";
 import "./FileRegister.sol";
 import "./AuditLogControl.sol";
 import "./Helper.sol";
+import "./LoginRegister.sol";
 
 contract AccessControl {
 
@@ -19,6 +20,7 @@ contract AccessControl {
     UserRegister userRegister;
     AuditLogControl auditLogControl;
     Helper helper;
+    LoginRegister loginRegister;
     bool private fileRegisterInitialized; // Solidity initializes contract state variables to their default values, which for complex types like contract instances, is an empty or zero-intiialized state. So one common approach is to use a boolean flag.
     event FileActionLog(address indexed userAccount, string fileIpfsCID, string permissionsOwner, string action);
 
@@ -26,8 +28,12 @@ contract AccessControl {
         helper = Helper(helperContract);
         fileRegister = new FileRegister(helperContract);
         userRegister = new UserRegister(helperContract);
+        loginRegister = new LoginRegister(address(userRegister));
         auditLogControl = new AuditLogControl();
         fileRegisterInitialized = false;
+
+        // Sets the loginRegisterAddress in the userRegister
+        userRegister.setLoginRegisterAddress(address(loginRegister));
     }
 
     // File Upload: only if the transaction executer is the same as the userAccount, 
@@ -36,7 +42,7 @@ contract AccessControl {
     //              the file and the user exist
     //              fields are valid
     function uploadFile (address userAccount, FileRegister.File memory file, string memory encSymmetricKey) external {  
-        if (elegibleToUpload(userAccount, file.ipfsCID)) {
+        if (elegibleToUpload(userAccount, file.ipfsCID) && loginRegister.userLoggedIn(userAccount) && loginRegister.noTimeOut(userAccount)) {
             string[] memory permissionsOwner = new string[](4); // because the file owner has all permissions
             permissionsOwner[0] = "share";
             permissionsOwner[1] = "download";
@@ -482,17 +488,22 @@ contract AccessControl {
     }
 
     // Getter function for auditLogControl address
-    function getAuditLogControlAddress() external  view returns (address) {
+    function getAuditLogControlAddress() external view returns (address) {
         return address(auditLogControl);
     }
 
     // Getter function for fileRegister address
-    function getFileRegisterAddress() external  view returns (address) {
+    function getFileRegisterAddress() external view returns (address) {
         return address(fileRegister);
     }
 
     // Getter function for userRegister address
-    function getUserRegisterAddress() external  view returns (address) {
+    function getUserRegisterAddress() external view returns (address) {
         return address(userRegister);
+    }
+
+    // Getter function for loginRegister address
+    function getLoginRegister() external view returns (address) {
+        return address(loginRegister);
     }
 }

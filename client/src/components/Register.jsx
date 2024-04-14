@@ -7,7 +7,7 @@ import { FcHighPriority } from "react-icons/fc";
 
 const Register = () => {
     const navigate = useNavigate();
-    const {fileManagerFacadeInstance} = useWeb3();
+    const {setsFileManagerFacadeWSelectedUser, fileManagerFacadeInstance} = useWeb3();
     const [username, setUsername] = useState('');
     const [showInfoMnemonicPopup, setShowInfoMnemonicPopup] = useState(false); // controls the info mnemonic popup visibility
     const [showInfoNamePopup, setShowInfoNamePopup] = useState(false); // controls the info name popup visibility
@@ -38,9 +38,13 @@ const Register = () => {
             return;
         }
 
+        // Generates a mnemonic
+        const mnemonic = await fileManagerFacadeInstance.current.generateMnemonic();
+
         // Adds the user to the blockchain and redirects him to the home page
-        UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username).then((mnemonic)=>{
-            if (fileManagerFacadeInstance.current._selectedUser != null) {
+        UserApp.storeUserBlockchain(fileManagerFacadeInstance.current, username, mnemonic).then((userLogged)=>{
+            if (userLogged != null) {
+                setsFileManagerFacadeWSelectedUser(userLogged);
                 setTitleInfoMnemonicPopup("Attention");
                 setMnemonic(mnemonic);
                 setShowInfoMnemonicPopup(true);
@@ -51,8 +55,9 @@ const Register = () => {
         })      
     };
 
-    const handleContinueMnemonic = () => {
+    const handleContinueMnemonic = async () => {
         cleanFields();
+        console.log("GOING HOME");
         navigate('/home');
     }
 

@@ -20,8 +20,8 @@ const SessionExpirationHandler = ({handleSessionExpire}) => {
     });
 
     useEffect(() => {
-        //const sessionExpirationTime = 60*60*1000; //1h
-        const sessionExpirationTime = 10*1000; //10 seconds => testing purposes
+        const sessionExpirationTime = 60*60*1000; //1h
+        //const sessionExpirationTime = 10*1000; //10 seconds => testing purposes
         const intervalId = setInterval(() => { // setInterval() => function used to repeatedly execute a specified function at defined intervals in milliseconds. It returns an interval ID that identifies the interval so it can be later canceled using clearInterval()
             const timeSinceLastAction = Date.now() - lastActionTime;
             if (timeSinceLastAction > sessionExpirationTime) {

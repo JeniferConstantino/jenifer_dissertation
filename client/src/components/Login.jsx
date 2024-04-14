@@ -32,6 +32,11 @@ const Login = () => {
                 // Regenerates the public and private keys for the given mnomonic and sets on the local storage 
                 const {privateKey, publicKey, address} = await fileManagerFacadeInstance.current.generateKeysFromMnemonic(mnemonic);
                 await fileManagerFacadeInstance.current.storeLocalSotrage(privateKey, publicKey, address);
+
+                // Logs in the user in the backend
+                await fileManagerFacadeInstance.current.logsInUser();
+                
+                // Redirects the user to the home page
                 handleContinue();
                 return;
             } 

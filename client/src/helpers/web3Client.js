@@ -1,12 +1,14 @@
 import Web3 from 'web3'
 import AccessControl from '../contracts/contracts/AccessControl.sol/AccessControl.json'
 import AuditLogControl from '../contracts/contracts/AuditLogControl.sol/AuditLogControl.json'
+import LoginRegister from '../contracts/contracts/LoginRegister.sol/LoginRegister.json'
 import FileRegister from '../contracts/contracts/FileRegister.sol/FileRegister.json'
 import UserRegister from '../contracts/contracts/UserRegister.sol/UserRegister.json'
 import UserRegister_ContractAddress from '../contracts/UserRegister_ContractAddress.json'
 import FileRegister_ContractAddress from '../contracts/FileRegister_ContractAddress.json'
 import AccessControl_ContractAddress from '../contracts/AccessControl_ContractAddress.json'
 import AuditLogControl_ContractAddress from '../contracts/AuditLogControl_ContractAddress.json'
+import LoginRegister_ContractAddress from '../contracts/LoginRegister_ContractAddress.json'
 import FileManagerFacade from './FileManagerFacade.js'
 import PropTypes from 'prop-types';
 
@@ -30,39 +32,9 @@ const Web3Provider = ({children}) => {
     let userRegisterContract = useRef();    // keeps the User Register Contract so its functions can be executed
     let accessControlContract = useRef();   // keeps the Access Control Contract so its functions can be executed
     let auditLogControlContract = useRef(); // keeps the Audit Log Contract so its functions can be executed
+    let loginRegisterContract = useRef();    // keeps the Login Register so its functions can be executed
     let provider = useRef();
     let fileManagerFacadeInstance = useRef(null);
-
-    // Starts the app: contracts and metamask connection 
-    const setup = useCallback(async () => {
-        try {
-            // Link to my Ethereum node - a "gateway" to the rest of the network 
-            provider.current = window.ethereum; 
-
-            // MetaMask is not installed
-            if(typeof provider.current === 'undefined'){ 
-                return "MetaMask not intsalled";
-            }
-
-            // Ask the user to connect is wallet to the website
-            const accounts = await provider.current.request({ method: 'eth_requestAccounts' });
-
-            selectedAccount.current = accounts[0];
-
-            // Initialize contracts
-            const web3 = new Web3(provider.current) // now web3 instance can be used to make calls, transactions and much more 
-            contractInitialization(UserRegister, UserRegister_ContractAddress, userRegisterContract, web3);
-            contractInitialization(FileRegister, FileRegister_ContractAddress, fileRegisterContract, web3);
-            contractInitialization(AccessControl, AccessControl_ContractAddress, accessControlContract, web3);
-            contractInitialization(AuditLogControl, AuditLogControl_ContractAddress, auditLogControlContract, web3);
-            console.log("Contracts initialized");
-
-            fileManagerFacadeInstance.current = new FileManagerFacade(fileRegisterContract.current, userRegisterContract.current, accessControlContract.current, auditLogControlContract.current);
-            fileManagerFacadeInstance.current._selectedAccount = selectedAccount;
-        } catch (error) {
-            return "Something went wrong while trying to authenticate the user. Make sure you're connected to metamask extension or ensure the contracts are deployed in the network you're in.";
-        }
-    }, []);
 
     // Initialize contracts
     const contractInitialization = (contract, contractAddress, contractVar, web3) => {
@@ -91,7 +63,8 @@ const Web3Provider = ({children}) => {
             contractInitialization(FileRegister, FileRegister_ContractAddress, fileRegisterContract, web3);
             contractInitialization(AccessControl, AccessControl_ContractAddress, accessControlContract, web3);
             contractInitialization(AuditLogControl, AuditLogControl_ContractAddress, auditLogControlContract, web3);
-            fileManagerFacadeInstance.current = new FileManagerFacade(fileRegisterContract.current, userRegisterContract.current, accessControlContract.current, auditLogControlContract.current);
+            contractInitialization(LoginRegister, LoginRegister_ContractAddress, loginRegisterContract, web3);
+            fileManagerFacadeInstance.current = new FileManagerFacade(fileRegisterContract.current, userRegisterContract.current, accessControlContract.current, auditLogControlContract.current, loginRegisterContract.current);
             console.log("Contracts initialized");
         } catch (error) {
             return "Something went wrong while trying to initialize contracts.";
@@ -134,7 +107,6 @@ const Web3Provider = ({children}) => {
     }
 
     const value = {
-        setup,
         logOut,
         setFileManagerFacadeWSelectedAccount,
         initializeFileManagerFacadeWContracts, 

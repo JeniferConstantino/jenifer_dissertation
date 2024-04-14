@@ -91,8 +91,8 @@ function () {
 
   }, {
     key: "storeUserBlockchain",
-    value: function storeUserBlockchain(fileManagerFacadeInstance, userName) {
-      var mnemonic, _ref, privateKey, publicKey, address, hashedMnemonic, userLogged, result;
+    value: function storeUserBlockchain(fileManagerFacadeInstance, userName, mnemonic) {
+      var _ref, privateKey, publicKey, address, hashedMnemonic, userLogged, resultUserVerification;
 
       return regeneratorRuntime.async(function storeUserBlockchain$(_context3) {
         while (1) {
@@ -100,66 +100,62 @@ function () {
             case 0:
               _context3.prev = 0;
               _context3.next = 3;
-              return regeneratorRuntime.awrap(fileManagerFacadeInstance.generateMnemonic());
-
-            case 3:
-              mnemonic = _context3.sent;
-              _context3.next = 6;
               return regeneratorRuntime.awrap(fileManagerFacadeInstance.generateKeysFromMnemonic(mnemonic));
 
-            case 6:
+            case 3:
               _ref = _context3.sent;
               privateKey = _ref.privateKey;
               publicKey = _ref.publicKey;
               address = _ref.address;
-              _context3.next = 12;
+              _context3.next = 9;
               return regeneratorRuntime.awrap(fileManagerFacadeInstance.storeLocalSotrage(privateKey, publicKey, address));
 
-            case 12:
-              _context3.next = 14;
+            case 9:
+              _context3.next = 11;
               return regeneratorRuntime.awrap(fileManagerFacadeInstance.hashMnemonicSymmetricEncryption(mnemonic));
 
-            case 14:
+            case 11:
               hashedMnemonic = _context3.sent;
               // Because the usernames are going to be case insensitive, this is writing Maria = maria = MARIA and so it goes
               userName = userName.toLowerCase(); // Cretaes the user to be stored
 
-              userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex')); // Stors the user in the blockchain
+              userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex')); // Registers the user in the blockchain
 
-              _context3.next = 19;
-              return regeneratorRuntime.awrap(fileManagerFacadeInstance.userRegistered(userLogged));
+              _context3.next = 16;
+              return regeneratorRuntime.awrap(fileManagerFacadeInstance.registerUser(userLogged));
 
-            case 19:
-              result = _context3.sent;
+            case 16:
+              _context3.next = 18;
+              return regeneratorRuntime.awrap(fileManagerFacadeInstance.getUser(userLogged.account));
 
-              if (!result.status) {
-                _context3.next = 24;
+            case 18:
+              resultUserVerification = _context3.sent;
+
+              if (!resultUserVerification.success) {
+                _context3.next = 22;
                 break;
               }
 
-              // --------- Registration setup ---------------------
-              fileManagerFacadeInstance._selectedUser = userLogged; // --------------------------------------------------
-
               console.log("Registration - user added in the blockchain.");
-              return _context3.abrupt("return", mnemonic);
+              return _context3.abrupt("return", userLogged);
 
-            case 24:
-              console.log("Something went wrong when trying to add the user to the blockchain.");
-              _context3.next = 31;
-              break;
+            case 22:
+              // eslint-disable-next-line security-node/detect-crlf
+              console.log("Something went wrong while trying to register the user: ", resultUserVerification.message);
+              return _context3.abrupt("return", null);
 
-            case 27:
-              _context3.prev = 27;
+            case 26:
+              _context3.prev = 26;
               _context3.t0 = _context3["catch"](0);
               console.error("Transaction error: ", _context3.t0.message);
               throw _context3.t0;
 
-            case 31:
+            case 30:
             case "end":
               return _context3.stop();
           }
         }
-      }, null, null, [[0, 27]]);
+      }, null, null, [[0, 26]]);
     }
   }]);
 

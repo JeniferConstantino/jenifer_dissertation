@@ -21,6 +21,7 @@ contract UserRegister {
     mapping(string => User) private usersByName;             // Same information as the map "users" but with the name being the key: helps in the method: getUserByUserName 
     mapping(string => bool) private userNameExists;
     Helper helper;
+    address loginRegisterAddress;
 
     constructor(address helperContract) {
         helper = Helper(helperContract);
@@ -30,10 +31,10 @@ contract UserRegister {
     // Unwanted Usage: incert an existing user and overlap the existing information. 
     // To be able to register: userName has to be unique
     //                         address has to be unique
-    //                         the transaction executer has to have the same address as the user
+    //                         the transaction executer has to be the LoginRegister contract
     //                         user fields have to be valid
     function userRegistered(User memory user) external {
-        if (user.account == msg.sender) {
+        if (loginRegisterAddress == msg.sender) {
             if (canRegister(user)) { // Checks if the user is elegible to register (including validating fields)
                 users[user.account] = User(user.account, helper.toLower(user.userName), user.mnemonic, user.publicKey);
                 usersByName[user.userName] = User(user.account, user.userName, user.mnemonic, user.publicKey);
@@ -82,7 +83,7 @@ contract UserRegister {
     // Checks if the user is elegible to register
     // The one seeing if the user is elegible to register should be the same one executing the transaction
     function canRegister(User memory user) private view returns (bool) {
-        if (user.account == msg.sender) { 
+        if ( loginRegisterAddress == msg.sender) { 
             if (!existingAddress(user.account) && !existingUserName(user.userName) && helper.validUserFields(user)) {
                 return true;
             }
@@ -113,5 +114,15 @@ contract UserRegister {
     // Verifies if the username is taken
     function existingUserName(string memory userName) public view returns (bool) {
         return userNameExists[userName];
+    }
+
+    // Sets the LoginRegister address
+    function setLoginRegisterAddress(address loginRegisterContractAddress) external {
+        loginRegisterAddress = loginRegisterContractAddress;
+    }
+
+    // Returns the LoginRegister address
+    function getLoginRegisterAddress() public view returns (address) {
+        return loginRegisterAddress;
     }
 }

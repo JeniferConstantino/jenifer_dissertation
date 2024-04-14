@@ -11,11 +11,12 @@ import DeleteFileCommand from './Commands/DeleteFileCommand.js';
 
 class FileManagerFacade {
 
-  constructor(fileRegisterContract, userRegisterContract, accessControlContract, auditLogControlContract) {
+  constructor(fileRegisterContract, userRegisterContract, accessControlContract, auditLogControlContract, loginRegisterContract) {
       this.fileRegisterContract = fileRegisterContract;
       this.userRegisterContract = userRegisterContract;
       this.accessControlContract = accessControlContract;
       this.auditLogControlContract = auditLogControlContract;
+      this.loginRegisterContract = loginRegisterContract;
       this._selectedAccount = "";
       this._selectedUser = null;
   }
@@ -215,8 +216,8 @@ class FileManagerFacade {
   }
 
   // Adds a user into the blockchain
-  userRegistered(user) {
-    return BlockchainWrapper.userRegistered(this.userRegisterContract, user, this.selectedAccount.current);
+  async registerUser(user) {
+    return await BlockchainWrapper.registerUser(this.loginRegisterContract, user, this.selectedAccount.current);
   }
 
   // Returns if a user is associated with a file
@@ -247,6 +248,16 @@ class FileManagerFacade {
   // Gets the users associated with the file 
   async getUsersAssociatedWithFile(fileIpfsCID) {
     return await BlockchainWrapper.getUsersAssociatedWithFile(this.accessControlContract, fileIpfsCID, this.selectedUser.account);
+  }
+
+  // Logs the given user
+  async logsInUser() {
+    return await BlockchainWrapper.logsInUser(this.loginRegisterContract, this.selectedUser.account);
+  } 
+
+  // Logs out the given user 
+  async logOutUser() {
+    return await BlockchainWrapper.logOutUser(this.loginRegisterContract, this.selectedUser.account);
   }
 
   // Hashes the mnemonic using symmetric encryption
