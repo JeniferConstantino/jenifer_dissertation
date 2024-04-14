@@ -13,27 +13,6 @@ contract LoginRegister {
         userRegister = UserRegister(userRegisterContract);
     }
 
-    // Verify if user is logged in
-    // Returns true if the user is logged in and false otherwise
-    // Does not need any validation to ensure who executes the method because it only returns if a user is or isn't logged in
-    function userLoggedIn(address userAccount) external view returns (bool) {
-        if(loggedIn[userAccount]) {
-            return true;
-        }
-        return false;
-    }
-
-    // Verifies if there is no timeout
-    // returns true if the timeout hasn't been reached and false otherwise
-    // Does not need any validation to ensure who executes the method because it only returns if a user has reached timeout or not
-    function noTimeOut(address userAccount) external view returns (bool) {
-        uint intervalTimeLogged = block.timestamp - loginTime[userAccount];
-        if(intervalTimeLogged <= TIMEOUT_LIMIT) {
-            return true;
-        }
-        return false;
-    }
-
     // Logs the user in
     function logsInUser() external {
         if (!loggedIn[msg.sender]) { // If the user is not already logged in
@@ -54,5 +33,30 @@ contract LoginRegister {
         if(loggedIn[msg.sender]){ // If the user is logged in
            loggedIn[msg.sender] = false; 
         }
+    }
+
+    // Verify if user is logged in
+    // Returns true if the user is logged in and false otherwise
+    // Does not need any validation to ensure who executes the method because it only returns if a user is or isn't logged in
+    function userLoggedIn(address userAccount) external view returns (bool) {
+        if(loggedIn[userAccount]) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verifies if the timeout has been reached
+    // returns true if the timeout hasn't been reached and false otherwise
+    // Does not need any validation to ensure who executes the method because it only returns if a user has reached timeout or not
+    function noTimeOut(address userAccount) external view returns (bool) {
+        uint intervalTimeLogged = block.timestamp - loginTime[userAccount];
+        if(intervalTimeLogged <= TIMEOUT_LIMIT) {
+            return true;
+        }
+        return false;
+    }
+
+    function getTimeOutLimit() external pure returns (uint){
+        return TIMEOUT_LIMIT;
     }
 }
