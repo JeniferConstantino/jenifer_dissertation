@@ -5,8 +5,9 @@ import { FcPlus } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
-const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
+const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedActiveFiles, uploadedFiles, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
@@ -27,7 +28,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
         setIsDragOver(true);
     }
 
-    const handleDragLeave = (e) => {
+    const handleDragLeave = () => {
         setIsDragOver(false);
     }
 
@@ -48,6 +49,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                 }
                 await fileManagerFacadeInstance.uploadFile(fileUpl.name, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
+                handleFileUploaded("upload");
             } catch (error) {
                 console.error("Error uploading file:", error);
             }
@@ -80,7 +82,7 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     // Sets to close the popup to upload a file
     const handleCloseUploadPopup = () => {
         cleanFields();
-        handleClosePopup("upload"); 
+        handleFileUploaded("upload");
     }
 
     const handleCloseWrongFileType = () => {
@@ -90,7 +92,6 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     }
 
     const cleanFields = () => {
-        handleFileUploaded("upload");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
@@ -122,8 +123,8 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
-                                            <button className="app-button__drop app-button" onClick={handleCloseUploadPopup}> Cancel </button>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <button className="app-button__drop app-button" onClick={cleanFields}> Cancel </button>
                                         </>
                                     ) : (
                                         <p> <FcPlus/> Drop your file</p>  
@@ -146,5 +147,14 @@ const UploadPopup = ({fileManagerFacadeInstance, handleFileUploaded, uploadedAct
     );
 
 }
+
+UploadPopup.propTypes = {
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleFileUploaded: PropTypes.func.isRequired,
+    uploadedActiveFiles: PropTypes.array.isRequired,
+    uploadedFiles: PropTypes.array.isRequired,
+    show: PropTypes.bool.isRequired,
+    children: PropTypes.object,
+};
 
 export default UploadPopup;

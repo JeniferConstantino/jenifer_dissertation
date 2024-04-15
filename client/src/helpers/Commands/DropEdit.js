@@ -1,25 +1,25 @@
-import {FileApp} from '../FileApp';
-import DropFileCommand from "./DropFileCommand";
+import {FileApp} from '../FileApp.js';
+import DropFileCommand from "./DropFileCommand.js";
 
 // Concrete command for uploading a file
 class DropEdit extends DropFileCommand {
 
-    constructor(fileManager, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles) {
-        super();
-        this.fileManager = fileManager;
+    constructor(fileUplName, selectedFile,  getUsersAssociatedWithFile, getPubKeyUser, encryptSymmetricKey, editFileUpl, fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey, addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, selectedUserAccount) {
+        super(fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey, addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, selectedUserAccount);
         this.fileUplName = fileUplName;
         this.selectedFile = selectedFile;
-        this.fileAsBuffer = fileAsBuffer;
-        this.handleFileUploaded = handleFileUploaded;
-        this.uploadedActiveFiles = uploadedActiveFiles;
-        this.uploadedFiles = uploadedFiles;
+        this.getUsersAssociatedWithFile = getUsersAssociatedWithFile;
+        this.getPubKeyUser = getPubKeyUser;
+        this.encryptSymmetricKey = encryptSymmetricKey;
+        this.editFileUpl = editFileUpl;
     }
 
     // Gets the encrypted symmetric key for each user that has download permissions over a file
     async encryptedSymmetricKeys(selectedFile, symmetricKey) {
         // Gets the users that have download permissions of the file to be edited
-        const result = await this.fileManager.getUsersWithDownloadPermissionsFile(selectedFile);
+        const result = await this.getUsersAssociatedWithFile(selectedFile.ipfsCID);
         if (!result.success) {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log("Error: ", result.message);
         }
         const usersDonldPermFile = result.resultAddresses;
@@ -30,7 +30,7 @@ class DropEdit extends DropFileCommand {
         // Iterate over each user, encrypt the symmetric key with the corresponding public key and store it on the map
         for (const userAddress of usersDonldPermFile) {
             // Gets the user public key
-            const res = await this.fileManager.getPubKeyUser(userAddress);
+            const res = await this.getPubKeyUser(userAddress);
             if (!res.success) {
                 console.log("something went wrong while trying to get the users public key.");
                 return '';
@@ -38,7 +38,7 @@ class DropEdit extends DropFileCommand {
             const userPublicKey = res.resultString;
 
             // Encrypt the symmetric key with teach users' public  key
-            let encryptedSymmetricKey = await this.fileManager.encryptSymmetricKey(symmetricKey, userPublicKey);
+            let encryptedSymmetricKey = await this.encryptSymmetricKey(symmetricKey, userPublicKey);
 
             // Store in the map the encrypted symmetric key as a value and with user as the key 
             encryKeysUsers.set(userAddress, encryptedSymmetricKey.toString('base64'));
@@ -59,7 +59,7 @@ class DropEdit extends DropFileCommand {
         const pubKeyUsersWithDownloadPermSelectFile = Array.from(encryKeysUsers.values());
         
         // Calls the method on the contract responsible for uploading the edited file and changing the state of the previous one
-        await this.fileManager.editFileUpl(this.selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile); 
+        await this.editFileUpl(this.selectedFile, fileEdited, usersWithDownlodPermSelectFile, pubKeyUsersWithDownloadPermSelectFile); 
     
         return fileEdited;
     }

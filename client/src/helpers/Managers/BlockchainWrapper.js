@@ -1,4 +1,4 @@
-import { FileApp } from "../FileApp";
+import { FileApp } from "../FileApp.js";
 
 class BlockchainWrapper {
     // Gets the public key of the given user
@@ -27,13 +27,13 @@ class BlockchainWrapper {
     }
 
     // Stores the user in the blockchain
-    static userRegistered = async (userRegisterContract, user, selectedAccount) => {
-        return userRegisterContract.methods.userRegistered(user).send({from: selectedAccount});
+    static registerUser = async (loginRegisterContract, user, selectedAccount) => {
+        return await loginRegisterContract.methods.registerUser(user).send({from: selectedAccount});
     }
 
     // Verifies if a uer is associated with a mnemonic
     static verifyUserAssociatedMnemonic = async (userRegisterContract, mnemonic, userAccount, selectedUserAccount) => {
-        return await userRegisterContract.methods.verifyUserAssociatedMnemonic(mnemonic, userAccount).call({from: selectedUserAccount});;
+        return await userRegisterContract.methods.verifyUserAssociatedMnemonic(mnemonic, userAccount).call({from: selectedUserAccount});
     }
 
     // Returns the user
@@ -71,9 +71,9 @@ class BlockchainWrapper {
         return await auditLogControlContract.methods.getLogs(filesIpfsCid).call({from: selectedUserAccount});
     }
 
-    // Gets the users with download permissions over a file
-    static getUsersWithDownloadPermissionsFile = async (accessControlContract, file, selectedUserAccount) => {
-        return accessControlContract.methods.getUsersWithDownloadPermissionsFile(file).call({from: selectedUserAccount});
+    // Gets the users associated with the file
+    static getUsersAssociatedWithFile = async (accessControlContract, fileIpfsCID, selectedUserAccount) => {
+        return accessControlContract.methods.getUsersAssociatedWithFile(fileIpfsCID).call({from: selectedUserAccount});
     }
 
     // Returns true if the user is already associated with a file with the given name
@@ -81,9 +81,14 @@ class BlockchainWrapper {
         return await accessControlContract.methods.userAssociatedWithFileName(userAccount, fileName).call({from: selectedUserAccount});
     }
 
-    // Get the encrypted symmetric key of a file associated with a given user
+    // Get the encrypted symmetric key of one singel file associated with a given user
     static getEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
         return await accessControlContract.methods.getEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
+    }
+
+    // Get the all the encrypted symmetric keys of a file (including passed editings) associated with a given user 
+    static getAllEncSymmetricKeyFileUser = async (accessControlContract, userAccount, fileIpfcid) => {
+        return await accessControlContract.methods.getAllEncSymmetricKeyFileUser(userAccount, fileIpfcid).call({from: userAccount});
     }
 
     // Get active files from the Blockchain given a user
@@ -110,6 +115,11 @@ class BlockchainWrapper {
         return await accessControlContract.methods.verifyValidFile(userAccount, fileHash).call({from: selectedUserAccount});
     }
 
+    // Records the file verification
+    static recordFileVerification = async (accessControlContract, userAccount, fileHash, selectedUserAccount) => {
+        return await accessControlContract.methods.recordFileVerification(userAccount, fileHash).send({from: selectedUserAccount});
+    }
+
     // Gets the permissions a user has over a file
     static getPermissionsUserOverFile = async (accessControlContract, accountUserToGetPermssion, fileIpfsCid, selectedUserAccount) => {
         return await accessControlContract.methods.getPermissionsOverFile(accountUserToGetPermssion, fileIpfsCid).call({from: selectedUserAccount}); 
@@ -126,8 +136,8 @@ class BlockchainWrapper {
     } 
 
     // Delete the association of the file with the users and deletes the file
-    static deactivateFile = async (accessControlContract, userAccount, fileIpfsCid, selectedUserAccount) => {
-        return await accessControlContract.methods.deactivateFile(userAccount, fileIpfsCid).send({from: selectedUserAccount});
+    static deactivateFile = async (accessControlContract, fileIpfsCid, selectedUserAccount) => {
+        return await accessControlContract.methods.deactivateFile(selectedUserAccount, fileIpfsCid).send({from: selectedUserAccount});
     }
 
     // Returns the permissions of a user over a file
@@ -146,15 +156,24 @@ class BlockchainWrapper {
     }
 
     // Share File: associates a file with a user given certain permissions
-    static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray, selectedUserAccount) => {
-        await accessControlContract.methods.shareFile(userAccount, fileIpfCid, encryptedSymmetricKeyShared, permissionsArray).send({ from: selectedUserAccount }) ;
+    static fileShare = async (accessControlContract, userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray, selectedUserAccount) => {
+        await accessControlContract.methods.shareFile(userAccount, fileIpfCid, encryptedSymmetricKeysShared, permissionsArray).send({ from: selectedUserAccount }) ;
     }
 
     // Downloads the file
     static downloadFileAudit = async (accessControlContract, fileIpfsCid, userAccount, selectedUserAccount) => {
         return await accessControlContract.methods.downloadFileAudit(fileIpfsCid, userAccount).send({ from: selectedUserAccount });
     }
-    
+
+    // Logs the given user 
+    static logsInUser = async (loginRegisterContract, selectedUserAccount) => {
+        return await loginRegisterContract.methods.logsInUser().send({from: selectedUserAccount});
+    }
+
+    // Logs out the given user
+    static logOutUser = async (loginRegisterContract, selectedUserAccount) => {
+        return await loginRegisterContract.methods.logOutUser().send({from: selectedUserAccount});
+    }
 }
 
 export default BlockchainWrapper;

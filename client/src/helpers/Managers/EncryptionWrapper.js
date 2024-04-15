@@ -2,7 +2,7 @@ import ecies from 'eth-ecies';
 import { generateMnemonic, mnemonicToSeedSync } from 'bip39';
 import * as ethUtil from 'ethereumjs-util';
 import HDKey from 'hdkey';
-const crypto = require('crypto-browserify');
+import crypto from 'crypto-browserify';
 
 class EncryptionWrapper {
 
@@ -38,17 +38,41 @@ class EncryptionWrapper {
         console.log("Key Pair stored in the local storage");
     }
 
-    // Encrypts a given symmetric key using a given public key
-    static encryptSymmetricKey(symmetricKey, publicKey) {
+    // Encrypts a single symmetric key using a given public key
+    static encryptSymmetricKey(symmetricKeys, publicKey) {
         const storedPublicKey = Buffer.from(publicKey, 'hex');
-        const encryptedSymmetricKey = ecies.encrypt(storedPublicKey, Buffer.from(symmetricKey));
-        return encryptedSymmetricKey;
+        const encryptedSymmetricKey = ecies.encrypt(storedPublicKey, Buffer.from(symmetricKeys));
+        return encryptedSymmetricKey.toString('base64');
+    }
+
+    // Encrypts symmetric keys using a given public key
+    static encryptSymmetricKeys(symmetricKeys, publicKey) {
+        var encSymmetricKeys = [];
+        const storedPublicKey = Buffer.from(publicKey, 'hex');
+        for (var i = 0; i < symmetricKeys.length; i++) {
+            // eslint-disable-next-line security/detect-object-injection
+            const encryptedSymmetricKey = ecies.encrypt(storedPublicKey, Buffer.from(symmetricKeys[i]));
+            encSymmetricKeys.push(encryptedSymmetricKey.toString('base64')); 
+        }
+        return encSymmetricKeys;
     }
 
     // Decrypts a given symmetric key using a given private key
     static decryptSymmetricKey(encryptedSymmetricKeyBuffer, privateKey) {
         const decryptedSymmetricKey = ecies.decrypt(privateKey, encryptedSymmetricKeyBuffer);
         return decryptedSymmetricKey;
+    }
+
+    // Decrypts a given group of symmetric keys using a given private key
+    static decryptSymmetricKeys(encSymmetricKeys, privateKey){
+        var decSymmetricKeys = [];
+        for (var i = 0; i < encSymmetricKeys.length; i++) {
+            // eslint-disable-next-line security/detect-object-injection
+            var encSymmetricKeyBuffer = Buffer.from(encSymmetricKeys[i], 'base64');
+            var decSymKey = ecies.decrypt(privateKey, encSymmetricKeyBuffer);
+            decSymmetricKeys.push(decSymKey); 
+        }
+        return decSymmetricKeys;
     }
 
     // Encrypts a given file using a given symmetric key 

@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require('dotenv').config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -16,7 +17,7 @@ module.exports = {
     currency: 'EUR', // currency which gas costs are reported
     gasPrice: 27,    // gas price to be used for calculating gas costs - adjust according to the fas price in the network
     enabled: true,
-    coinmarketcap: "5be6b9cc-2d28-4889-8d4a-c1c90ad0cca3",
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     // --- To create a report file uncomment these lines bellow ---
     //outputFile: 'gar-report.txt', // gar report file name
     //noColors: true,

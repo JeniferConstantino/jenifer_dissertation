@@ -43,9 +43,11 @@ async function main() {
     const auditLogControlContractAddress = await accessControlContract.getAuditLogControlAddress();
     const fileRegisterContractAddress = await accessControlContract.getFileRegisterAddress();
     const userRegisterContractAddress = await accessControlContract.getUserRegisterAddress();
+    const loginRegisterContractAddress = await accessControlContract.getLoginRegister();
     addAdressToFile(auditLogControlContractAddress, "AuditLogControl");
     addAdressToFile(fileRegisterContractAddress, "FileRegister");
     addAdressToFile(userRegisterContractAddress, "UserRegister");
+    addAdressToFile(loginRegisterContractAddress, "LoginRegister");
 
     const fileRegisterContract = await hre.ethers.getContractAt("FileRegister", fileRegisterContractAddress);
     // Sets the needed variables for each contract

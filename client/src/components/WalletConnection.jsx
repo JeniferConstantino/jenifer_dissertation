@@ -5,23 +5,32 @@ import UserApp from '../helpers/UserApp'
 
 const WalletConnection = () => {
     const navigate = useNavigate();
-    const {setup, fileManagerFacadeInstance } = useWeb3();
+    const {setsFileManagerFacadeWSelectedUser, setFileManagerFacadeWSelectedAccount, initializeFileManagerFacadeWContracts, fileManagerFacadeInstance } = useWeb3();
 
     const onSubmitLogin = async (e) => {
         console.log('Loggin the user ...')
         e.preventDefault()
         
-        await setup();
-        // Verifies if the entered mnemonic belongs to a given user
-        UserApp.verifyIfAccountExists(fileManagerFacadeInstance.current).then(async (existingUser)=>{
-            if (existingUser) {
-                navigate('/login');
+        // Initializes FileManagerFacadeInstance with contracts
+        await initializeFileManagerFacadeWContracts();
+
+        // Sets the FileManagerFacadeInstance with the selectedAccount
+        await setFileManagerFacadeWSelectedAccount();
+
+        // Verifies if the account exists  in the dApp
+        UserApp.getUserWithAccount(fileManagerFacadeInstance.current).then( async (resultUser) => {
+            if (resultUser.success == false) {
+                console.log("User first time in the app");
+                navigate('/register');
                 return;
-            } 
-            navigate('/register');
-        }).catch(err=>{
+            }
+            console.log("User already in the app.");
+            await setsFileManagerFacadeWSelectedUser(resultUser.user);
+            navigate('/login');
+        }).catch( err => {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
-        })  
+        });
     };
 
     return (
@@ -31,7 +40,7 @@ const WalletConnection = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>NearFile</h1>
-                        <p>Store and share your documents safely. Access other people's documents easily.</p>
+                        <p className='content-wallet-connection'><strong className='boltColor'>Manage</strong> your documents <strong className='boltColor'>safely</strong>.<br/>Access other people&apos;s documents <strong className='boltColor'>easily</strong>. Trust is in your hands.</p>
                     </div>
                     <div className='login-column'>
                         <button className='app-button app-button__login' onClick={onSubmitLogin}> Connect Wallet </button>

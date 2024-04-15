@@ -1,15 +1,15 @@
 import React from "react";
 import { FcDocument , FcImageFile} from "react-icons/fc";
 import { FileApp } from "../../helpers/FileApp";
+import PropTypes from 'prop-types';
 
 const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loading, maxFilesPerColumn}) => {
 
     // Sends the file to be decrypt
-    const decryptAndDownload = async (file) => {
+    const select = async (file) => {
         if (selectedFile === file) {
             setSelectedFile(null);
         } else {
-            console.log("selected file: ", file);
             setSelectedFile(file);
         }
     }
@@ -23,7 +23,7 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loa
                     <div 
                         key={index} 
                         className={`uploaded-docs ${selectedFile === file ? 'selected' : ''}`} 
-                        onClick={() => decryptAndDownload(file)}
+                        onClick={() => select(file)}
                     >
                         {file.fileType === FileApp.FileType.Image ? (
                             <>
@@ -68,5 +68,13 @@ const DisplayUplDocs = ({selectedFile, setSelectedFile, uploadedActiveFiles, loa
         </>
     );
 }
+
+DisplayUplDocs.propTypes = {
+    selectedFile: PropTypes.object,
+    setSelectedFile: PropTypes.func,
+    uploadedActiveFiles: PropTypes.array.isRequired,
+    loading: PropTypes.bool.isRequired,
+    maxFilesPerColumn: PropTypes.number.isRequired
+};
 
 export default DisplayUplDocs;

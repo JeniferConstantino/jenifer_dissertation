@@ -5,6 +5,7 @@ import { FcPlus } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
 import InfoPopup from '../Infos/InfoPopup';
 import { FcHighPriority } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
 const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile, uploadedActiveFiles, uploadedFiles, handleClosePopup, show, children}) => {
 
@@ -27,7 +28,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
         setIsDragOver(true);
     }
 
-    const handleDragLeave = (e) => {
+    const handleDragLeave = () => {
         setIsDragOver(false);
     }
 
@@ -48,6 +49,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                 }
                 await fileManagerFacadeInstance.editFile(fileUpl.name, fileAsBuffer, selectedFile, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
                 cleanFields();
+                handleFileUploaded("edit"); 
             } catch (error) {
                 console.error("Error uploading file:", error);
             }
@@ -90,7 +92,6 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
     }
 
     const cleanFields = () => {
-        handleFileUploaded("edit");
         setShowDragDrop(true);
         setDroppedFile(null);
         setFileAsBuffer(null);
@@ -119,7 +120,7 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
                                             <button className="app-button__drop app-button" onClick={cleanFields}> Cancel </button>
                                         </>
                                     ) : (
@@ -143,5 +144,16 @@ const EditPopup = ({fileManagerFacadeInstance, handleFileUploaded, selectedFile,
     );
 
 }
+
+EditPopup.propTypes = {
+    fileManagerFacadeInstance:  PropTypes.object.isRequired,
+    handleFileUploaded: PropTypes.func.isRequired,
+    selectedFile: PropTypes.object,
+    uploadedActiveFiles: PropTypes.array.isRequired,
+    uploadedFiles: PropTypes.array.isRequired,
+    handleClosePopup: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    children:  PropTypes.object
+};
 
 export default EditPopup;

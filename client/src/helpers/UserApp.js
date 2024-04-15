@@ -8,22 +8,12 @@ class UserApp {
     this.publicKey = publicKey;   // Stores the users' public key
   }
 
-  // Sees if the user already exists in the app by seeing if the account is already stored in the blockchain
-  static async verifyIfAccountExists(fileManagerFacadeInstance) {
-    try {
-      // Verifies if the user exist
-      var result = await fileManagerFacadeInstance.getUser(fileManagerFacadeInstance._selectedAccount.current);
-      if (result.success === false) {
-          console.log("User first time in the app");
-          return null;
-      } 
-
-      console.log("User already in the app.");
-      // --------- Registration setup ---------------------
-      fileManagerFacadeInstance._selectedUser = result.user;
-      // --------------------------------------------------
-      return result.user;
-    } catch (error) {
+  // Sees if the user already exist in the app by seeing if the account is already stored in the blockchain
+  static async getUserWithAccount(fileManagerFacadeInstance) {
+    try{
+      var resultUser = await fileManagerFacadeInstance.getUser(fileManagerFacadeInstance._selectedAccount.current);
+      return resultUser;
+    } catch(error){
       console.error("Error storing user on the blockchain:", error);
       throw error; 
     }
@@ -40,10 +30,8 @@ class UserApp {
   }
 
   // Stores the user in the blockchain
-  static async storeUserBlockchain(fileManagerFacadeInstance, userName) {
+  static async storeUserBlockchain(fileManagerFacadeInstance, userName, mnemonic) {
     try {
-      // Generates a mnemonic
-      const mnemonic = await fileManagerFacadeInstance.generateMnemonic();
       // Gets a private and public key from the mnemonic
       const {privateKey, publicKey, address} = await fileManagerFacadeInstance.generateKeysFromMnemonic(mnemonic);
       // Stores the private and public key in the local storage
@@ -53,23 +41,25 @@ class UserApp {
 
       // Because the usernames are going to be case insensitive, this is writing Maria = maria = MARIA and so it goes
       userName = userName.toLowerCase();
-      console.log("username: ", userName);
 
       // Cretaes the user to be stored
       var userLogged = new UserApp(fileManagerFacadeInstance.selectedAccount.current, userName, hashedMnemonic, publicKey.toString('hex'));
       
-      // Stors the user in the blockchain
-      const result = await fileManagerFacadeInstance.userRegistered(userLogged);
-      if (result.status) {
-        // --------- Registration setup ---------------------
-        fileManagerFacadeInstance._selectedUser = userLogged;
-        // --------------------------------------------------
+      // Registers the user in the blockchain
+      await fileManagerFacadeInstance.registerUser(userLogged);
+      
+      // Verifies if the registration was seccessful
+      const resultUserVerification = await fileManagerFacadeInstance.getUser(userLogged.account);
+      if (resultUserVerification.success) {
         console.log("Registration - user added in the blockchain.");
-        return mnemonic;
+        return userLogged;
       }
-      console.log("Something went wrong when trying to add the user to the blockchain.");       
+      // eslint-disable-next-line security-node/detect-crlf
+      console.log("Something went wrong while trying to register the user: ", resultUserVerification.message);
+      return null;
     } catch (error) {
         console.error("Transaction error: ", error.message);
+        throw error;
     }
   }
 

@@ -1,7 +1,8 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent: IconComponentnent, changeWithButton, mnemonic}) => {
-    const showHideClassName = showInfoPopup ? 'modalPopup display-block-popup' : 'modalPopup display-none';
+    const showHideClassName = showInfoPopup ? 'modalPopup' : 'modalPopup display-none';
     const changeWidth = changeWithButton ? 'app-button app-button__popup-width' : 'app-button app-button__popup';
 
     return (
@@ -20,9 +21,9 @@ const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent
                             <div>
                                 {mnemonic !== '' ? (
                                     <>
-                                    <p className="message-popup"> This is your <b>mnemonic</b> </p>
-                                    <p className="message-popup"> {mnemonic}</p>
-                                    <p className="message-popup"> Keep it safe (write it on a peper, for example). Anyone with access to this mnemonic can <b>access your account</b>. And, if you lose it you <b>lose</b> your access forever.</p>
+                                    <p className="message-popup mnemonic-phrase"> This is your <b>mnemonic</b>: </p>
+                                    <p className="message-popup mnemonic-message"> {mnemonic}</p>
+                                    <p className="message-popup"> Remember to keep it <strong>safe</strong>, like writing it down on a piece of paper. Your mnemonic gives <strong>access to your account</strong>. If it falls into the wrong hands, they could gain entry. And if you lose it, you&apos;ll lose access to your account permanently.</p>
                                     </>
                                 ) : (
                                     <p className="message-popup">{message}</p>
@@ -38,5 +39,15 @@ const InfoPopup = ({handleContinue, message, title, showInfoPopup, iconComponent
         </div>
     );
 }
+
+InfoPopup.propTypes = {
+    handleContinue: PropTypes.func.isRequired,
+    message: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    showInfoPopup: PropTypes.bool.isRequired,
+    iconComponent: PropTypes.func.isRequired,
+    changeWithButton: PropTypes.bool.isRequired,
+    mnemonic: PropTypes.string.isRequired
+};
 
 export default InfoPopup;

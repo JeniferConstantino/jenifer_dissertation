@@ -4,8 +4,9 @@ import {Buffer} from 'buffer';
 import { FcPlus } from "react-icons/fc";
 import InfoPopup from '../Infos/InfoPopup';
 import { FcCheckmark, FcCancel } from "react-icons/fc";
+import PropTypes from 'prop-types';
 
-const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children}) => {
+const VeifyPopup = ({fileManagerFacadeInstance, handleVerify, show, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [showDragDrop, setShowDragDrop] = useState(true);// controls the visibility of the drag and drop popup
@@ -24,7 +25,7 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
         setIsDragOver(true);
     }
 
-    const handleDragLeave = (e) => {
+    const handleDragLeave = () => {
         setIsDragOver(false);
     }
 
@@ -40,9 +41,9 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                 setShowInfoPopup(true);
                 setShowDragDrop(false);
                 if (validFile) {
-                    setMessage("Congrats! File is valid. Proceed with more verifications.");
+                    setMessage("Congrats! This file seems to be valid. Let's proceed with additional verifications.");
                 } else {
-                    setMessage("Ups. File is not valid. Proceed with more verifications.");
+                    setMessage("Oops! This file doesn't seem to be valid. Let's proceed with additional verifications.");
                 }
             } catch (error) {
                 console.error("Error verifying file:", error);
@@ -75,11 +76,10 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
     // Sets to close the popup to verify a file
     const handleCloseVerifyPopup = () => {
         cleanFields();
-        handleClosePopup("verify"); 
+        handleVerify(); 
     }
 
     const handleContinue = () => {
-        // file version is -1, indicating that is a reupload of an existing file
         cleanFields();
     }
 
@@ -92,7 +92,6 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
     }
 
     const iconComponent = titleInfoPopup === "Valid" ? FcCheckmark : FcCancel;
-
 
     return(
         <>
@@ -115,7 +114,7 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
                                 >
                                     {droppedFile ? (
                                         <>
-                                            <p><FaCheck size={24} color="green" /> {droppedFile.name}</p>
+                                            <p className='content-drop'><FaCheck size={24} color="green" /> {droppedFile.name}</p>
                                             <button className="app-button__drop app-button" onClick={handleCloseVerifyPopup}> Cancel </button>
                                         </>
                                     ) : (
@@ -135,7 +134,13 @@ const VeifyPopup = ({fileManagerFacadeInstance, handleClosePopup, show, children
             </div>
         </>
     );
-
 }
+
+VeifyPopup.propTypes = {
+    fileManagerFacadeInstance:PropTypes.object.isRequired,
+    handleVerify: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    children: PropTypes.object,
+};
 
 export default VeifyPopup;

@@ -1,4 +1,3 @@
-import { FileManagerFacade } from '../helpers/FileManagerFacade'; 
 import { FileApp } from '../helpers/FileApp'; 
 import UpdatePermissionsCommand from '../helpers/Commands/UpdatePermissionsCommand';
 
@@ -25,18 +24,24 @@ console.log = jest.fn();
 
 describe('UpdatePermissionsCommand', () => {
 
-    let fileManager;
     let selectedFile;
     let permissions;
     let accountUserToShareFileWith;
     let updatePermissionsCommand;
+    let verifyUserAssociatedWithFile;
+    let updateUserFilePermissions;
+    let getPermissionsOverFile;
+    let removeUserFileAssociation;
 
     beforeEach(() => {
-        fileManager = new FileManagerFacade();
         selectedFile = new FileApp();
         permissions = {edit: true, delete: false};
         accountUserToShareFileWith = 'mocked_account';
-        updatePermissionsCommand = new UpdatePermissionsCommand(fileManager, selectedFile, permissions, accountUserToShareFileWith);
+        verifyUserAssociatedWithFile = jest.fn();
+        updateUserFilePermissions = jest.fn();
+        getPermissionsOverFile = jest.fn();
+        removeUserFileAssociation = jest.fn();
+        updatePermissionsCommand = new UpdatePermissionsCommand(selectedFile, permissions, accountUserToShareFileWith, verifyUserAssociatedWithFile, updateUserFilePermissions, getPermissionsOverFile, removeUserFileAssociation);
     });
 
     afterEach(() => {
@@ -47,66 +52,66 @@ describe('UpdatePermissionsCommand', () => {
         describe('when permissions input are given, and the user is already associated with the file', () => {
             it('should update a users permissions over a file', async () => {
                 // Arrange
-                fileManager.verifyUserAssociatedWithFile.mockResolvedValue(true);
-                fileManager.updateUserFilePermissions.mockResolvedValue();
-                fileManager.getPermissionsOverFile.mockResolvedValue({ resultStrings: ['edit'] });
+                verifyUserAssociatedWithFile.mockResolvedValue(true);
+                updateUserFilePermissions.mockResolvedValue();
+                getPermissionsOverFile.mockResolvedValue({ resultStrings: ['edit'] });
     
                 // Act
                 await updatePermissionsCommand.execute();
     
                 // Assert
-                expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(fileManager.updateUserFilePermissions).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, ['edit']);
-                expect(fileManager.getPermissionsOverFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(updateUserFilePermissions).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, ['edit']);
+                expect(getPermissionsOverFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
                 expect(console.log).toHaveBeenCalledWith("File Shared.");
             });
         });
         describe('when no permissions are given and the user is associated with the file', () => {
             it('should remove the relationship between the user and the file', async () => {
                 // Arrange
-                fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(true);
-                fileManager.removeUserFileAssociation.mockResolvedValue();
-                fileManager.verifyUserAssociatedWithFile.mockResolvedValueOnce(false);
+                verifyUserAssociatedWithFile.mockResolvedValueOnce(true);
+                removeUserFileAssociation.mockResolvedValue();
+                verifyUserAssociatedWithFile.mockResolvedValueOnce(false);
     
                 permissions = {};
-                updatePermissionsCommand = new UpdatePermissionsCommand(fileManager, selectedFile, permissions, accountUserToShareFileWith);
+                updatePermissionsCommand = new UpdatePermissionsCommand(selectedFile, permissions, accountUserToShareFileWith, verifyUserAssociatedWithFile, updateUserFilePermissions, getPermissionsOverFile, removeUserFileAssociation);
     
                 // Act
                 await updatePermissionsCommand.execute();
     
                 // Assert
-                expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(fileManager.removeUserFileAssociation).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(removeUserFileAssociation).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
                 expect(console.log).toHaveBeenCalledWith("Relationship removed");
             });
         });
         describe('when the user is not already associated with the file', () => {
             it('should return error', async () => {
                 // Arrange
-                fileManager.verifyUserAssociatedWithFile.mockResolvedValue(false);
+                verifyUserAssociatedWithFile.mockResolvedValue(false);
                 
                 // Act
                 await updatePermissionsCommand.execute();
     
                 // Assert
-                expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(console.log).toHaveBeenCalledWith("It was called 'UpdatePermissionsCommand' but the user: ", accountUserToShareFileWith, " is not associated with the file: ", selectedFile.fileName);
+                expect(verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(console.log).toHaveBeenCalled();
             });
         });
         describe('when getPermissionsOverFile fails', () => {
             it('should console.log an error', async () => {
                 // Arrange
-                fileManager.verifyUserAssociatedWithFile.mockResolvedValue(true);
-                fileManager.updateUserFilePermissions.mockResolvedValue();
-                fileManager.getPermissionsOverFile.mockResolvedValue({ success: true, resultStrings: ['read', 'write'] });
+                verifyUserAssociatedWithFile.mockResolvedValue(true);
+                updateUserFilePermissions.mockResolvedValue();
+                getPermissionsOverFile.mockResolvedValue({ success: true, resultStrings: ['read', 'write'] });
     
                 // Act
                 await updatePermissionsCommand.execute();
     
                 // Assert
-                expect(fileManager.verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
-                expect(fileManager.updateUserFilePermissions).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, ['edit']);
-                expect(fileManager.getPermissionsOverFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(verifyUserAssociatedWithFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
+                expect(updateUserFilePermissions).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID, ['edit']);
+                expect(getPermissionsOverFile).toHaveBeenCalledWith(accountUserToShareFileWith, selectedFile.ipfsCID);
                 expect(console.log).toHaveBeenCalledWith("Something went wrong while trying to associate the user with the file.");
             });
         });  

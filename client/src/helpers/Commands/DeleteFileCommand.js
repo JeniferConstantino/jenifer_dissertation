@@ -1,18 +1,18 @@
-import Command from "./Command";
+import Command from "./Command.js";
 
 class DeleteFileCommand extends Command {
-    constructor(fileManager, selectedFile, handleFileDeleted, uploadedFiles){
+    constructor(selectedFile, handleFileDeleted, uploadedFiles, deactivateFile){
         super();
-        this.fileManager = fileManager;
         this.selectedFile = selectedFile;
         this.uploadedFiles = uploadedFiles;
         this.handleFileDeleted = handleFileDeleted;
+        this.deactivateFile = deactivateFile;
     }
 
     async execute(){
         try {
             // Calls the method to deactivate the file
-            await this.fileManager.deactivateFile(this.fileManager.selectedUser.account, this.selectedFile.ipfsCID);    
+            await this.deactivateFile(this.selectedFile.ipfsCID);    
             console.log("Files deleted.");
 
             // Remove the selectedFile from the uploadedFiles array

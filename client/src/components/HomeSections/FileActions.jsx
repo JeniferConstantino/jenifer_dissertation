@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { FcExternal , FcInternal, FcFullTrash , FcShare, FcOk, FcInfo } from 'react-icons/fc';
 import { MdOutlineEdit } from "react-icons/md";
 import { FileApp } from '../../helpers/FileApp';
+import PropTypes from 'prop-types';
 
 const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions, permissions, selectedFile}) => {
 
@@ -121,10 +122,18 @@ const FileActions = ({fileManagerFacadeInstance, handleOpenPopup, setPermissions
                 <FcOk size={25} />
             </button>
             <button onClick={handlePopupOpenInfo} title="info">
-                <FcInfo size={25} />
+                <FcInfo className={!(selectedFile) ? "faded" : "not-faded"} size={25} />
             </button>
         </div>
     );
 }
+
+FileActions.propTypes = {
+    fileManagerFacadeInstance: PropTypes.object.isRequired,
+    handleOpenPopup: PropTypes.func.isRequired,
+    setPermissions: PropTypes.func.isRequired,
+    permissions: PropTypes.array.isRequired,
+    selectedFile: PropTypes.object,
+};
 
 export default FileActions;

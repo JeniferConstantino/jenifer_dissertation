@@ -1,13 +1,18 @@
 import React from "react";
 import { GoPerson   } from "react-icons/go";
 import {useWeb3} from '../../helpers/web3Client';
+import PropTypes from 'prop-types';
 
 const Logout = ({selectedUser}) => {
 
-    const {logOut} = useWeb3();
+    const {logOut, fileManagerFacadeInstance} = useWeb3();
 
     // Performs the users' logout
-    const handleLogout = () => {           
+    const handleLogout = async () => {    
+        // Logs out the user in the backend
+        await fileManagerFacadeInstance.current.logOutUser();
+        
+        // Cleans fields and redirects the user to the wallet connection page
         logOut();              
     }
 
@@ -23,5 +28,12 @@ const Logout = ({selectedUser}) => {
         </div>
     );
 }
+
+Logout.propTypes = {
+    selectedUser: PropTypes.oneOfType([
+        PropTypes.array,
+        PropTypes.object
+    ]).isRequired
+};
 
 export default Logout;

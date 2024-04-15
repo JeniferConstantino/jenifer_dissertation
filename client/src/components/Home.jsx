@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {useWeb3} from '../helpers/web3Client';
 import DisplayUplDocs from './HomeSections/DisplayUplDocs';
 import FileActions from './HomeSections/FileActions';
-import AuditLog from './HomeSections/AuditLog/AuditLog';
+import AuditLog from './HomeSections/AuditLog';
 import UploadPopup from './ActionsOverFiles/UploadPopup';
 import EditPopup from './ActionsOverFiles/EditPopup';
 import VeifyPopup from './ActionsOverFiles/VeifyPopup';
@@ -10,8 +10,14 @@ import InfoFilePopup from './ActionsOverFiles/InfoFilePopup';
 import Download from './ActionsOverFiles/Download'
 import Delete from './ActionsOverFiles/Delete'
 import Logout from './HomeSections/Logout';
+import Menu from './HomeSections/Menu';
 import SharePopup from './ActionsOverFiles/SharePopup';
 import { FileApp } from '../helpers/FileApp';
+import UserApp from '../helpers/UserApp';
+import { useNavigate } from 'react-router-dom';
+import SessionExpirationHandler from './SessionExpirationHandler';
+import InfoPopup from './Infos/InfoPopup';
+import { FcHighPriority } from "react-icons/fc";
 
 const Home = () => {
     const [isUploadPopupDisplayed, setIsUploadPopupDisplayed] = useState(false);
@@ -31,12 +37,17 @@ const Home = () => {
     const [showVerifyPopup, setShowVerifyPopup] = useState(false);
     const [showInfoPopup, setShowInfoPopup] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [showInfoFilePopup, setShowInfoFilePopup] = useState(false);
+    const [message, setMessage] = useState("");
+    const [titleInfoNamePopup, setTitleInfoNamePopup] = useState("");
 
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [maxFilesPerColumn, setMaxFilesPerColumn] = useState(5);
     const [refreshPage, setRefreshPage] = useState(false);
-    const { fileManagerFacadeInstance } = useWeb3();
+    const { initializeFileManagerFacadeWContracts, setFileManagerFacadeWSelectedAccount, setsFileManagerFacadeWSelectedUser, fileManagerFacadeInstance, logOut } = useWeb3();
+
+    const navigate = useNavigate();
 
     // Get Active Files
     const fetchActiveFiles = useCallback(async () => {
@@ -47,13 +58,13 @@ const Home = () => {
                     setUploadedActiveFiles(files);
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
                 setLoading(false);   
             });
         }
-        
     }, [fileManagerFacadeInstance, selectedUser]);
 
     // Get all files (be them active or deactive)
@@ -64,6 +75,7 @@ const Home = () => {
                     setUploadedFiles(files);
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
@@ -81,6 +93,7 @@ const Home = () => {
                     return;
                 }
             }).catch(err => {
+                // eslint-disable-next-line security-node/detect-crlf
                 console.log(err);
             })
             .finally( () => {
@@ -88,6 +101,33 @@ const Home = () => {
             });
         }
     }, [uploadedActiveFiles, selectedUser, fileManagerFacadeInstance, uploadedFiles]);
+
+    useEffect(() => {
+        async function fetchData() {
+            // Initializes FileManagerFacadeInstance with contracts
+            await initializeFileManagerFacadeWContracts();
+
+            // Sets the FileManagerFacadeInstance with the selectedAccount
+            await setFileManagerFacadeWSelectedAccount();
+
+            // Verifies if the account exists  in the dApp
+            await UserApp.getUserWithAccount(fileManagerFacadeInstance.current).then( async (resultUser) => {
+                if (resultUser.success == false) {
+                    console.log("User first time in the app");
+                    navigate('/');
+                    return;
+                }
+                console.log("User already in the app.");
+                await setsFileManagerFacadeWSelectedUser(resultUser.user);
+                setSelectedUser(fileManagerFacadeInstance.current.selectedUser.current);
+                navigate('/home');
+            }).catch( err => {
+                // eslint-disable-next-line security-node/detect-crlf
+                console.log(err);
+            });
+        }
+        fetchData();
+    }, [fileManagerFacadeInstance, initializeFileManagerFacadeWContracts, navigate, setFileManagerFacadeWSelectedAccount, setsFileManagerFacadeWSelectedUser]);
 
     // This component runs after the component has mounted
     useEffect(() => {
@@ -118,6 +158,7 @@ const Home = () => {
                 return;
             }
         }).catch(err => {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         }).finally( () => {
             setLoading(false);   
@@ -143,7 +184,9 @@ const Home = () => {
             await getLogs();
             setRefreshPage(prevState => !prevState);
             handleClosePopup(popupToClose);
+            setSelectedFile(null);
         } catch (error) {
+            // eslint-disable-next-line security-node/detect-crlf
             console.log("error: ", error);
         }
     };
@@ -159,12 +202,19 @@ const Home = () => {
         await getLogs();
         setUploadedActiveFiles(tempUpdatedUploadedActiveFiles);   
         handleClosePopup(FileApp.FilePermissions.Delete);
+        setSelectedFile(null);
     }
 
     // Closes popup and updates logs
     const handleShare = async () => {
         await getLogs();
         handleClosePopup(FileApp.FilePermissions.Share);
+    }
+
+    // Closes verify popup
+    const handleVerify = async () => {
+        await getLogs();
+        handleClosePopup(FileApp.FilePermissions.Verify);
     }
 
     // Placeholder functions for file actions (upload, delete, share)
@@ -194,7 +244,7 @@ const Home = () => {
                 setShowInfoPopup(true);
                 return;
             default:
-                console.log("NOT A VALID OPERATION: ", chosenAction);
+                console.log("The action chosen was not valid.");
                 return;
         }
     };
@@ -226,17 +276,33 @@ const Home = () => {
                 setShowInfoPopup(false);
                 return;
             default:
-                console.log("NOT A VALID OPERATION: ", chosenAction);
+                console.log("The chosen operation to close was not valid");
             return;
         }
     }
 
+    // handles the session expiration
+    const handleSessionExpired = async () => {
+        setShowInfoFilePopup(true);
+        setMessage("Oops! It looks like your session has timed out. Please log in again.");
+        setTitleInfoNamePopup("Attention");
+    }
+
+    // Redirects the user to the sign in, once the session has expired
+    const handleContinueSessionEnd = async () => {
+        logOut();
+    }
+
+    const iconComponent = FcHighPriority;
+
     return (
         <>
+            <SessionExpirationHandler handleSessionExpire={handleSessionExpired}/>
             {selectedUser && (
                 <> 
-                    <div className={homeClassName}>
+                    <div id="files-section" className={homeClassName}>
                         <div className='menu-wrapper'>
+                            <Menu/>
                             <Logout selectedUser={selectedUser}/>
                         </div>
                         <div className='home-wrapper content-wrapper'>
@@ -246,20 +312,26 @@ const Home = () => {
                         </div>
                     </div>
                 
-                    <div className={homeClassName}>
+
+                    <div id="audit-log-section" className={homeClassName}>
                         <div className='home-wrapper content-wrapper'>
                             <AuditLog logs={logs} fileManagerFacadeInstance={fileManagerFacadeInstance.current}/>
                             <div className='shadow-overlay shadow-overlay-home'></div>
                         </div>
-                    </div>
+                    </div>                    
                     
-                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup} handleClosePopup={handleClosePopup} /> 
+                    <UploadPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} show={showUploadPopup}/> 
                     <EditPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileUploaded={handleUpload} selectedFile={selectedFile} uploadedActiveFiles={uploadedActiveFiles} uploadedFiles={uploadedFiles} handleClosePopup={handleClosePopup} show={showEditPopup} /> 
-                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleClosePopup={handleClosePopup} show={showVerifyPopup}/>
+                    <VeifyPopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleVerify={handleVerify} show={showVerifyPopup}/>
                     <SharePopup  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleShare={handleShare} show={showSharePopup} selectedFile={selectedFile}/>
                     <Download  fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleDownloaded={handleDownloaded} show={showDownloadPopup} handleClosePopup={handleClosePopup} selectedFile={selectedFile}/>
                     <Delete fileManagerFacadeInstance={fileManagerFacadeInstance.current} handleFileDeleted={handleFileDeleted} uploadedActiveFiles={uploadedActiveFiles} show={showDeletePopup} selectedFile={selectedFile}/>
-                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} handleOpenPopup={handleOpenPopup} permissions={permissions} show={showInfoPopup}/>
+                    <InfoFilePopup fileManagerFacadeInstance={fileManagerFacadeInstance.current} selectedFile={selectedFile} handleClosePopup={handleClosePopup} permissions={permissions} show={showInfoPopup}/>
+                    {showInfoFilePopup && (
+                        <div className='modal-wrapper'>
+                            <InfoPopup handleContinue={handleContinueSessionEnd} message={message} title={titleInfoNamePopup} showInfoPopup = {showInfoFilePopup} iconComponent={iconComponent} changeWithButton={true} mnemonic={""}/>
+                        </div>
+                    )}
                 </>
             )}
         </>

@@ -1,11 +1,14 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { FaAngleLeft } from "react-icons/fa6";
+import { FcDown } from "react-icons/fc";
 import { FileApp } from '../../helpers/FileApp';
+import PropTypes from 'prop-types';
 
-const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, handleOpenPopup, show, permissions, children}) => {
+const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopup, show, permissions, children}) => {
 
     const showHideClassName = show ? 'display-block' : 'display-none'; // controls the popup visibility
     const [uploadedFiles, setUploadedFiles ] = useState([]);
+    const [ownerName, setOwnerName ] = useState("");
 
     // Get all edited files of the current selected file
     const fetchFiles = useCallback(async () => {
@@ -16,17 +19,34 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                         setUploadedFiles(result.files);
                     }
                 } else {
-                    console.log("Something went wrong while trying to get the previous edit files of the file: ", selectedFile.fileName);
+                    console.log("Something went wrong while trying to get the previous edit files of the selected file.");
                 }
             }).catch(err => {
-                console.log(err);
+                // eslint-disable-next-line security-node/detect-crlf
+                console.log(`Error occurred: ${err}`);
             })
+        }
+    }, [fileManagerFacadeInstance, selectedFile]);
+
+    const fetchOwner = useCallback(async () => {
+        if (selectedFile != null) {
+            await fileManagerFacadeInstance.getUserUserName(selectedFile.owner).then((result) => {
+                if (result.success) {   
+                    setOwnerName(result.resultString);
+                } else {
+                    console.log("Something went wrong while trying to get the name of the file owner.");
+                }
+            });
         }
     }, [fileManagerFacadeInstance, selectedFile]);
 
     useEffect(() => {
         fetchFiles();
     }, [fetchFiles]);
+
+    useEffect(() => {
+        fetchOwner();
+    }, [fetchOwner]);
 
     // Preforms the file download
     const handleDownload = async (file) => {
@@ -35,7 +55,7 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
             const blob = await fileManagerFacadeInstance.downloadFile(file); 
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = selectedFile.fileName;
+            downloadLink.download = file.fileName;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -88,7 +108,7 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                                             <strong>Owner</strong>
                                         </div>
                                         <div className='column'>
-                                            {selectedFile.owner}
+                                            {ownerName}
                                         </div>
                                     </div>
                                     <div className='row'>
@@ -113,7 +133,10 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
                                     <div className="edit-list">
                                         <ul>
                                             {uploadedFiles.map((file, index) => (
-                                                <li key={index} onClick={() => handleDownload(file)}>v.{file[2]} {file[1]}</li>
+                                                <div className='div-pre-edits' key={index}>
+                                                    <FcDown className='icon-info' size={19}/>
+                                                    <li key={index} onClick={() => handleDownload(file)}>  v.{file[2]} {file[1]}</li>
+                                                </div>
                                             ))}
                                         </ul>
                                     </div>
@@ -126,5 +149,15 @@ const InfoFilePopup = ({fileManagerFacadeInstance, selectedFile, handleClosePopu
         </>
     );
 }
+
+InfoFilePopup.propTypes = {
+    fileManagerFacadeInstance:PropTypes.object.isRequired,
+    selectedFile:PropTypes.object,
+    handleClosePopup:PropTypes.func.isRequired,
+    handleOpenPopup: PropTypes.func,
+    show: PropTypes.bool.isRequired,
+    permissions: PropTypes.array.isRequired,
+    children: PropTypes.object,
+};
 
 export default InfoFilePopup;

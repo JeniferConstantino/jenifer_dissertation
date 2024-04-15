@@ -13,6 +13,12 @@ describe("UserRegister", function () {
 
         const UserRegister = await ethers.getContractFactory("UserRegister");
         const userRegister = await UserRegister.deploy(helperContract.target);
+
+        const LoginRegister = await ethers.getContractFactory("LoginRegister");
+        const loginRegister = await LoginRegister.deploy(userRegister.target);
+
+        // sets the loginRegister address in the userRegister contract
+        userRegister.setLoginRegisterAddress(loginRegister.target);
         
         const [signer1, signer2] = await ethers.getSigners(); // Get the first signer 
 
@@ -37,12 +43,74 @@ describe("UserRegister", function () {
             publicKey: "wer"
         };
 
-        return { userRegister, userAnaRita, invalidAnaPaula, invalidAnaRita, signer1, signer2 };
+        return { loginRegister, userRegister, userAnaRita, invalidAnaPaula, invalidAnaRita, signer1, signer2 };
     }
 
     // already tests the canRegister() method
+    // userRegistered is executed by calling the loginRegister() of the contract LoginRegister contract
     describe("userRegistered", function(){
-        describe("when the transaction executer is not the user trying to register", function(){
+        describe("when the transaction executer is the user trying to register", function() {
+            describe("and the username and address are unique", function(){
+                it("should register a user", async function(){
+                    // Arrange        
+                    const { userRegister, loginRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);     
+                    
+                    // Act
+                    const tx = await loginRegister.connect(signer1).registerUser(userAnaRita);
+                    await tx.wait();
+
+                    // Assert
+                    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+                    expect(receipt.status).to.equal(1); // 1 = success
+    
+                    const result = await userRegister.connect(signer1).getUser(userAnaRita.account);
+                    expect(result.success).to.equal(true);
+                });
+            });
+
+            describe("and the address is already in use", function(){
+                it ("should NOT register the user", async function(){
+                    // Arrange
+                    const { userRegister, loginRegister, userAnaRita, invalidAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);   
+                    const tx = await loginRegister.connect(signer1).registerUser(userAnaRita);
+                    await tx.wait();
+    
+                    // Act
+                    const tx2 = await loginRegister.connect(signer1).registerUser(invalidAnaPaula);
+                    await tx2.wait();
+    
+                    // Assert
+                    const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
+                    expect(receipt.status).to.equal(1); // 1 = success
+    
+                    const result = await userRegister.connect(signer1).getUser(invalidAnaPaula.account);
+                    expect(result.user.userName).to.equal("ana rita");  // Ana Rita because she was already registered with the address
+                });
+            });
+
+            describe("and the userName is already in use", function(){
+                it ("should NOT register the user", async function(){
+                    // Arrange
+                    const { userRegister, loginRegister, userAnaRita, invalidAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
+                    const tx = await loginRegister.connect(signer1).registerUser(userAnaRita);
+                    await tx.wait();
+    
+                    // Act
+                    const tx2 = await loginRegister.connect(signer2).registerUser(invalidAnaRita);
+                    await tx2.wait();
+    
+                    // Assert
+                    const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
+                    expect(receipt.status).to.equal(1); // 1 = success
+    
+                    const result = await userRegister.connect(signer2).getUser(invalidAnaRita.account);
+                    expect(result.success).to.equal(false); 
+                    expect(result.user.account).to.equal("0x0000000000000000000000000000000000000000");  // User not stored because the name Ana Rita already existed
+                    expect(result.user.userName).to.equal("");
+                });
+            });
+        });
+        describe("when the transaction executer is not the LoginResgister contract", function(){
             it ("should NOT register the user", async function(){
                 // Arrange
                 const { userRegister, userAnaRita, signer2 } = await loadFixture(deployContractAndSetVariables);        
@@ -60,75 +128,14 @@ describe("UserRegister", function () {
                 expect(result.user.account).to.equal("0x0000000000000000000000000000000000000000");  // User not stored
             });
         });
-        describe("when the transaction executer is the user trying to register", function() {
-            describe("and the username and address are unique", function(){
-                it("should register a user", async function(){
-                    // Arrange
-                    const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
-    
-                    // Act
-                    const tx = await userRegister.connect(signer1).userRegistered(userAnaRita);
-                    await tx.wait();
-                    
-                    // Assert
-                    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-                    expect(receipt.status).to.equal(1); // 1 = success
-    
-                    const result = await userRegister.connect(signer1).getUser(userAnaRita.account);
-                    expect(result.success).to.equal(true);
-                });
-            });
-
-            describe("and the address is already in use", function(){
-                it ("should NOT register the user", async function(){
-                    // Arrange
-                    const { userRegister, userAnaRita, invalidAnaPaula, signer1 } = await loadFixture(deployContractAndSetVariables);        
-                    const tx = await userRegister.connect(signer1).userRegistered(userAnaRita);
-                    await tx.wait();
-    
-                    // Act
-                    const tx2 = await userRegister.connect(signer1).userRegistered(invalidAnaPaula);
-                    await tx2.wait();
-    
-                    // Assert
-                    const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
-                    expect(receipt.status).to.equal(1); // 1 = success
-    
-                    const result = await userRegister.connect(signer1).getUser(invalidAnaPaula.account);
-                    expect(result.user.userName).to.equal("ana rita");  // Ana Rita because she was already registered with the address
-                });
-            });
-
-            describe("and the userName is already in use", function(){
-                it ("should NOT register the user", async function(){
-                    // Arrange
-                    const { userRegister, userAnaRita, invalidAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
-                    const tx = await userRegister.connect(signer1).userRegistered(userAnaRita);
-                    await tx.wait();
-    
-                    // Act
-                    const tx2 = await userRegister.connect(signer2).userRegistered(invalidAnaRita);
-                    await tx2.wait();
-    
-                    // Assert
-                    const receipt = await ethers.provider.getTransactionReceipt(tx2.hash);
-                    expect(receipt.status).to.equal(1); // 1 = success
-    
-                    const result = await userRegister.connect(signer2).getUser(invalidAnaRita.account);
-                    expect(result.success).to.equal(false); 
-                    expect(result.user.account).to.equal("0x0000000000000000000000000000000000000000");  // User not stored because the name Ana Rita already existed
-                    expect(result.user.userName).to.equal("");
-                });
-            });
-        });
     });
 
     describe("getUser", function(){
         describe("when the transaction executer is not the same as the user", function(){
             it ("should NOT return the user ", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
-                const txRegister = await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);
+                const txRegister = await loginRegister.connect(signer1).registerUser(userAnaRita);
                 await txRegister.wait();
 
                 // Act
@@ -146,8 +153,8 @@ describe("UserRegister", function () {
             describe("and the user is already registered", function(){
                 it("should return the user", async function(){
                     // Arrange
-                    const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
-                    await userRegister.connect(signer1).userRegistered(userAnaRita);
+                    const { userRegister, loginRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
+                    await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                     // Act
                     const result = await userRegister.connect(signer1).getUser(userAnaRita.account);
@@ -184,8 +191,8 @@ describe("UserRegister", function () {
         describe("when the user account exists", function(){
             it("should return the user name", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);        
-                await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);    
+                await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                 // Act
                 const result = await userRegister.connect(signer1).getUserUserName(userAnaRita.account);
@@ -214,8 +221,8 @@ describe("UserRegister", function () {
         describe("when the there is a user with the given name", function(){
             it("should return the users' accoun", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);        
-                const txRegister = await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);  
+                const txRegister = await loginRegister.connect(signer1).registerUser(userAnaRita);
                 await txRegister.wait();
 
                 // Act
@@ -245,8 +252,8 @@ describe("UserRegister", function () {
         describe("when the user exist", function(){
             it("should return the public key", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);  
-                const txRegister = await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1, signer2 } = await loadFixture(deployContractAndSetVariables);  
+                const txRegister = await loginRegister.connect(signer1).registerUser(userAnaRita);
                 await txRegister.wait();
         
                 // Act
@@ -275,9 +282,9 @@ describe("UserRegister", function () {
     describe("verifyUserAssociatedMnemonic", function(){
         describe("when the transaction executer is NOT the same as the user", async function(){
             // Arrange
-            const {userRegister, userAnaRita, signer1, signer2} = await loadFixture(deployContractAndSetVariables); 
+            const {userRegister, loginRegister, userAnaRita, signer1, signer2} = await loadFixture(deployContractAndSetVariables); 
             const mnemonic = userAnaRita.mnemonic;
-            userRegister.connect(signer1).userRegistered(userAnaRita);
+            await loginRegister.connect(signer1).registerUser(userAnaRita);
 
             // Act
             const result = await userRegister.connect(signer2).verifyUserAssociatedMnemonic(mnemonic, userAnaRita.account);
@@ -289,9 +296,9 @@ describe("UserRegister", function () {
             describe("and the mnemonic is the same as the users' mnemonic", async function(){
                 it("should return true", async function(){
                     // Arrange
-                    const {userRegister, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables); 
+                    const {userRegister, loginRegister, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables); 
                     const mnemonic = userAnaRita.mnemonic;
-                    await userRegister.connect(signer1).userRegistered(userAnaRita);
+                    await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                     // Act
                     const result = await userRegister.connect(signer1).verifyUserAssociatedMnemonic(mnemonic, userAnaRita.account);
@@ -304,9 +311,9 @@ describe("UserRegister", function () {
             describe("and the mnemonic is NOT the same as the users' mnemonic", async function(){
                 it("should return false", async function(){
                     // Arrange
-                    const {userRegister, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables); 
+                    const {userRegister, loginRegister, userAnaRita, signer1} = await loadFixture(deployContractAndSetVariables); 
                     const mnemonic = "angry flavor wire wish struggle prepare apart say stuff lounge increase area";
-                    await userRegister.connect(signer1).userRegistered(userAnaRita);
+                    await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                     // Act
                     const result = await userRegister.connect(signer1).verifyUserAssociatedMnemonic(mnemonic, userAnaRita.account);
@@ -322,8 +329,8 @@ describe("UserRegister", function () {
         describe("when the address already exists", function(){
             it("should return true", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
-                await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
+                await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                 // Act
                 const result = await userRegister.connect(signer1).existingAddress(userAnaRita.account);
@@ -350,8 +357,8 @@ describe("UserRegister", function () {
         describe("when the user name is in use", function(){
             it("should return true", async function(){
                 // Arrange
-                const { userRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
-                await userRegister.connect(signer1).userRegistered(userAnaRita);
+                const { userRegister, loginRegister, userAnaRita, signer1 } = await loadFixture(deployContractAndSetVariables);  
+                await loginRegister.connect(signer1).registerUser(userAnaRita);
 
                 // Act
                 const result = await userRegister.connect(signer1).existingUserName(userAnaRita.userName);

@@ -8,5 +8,8 @@
   },
   "scripts": {
     "slither": "slither ./contracts --solc-remaps=@openzeppelin=node_modules/@openzeppelin,@chainlink=node_modules/@chainlink --exclude naming-convention,external-function,low-level-calls --buidler-ignore-compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
   }
 }

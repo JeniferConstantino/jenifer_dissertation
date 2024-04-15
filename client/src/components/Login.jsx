@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useWeb3} from '../helpers/web3Client';
 import UserApp from '../helpers/UserApp'
@@ -13,12 +13,17 @@ const Login = () => {
     const {fileManagerFacadeInstance} = useWeb3();
     const [mnemonic, setMnemonic] = useState('');
 
-    const onNext = async (e) => {
-        if(mnemonic.trim() === ''){
-            alert('Please enter your mnemonic.');
-            return;
+    // On page refresh redirects the user to the WalletConnection page
+    useEffect(() => {
+        async function fetchData() {
+            if (fileManagerFacadeInstance.current == null) {
+                navigate("/");
+            }
         }
+        fetchData();
+    }, [fileManagerFacadeInstance, navigate]);
 
+    const onNext = async () => {
         // Hashes the inserted mnemonic
         var hashedMnemonic = await fileManagerFacadeInstance.current.hashMnemonicSymmetricEncryption(mnemonic);
         // Verifies if the entered mnemonic belongs to a given user
@@ -27,17 +32,22 @@ const Login = () => {
                 // Regenerates the public and private keys for the given mnomonic and sets on the local storage 
                 const {privateKey, publicKey, address} = await fileManagerFacadeInstance.current.generateKeysFromMnemonic(mnemonic);
                 await fileManagerFacadeInstance.current.storeLocalSotrage(privateKey, publicKey, address);
+
+                // Logs in the user in the backend
+                await fileManagerFacadeInstance.current.logsInUser();
+                
+                // Redirects the user to the home page
                 handleContinue();
                 return;
             } 
-            // TODO: Shows error popup
+            
             setShowInfoNamePopup(true);
-            setMessage("Invalid Mnemonic");
+            setMessage("Oops! That doesn't look like the correct seed. Please make sure you've entered the seed given to you when you first logged in. Remember, it's private and should not be shared.");
             setTitleInfoNamePopup("Attention");
         }).catch(err=>{
+            // eslint-disable-next-line security-node/detect-crlf
             console.log(err);
         })   
-
     };
 
     const handleContinue = () => {
@@ -56,7 +66,7 @@ const Login = () => {
         setTitleInfoNamePopup("");
     }
 
-    const handleBack = async (e) => {
+    const handleBack = async () => {
         navigate('/');
     }
 
@@ -69,7 +79,7 @@ const Login = () => {
                     <div className='shadow-overlay shadow-overlay-login'></div>
                     <div className='content-column'>
                         <h1 className='nearfile-heading'>Welcome back!</h1>
-                        <p>Good to see you again! Enter your mnemonic.</p>
+                        <p>Please enter your  <strong className='boltColor'>secret</strong> seed phrase.</p>
                     </div>
                     <div className='login-column'>
                         <div className='input-button-container-welcome'>
