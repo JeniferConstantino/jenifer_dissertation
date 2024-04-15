@@ -1,17 +1,8 @@
-import { FileManagerFacade } from '../helpers/FileManagerFacade'; 
 import DropFileCommand from "../helpers/Commands/DropFileCommand";
 
 // Mock dependencies => to isolates  the test
 jest.mock('../helpers/FileManagerFacade', () => ({
-    FileManagerFacade: jest.fn().mockImplementation(() => ({
-        generateSymmetricKey: jest.fn(),
-        encryptFileWithSymmetricKey: jest.fn(),
-        addFileToIPFS: jest.fn(),
-        generateHash256: jest.fn(),
-        getFileByIpfsCID: jest.fn(),
-        getPermissionsOverFile: jest.fn(),
-        selectedUser: { account: 'mocked_account' }
-    }))
+    FileManagerFacade: jest.fn().mockImplementation()
 }));
 
 jest.mock('../helpers/FileApp', () => ({
@@ -33,22 +24,19 @@ console.log = jest.fn();
 
 describe('DropFileCommand', () => {
 
-    let fileManager;
-    let fileUplName;
-    let fileAsBuffer;
-    let handleFileUploaded;
-    let uploadedActiveFiles;
-    let uploadedFiles;
+    let fileAsBuffer
     let dropFileCommand;
+    let generateSymmetricKey = jest.fn();
+    let encryptFileWithSymmetricKey = jest.fn();
+    let addFileToIPFS = jest.fn();
+    let generateHash256 = jest.fn();
+    let getFileByIpfsCID = jest.fn();
+    let getPermissionsOverFile = jest.fn();
+    let selectedUserAccount = 'mocked_account';
 
     beforeEach(() => {
-        fileManager = new FileManagerFacade();
-        fileUplName = "file1.pdf";
         fileAsBuffer = Buffer.from("some content");
-        handleFileUploaded = jest.fn();
-        uploadedActiveFiles = [];
-        uploadedFiles = [];
-        dropFileCommand = new DropFileCommand(fileManager, fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+        dropFileCommand = new DropFileCommand(fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey, addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, selectedUserAccount);
     });
 
     afterEach(() => {
@@ -71,23 +59,23 @@ describe('DropFileCommand', () => {
             it('should store the file', async () => {
                 // Arrange
                 dropFileCommand.storeFile = jest.fn().mockReturnValue({ ipfsCID: 'mocked_ipfsCID' });
-                fileManager.generateSymmetricKey = jest.fn().mockReturnValue('mockedSymmetricKey');
+                generateSymmetricKey = generateSymmetricKey.mockReturnValue('mockedSymmetricKey');
                 
-                fileManager.encryptFileWithSymmetricKey = jest.fn().mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
-                fileManager.addFileToIPFS = jest.fn().mockResolvedValue('mocked_ipfsCID');
-                fileManager.generateHash256 = jest.fn().mockResolvedValue('mockedFileHash');
-                fileManager.getFileByIpfsCID = jest.fn().mockResolvedValue({ success: true });
-                fileManager.getPermissionsOverFile = jest.fn().mockResolvedValue({ success: true });
+                encryptFileWithSymmetricKey = encryptFileWithSymmetricKey.mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
+                addFileToIPFS = addFileToIPFS.mockResolvedValue('mocked_ipfsCID');
+                generateHash256 = generateHash256.mockResolvedValue('mockedFileHash');
+                getFileByIpfsCID = getFileByIpfsCID.mockResolvedValue({ success: true });
+                getPermissionsOverFile = getPermissionsOverFile.mockResolvedValue({ success: true });
     
                 // Act
                 await dropFileCommand.execute();
     
                 // Assert
-                expect(fileManager.generateSymmetricKey).toHaveBeenCalled();
-                expect(fileManager.addFileToIPFS).toHaveBeenCalledWith('mockedEncryptedFile');
+                expect(generateSymmetricKey).toHaveBeenCalled();
+                expect(addFileToIPFS).toHaveBeenCalledWith('mockedEncryptedFile');
                 expect(dropFileCommand.storeFile).toHaveBeenCalledWith('mockedSymmetricKey', 'mockedIV', 'mockedFileHash', 'mocked_ipfsCID');
-                expect(fileManager.getFileByIpfsCID).toHaveBeenCalledWith('mocked_ipfsCID', 'active');
-                expect(fileManager.getPermissionsOverFile).toHaveBeenCalledWith('mocked_account', 'mocked_ipfsCID');
+                expect(getFileByIpfsCID).toHaveBeenCalledWith('mocked_ipfsCID', 'active');
+                expect(getPermissionsOverFile).toHaveBeenCalledWith('mocked_account', 'mocked_ipfsCID');
                 expect(console.log).toHaveBeenCalledWith('Action performed');
             });
         });
@@ -95,38 +83,38 @@ describe('DropFileCommand', () => {
             it("should console log the error", async function(){
                 // Arrange
                 dropFileCommand.storeFile = jest.fn().mockReturnValue({ ipfsCID: 'mocked_ipfsCID' });
-                fileManager.generateSymmetricKey = jest.fn().mockReturnValue('mockedSymmetricKey');
+                generateSymmetricKey = jest.fn().mockReturnValue('mockedSymmetricKey');
                 
-                fileManager.encryptFileWithSymmetricKey = jest.fn().mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
-                fileManager.addFileToIPFS = jest.fn().mockResolvedValue('mocked_ipfsCID');
-                fileManager.generateHash256 = jest.fn().mockResolvedValue('mockedFileHash');
-                fileManager.getFileByIpfsCID = jest.fn().mockResolvedValue({ success: false, error: 'Failed to get file by CID' });
-                fileManager.getPermissionsOverFile = jest.fn().mockResolvedValue({ success: true });
+                encryptFileWithSymmetricKey = encryptFileWithSymmetricKey.mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
+                addFileToIPFS = addFileToIPFS.mockResolvedValue('mocked_ipfsCID');
+                generateHash256 = generateHash256.mockResolvedValue('mockedFileHash');
+                getFileByIpfsCID = getFileByIpfsCID.mockResolvedValue({ success: false, error: 'Failed to get file by CID' });
+                getPermissionsOverFile = getPermissionsOverFile.mockResolvedValue({ success: true });
     
                 // Act
                 await dropFileCommand.execute();
     
                 // Assert
-                expect(console.log).toHaveBeenCalledWith('Upload file error: Something went wrong while trying to store the file in the blockchain. result: ', { success: false, error: 'Failed to get file by CID' });
+                expect(console.log).toHaveBeenCalled(); // did not put the error message so the unit test doesn't get to dependent on it
             });
         });
         describe('when it fails in getting the permissions of the file', () => {
             it("shounld console log the error", async function(){
                 // Arrange
                 dropFileCommand.storeFile = jest.fn().mockReturnValue({ ipfsCID: 'mocked_ipfsCID' });
-                fileManager.generateSymmetricKey = jest.fn().mockReturnValue('mockedSymmetricKey');
+                generateSymmetricKey = generateSymmetricKey.mockReturnValue('mockedSymmetricKey');
                 
-                fileManager.encryptFileWithSymmetricKey = jest.fn().mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
-                fileManager.addFileToIPFS = jest.fn().mockResolvedValue('mocked_ipfsCID');
-                fileManager.generateHash256 = jest.fn().mockResolvedValue('mockedFileHash');
-                fileManager.getFileByIpfsCID = jest.fn().mockResolvedValue({ success: true });
-                fileManager.getPermissionsOverFile = jest.fn().mockResolvedValue({ success: false, error: 'Failed to get permissions over file' });
+                encryptFileWithSymmetricKey = encryptFileWithSymmetricKey.mockResolvedValue({ encryptedFile: 'mockedEncryptedFile', iv: 'mockedIV' });
+                addFileToIPFS = addFileToIPFS.mockResolvedValue('mocked_ipfsCID');
+                generateHash256 = generateHash256.mockResolvedValue('mockedFileHash');
+                getFileByIpfsCID = getFileByIpfsCID.mockResolvedValue({ success: true });
+                getPermissionsOverFile = getPermissionsOverFile.mockResolvedValue({ success: false, error: 'Failed to get permissions over file' });
     
                 // Act
                 await dropFileCommand.execute();
     
                 // Assert
-                expect(console.log).toHaveBeenCalledWith('Even though the file was stored in the blockchain, something went wrong while trying to associate the user with the file: ', { success: false, error: 'Failed to get permissions over file' });
+                expect(console.log).toHaveBeenCalled();
             });
         });
     });

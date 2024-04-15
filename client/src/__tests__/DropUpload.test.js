@@ -1,5 +1,4 @@
 import DropUpload from "../helpers/Commands/DropUpload";
-import { FileManagerFacade } from '../helpers/FileManagerFacade'; 
 import { FileApp } from '../helpers/FileApp'; 
 
 // Mocking localStorage
@@ -14,8 +13,6 @@ global.localStorage = localStorageMock;
 // Mock dependencies => to isolates  the test
 jest.mock('../helpers/FileManagerFacade', () => ({
     FileManagerFacade: jest.fn().mockImplementation(() => ({
-        uploadFileUser: jest.fn(),
-        encryptSymmetricKey: jest.fn(),
         selectedUser: { account: 'mocked_account' }
     }))
 }));
@@ -54,22 +51,32 @@ console.error = jest.fn();
 
 describe('DropUpload', () => {
 
-    let fileManager;
     let fileUplName;
     let fileAsBuffer;
-    let handleFileUploaded;
-    let uploadedActiveFiles;
-    let uploadedFiles;
     let dropUpload;
+    let generateSymmetricKey;
+    let encryptFileWithSymmetricKey;
+    let addFileToIPFS;
+    let generateHash256;
+    let getFileByIpfsCID; 
+    let getPermissionsOverFile; 
+    let uploadFileUser;
+    let encryptSymmetricKey;
+    let selectedUserAccount;
 
     beforeEach(() => {
-        fileManager = new FileManagerFacade();
         fileUplName = "file1.pdf";
         fileAsBuffer = Buffer.from("some content");
-        handleFileUploaded = jest.fn();
-        uploadedActiveFiles = [];
-        uploadedFiles = [];
-        dropUpload = new DropUpload(fileManager, fileUplName, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+        generateSymmetricKey;
+        encryptFileWithSymmetricKey = jest.fn();
+        addFileToIPFS = jest.fn();
+        generateHash256 = jest.fn();
+        getFileByIpfsCID = jest.fn(); 
+        getPermissionsOverFile = jest.fn(); 
+        uploadFileUser = jest.fn();
+        encryptSymmetricKey = jest.fn();
+        selectedUserAccount = jest.fn();
+        dropUpload = new DropUpload(fileUplName, fileAsBuffer, generateSymmetricKey, encryptFileWithSymmetricKey,  addFileToIPFS, generateHash256, getFileByIpfsCID, getPermissionsOverFile, uploadFileUser, encryptSymmetricKey, selectedUserAccount);
     });
 
     afterEach(() => {
@@ -83,9 +90,9 @@ describe('DropUpload', () => {
             const iv = Buffer.from('mockedIV');
             const fileHash = 'mockedFileHash';
             const fileCID = 'mockedFileCID';
-            dropUpload.fileManager.uploadFileUser = jest.fn().mockResolvedValueOnce();
+            dropUpload.uploadFileUser = jest.fn().mockResolvedValueOnce();
             const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
-            fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
+            encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
 
             // Act
             const storedFile = await dropUpload.storeFile(symmetricKey, iv, fileHash, fileCID);

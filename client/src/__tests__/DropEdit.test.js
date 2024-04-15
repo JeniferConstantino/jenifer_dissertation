@@ -1,17 +1,9 @@
 import DropEdit from "../helpers/Commands/DropEdit";
-import { FileManagerFacade } from '../helpers/FileManagerFacade'; 
 import { FileApp } from '../helpers/FileApp'; 
 
 // Mock dependencies => to isolates  the test
 jest.mock('../helpers/FileManagerFacade', () => ({
-    FileManagerFacade: jest.fn().mockImplementation(() => ({
-        getUsersWithDownloadPermissionsFile: jest.fn(),
-        getPubKeyUser: jest.fn(),
-        encryptSymmetricKey: jest.fn(),
-        editFileUpl: jest.fn(),
-        getUsersAssociatedWithFile: jest.fn(),
-        selectedUser: { account: 'mocked_account' }
-    }))
+    FileManagerFacade: jest.fn().mockImplementation()
 }));
 
 jest.mock('../helpers/FileApp', () => ({
@@ -49,24 +41,39 @@ console.log = jest.fn();
 
 describe('DropEdit', () => {
 
-    let fileManager;
     let fileUplName;
     let selectedFile;
     let fileAsBuffer;
-    let handleFileUploaded;
-    let uploadedActiveFiles;
-    let uploadedFiles;
     let dropEdit;
 
-    beforeEach(() => {
-        fileManager = new FileManagerFacade();        
+    let getUsersAssociatedWithFileMock;
+    let getPubKeyUserMock;
+    let encryptSymmetricKeyMock;
+    let editFileUplMock;
+    let generateSymmetricKeyMock;
+    let encryptFileWithSymmetricKeyMock;
+    let addFileToIPFSMock;
+    let generateHash256Mock;
+    let getFileByIpfsCIDMock;
+    let getPermissionsOverFileMock;
+    let selectedUserAccountMock;
+
+    beforeEach(() => {    
         fileUplName = "file1.pdf";
         selectedFile = new FileApp("mocked_ipfsCID_2", "file2", 0, "0", "mocked_account", "file", "file2_iv", "active", "fileHash1");
         fileAsBuffer = Buffer.from("some content");
-        handleFileUploaded = jest.fn();
-        uploadedActiveFiles = [];
-        uploadedFiles = [];
-        dropEdit = new DropEdit(fileManager, fileUplName, selectedFile, fileAsBuffer, handleFileUploaded, uploadedActiveFiles, uploadedFiles);
+        getUsersAssociatedWithFileMock = jest.fn();
+        getPubKeyUserMock = jest.fn();
+        encryptSymmetricKeyMock = jest.fn();
+        editFileUplMock = jest.fn();
+        generateSymmetricKeyMock = jest.fn();
+        encryptFileWithSymmetricKeyMock = jest.fn();
+        addFileToIPFSMock = jest.fn();
+        generateHash256Mock = jest.fn();
+        getFileByIpfsCIDMock = jest.fn();
+        getPermissionsOverFileMock = jest.fn();
+        selectedUserAccountMock = 'mocked_account';
+        dropEdit = new DropEdit(fileUplName, selectedFile, getUsersAssociatedWithFileMock, getPubKeyUserMock, encryptSymmetricKeyMock, editFileUplMock, fileAsBuffer, generateSymmetricKeyMock, encryptFileWithSymmetricKeyMock, addFileToIPFSMock, generateHash256Mock, getFileByIpfsCIDMock, getPermissionsOverFileMock, selectedUserAccountMock);
     });
 
     afterEach(() => {
@@ -78,29 +85,28 @@ describe('DropEdit', () => {
             it('should return the encrypted symmetric keys of users with download permissions', async () => {
                 // Assert
                 const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
+                getUsersAssociatedWithFileMock.mockResolvedValue({
                     success: true,
                     resultAddresses: mockrResultAddresses
                 });
     
                 const mockPubKeyUsers = "mocked_public_key";
-                fileManager.getPubKeyUser.mockResolvedValue({
+                getPubKeyUserMock.mockResolvedValue({
                     success: true,
                     resultString: mockPubKeyUsers
                 });
     
                 const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
-                fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
+                encryptSymmetricKeyMock.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
     
                 // Act 
-                const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
-                console.log("encryptedSymmetricKeys: ", encryptedSymmetricKeys);
+                const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer)
     
                 // Arrange
-                expect(fileManager.getUsersAssociatedWithFile).toHaveBeenCalledWith("mocked_ipfsCID_1");
-                expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account");
-                expect(fileManager.getPubKeyUser).toHaveBeenCalledWith("mocked_account_2");
-                expect(fileManager.encryptSymmetricKey).toHaveBeenCalledWith(fileAsBuffer, mockPubKeyUsers);
+                expect(getUsersAssociatedWithFileMock).toHaveBeenCalledWith("mocked_ipfsCID_1");
+                expect(getPubKeyUserMock).toHaveBeenCalledWith("mocked_account");
+                expect(getPubKeyUserMock).toHaveBeenCalledWith("mocked_account_2");
+                expect(encryptSymmetricKeyMock).toHaveBeenCalledWith(fileAsBuffer, mockPubKeyUsers);
                 expect(encryptedSymmetricKeys.size).toBe(2);
                 expect(encryptedSymmetricKeys.get("mocked_account")).toBe(mockEncSymmetricKey);
                 expect(encryptedSymmetricKeys.get("mocked_account_2")).toBe(mockEncSymmetricKey);
@@ -109,25 +115,25 @@ describe('DropEdit', () => {
         describe('when it fails in geting users with download permissions over a file', () => {
             it('should handle errors gracefully', async () => {
                 // Arrange
-                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
+                getUsersAssociatedWithFileMock.mockResolvedValue({
                     success: false,
                     resultAddresses: []
                 });
     
                 const mockPubKeyUsers = "mocked_public_key";
-                fileManager.getPubKeyUser.mockResolvedValue({
+                getPubKeyUserMock.mockResolvedValue({
                     success: true,
                     resultString: mockPubKeyUsers
                 });
     
                 const mockEncSymmetricKey = "mockEncryptedSymmetricKe";
-                fileManager.encryptSymmetricKey.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
+                encryptSymmetricKeyMock.mockResolvedValue(Buffer.from(mockEncSymmetricKey, 'base64'));
     
                 // Act
                 const encryptedSymmetricKeys = await dropEdit.encryptedSymmetricKeys(selectedFile, fileAsBuffer);
     
                 // Assert
-                expect(fileManager.getUsersAssociatedWithFile).toHaveBeenCalledWith("mocked_ipfsCID_1");
+                expect(getUsersAssociatedWithFileMock).toHaveBeenCalledWith("mocked_ipfsCID_1");
                 expect(encryptedSymmetricKeys).toEqual(new Map());
             });
         });
@@ -135,12 +141,12 @@ describe('DropEdit', () => {
             it('should console log the error', async () => {
                 // Assert
                 const mockrResultAddresses = ["mocked_account", "mocked_account_2"]; // account of users with download permissions
-                fileManager.getUsersAssociatedWithFile.mockResolvedValue({
+                getUsersAssociatedWithFileMock.mockResolvedValue({
                     success: true,
                     resultAddresses: mockrResultAddresses
                 });
     
-                fileManager.getPubKeyUser.mockResolvedValue({
+                getPubKeyUserMock.mockResolvedValue({
                     success: false,
                     resultString: ''
                 });
@@ -161,7 +167,7 @@ describe('DropEdit', () => {
             const iv = Buffer.from('mockedIV');
             const fileHash = 'mockedFileHash';
             const fileCID = 'mockedFileCID';
-            const editFileUplMock = jest.spyOn(dropEdit.fileManager, 'editFileUpl').mockResolvedValueOnce(); // Mock the editFileUpl method
+            const editFileUplMock = jest.spyOn(dropEdit, 'editFileUpl').mockResolvedValueOnce(); // Mock the editFileUpl method
             const encryptedSymmetricKeysMock = jest.spyOn(dropEdit, 'encryptedSymmetricKeys').mockResolvedValueOnce(new Map()); // Mock encryptedSymmetricKeys method
             const fileType = FileApp.FileType.File;
             

@@ -1,14 +1,8 @@
-import { FileManagerFacade } from '../helpers/FileManagerFacade'; 
 import VerifyFileCommand from '../helpers/Commands/VerifyFileCommand';
 
 // Mock dependencies => to isolates  the test
 jest.mock('../helpers/FileManagerFacade', () => ({
-    FileManagerFacade: jest.fn().mockImplementation(() => ({
-        generateHash256: jest.fn(),
-        verifyValidFile: jest.fn(),
-        recordFileVerification: jest.fn(),
-        selectedUser: { account: 'mocked_account' },
-    }))
+    FileManagerFacade: jest.fn().mockImplementation()
 }));
 
 jest.mock('../helpers/FileApp', () => ({
@@ -23,12 +17,19 @@ console.log = jest.fn();
 
 describe('VerifyFileComman', () => {
 
-    let fileManager;
     let verifyFileCommand;
+    let generateHash256;
+    let verifyValidFile;
+    let recordFileVerification;
+    let selectedUserAccount;
 
     beforeEach(() => {
-        fileManager = new FileManagerFacade();
-        verifyFileCommand = new VerifyFileCommand(fileManager, );
+        generateHash256 = jest.fn();
+        verifyValidFile = jest.fn();
+        recordFileVerification = jest.fn();
+        selectedUserAccount = 'mocked_account';
+        const fileAsBuffer = {};
+        verifyFileCommand = new VerifyFileCommand(fileAsBuffer, generateHash256, verifyValidFile, recordFileVerification, selectedUserAccount);
     });
 
     afterEach(() => {
@@ -42,15 +43,15 @@ describe('VerifyFileComman', () => {
                 const mockFileHash = 'mockedHash';
                 const mockValidFile = true;
     
-                fileManager.generateHash256.mockResolvedValue(mockFileHash);
-                fileManager.verifyValidFile.mockResolvedValue(mockValidFile);
+                generateHash256.mockResolvedValue(mockFileHash);
+                verifyValidFile.mockResolvedValue(mockValidFile);
     
                 // Act
                 const result = await verifyFileCommand.execute();
     
                 // Assert
                 expect(result).toBe(true); 
-                expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
+                expect(verifyValidFile).toHaveBeenCalledWith(selectedUserAccount, mockFileHash);
             });
         });
         describe('when the file does not exists in the blockchain, associated to the user and in the active state', () => {
@@ -59,15 +60,15 @@ describe('VerifyFileComman', () => {
                 const mockFileHash = 'mockedHash';
                 const mockValidFile = false;
     
-                fileManager.generateHash256.mockResolvedValue(mockFileHash);
-                fileManager.verifyValidFile.mockResolvedValue(mockValidFile);
+                generateHash256.mockResolvedValue(mockFileHash);
+                verifyValidFile.mockResolvedValue(mockValidFile);
     
                 // Act
                 const result = await verifyFileCommand.execute();
     
                 // Assert
                 expect(result).toBe(false); 
-                expect(fileManager.verifyValidFile).toHaveBeenCalledWith(fileManager.selectedUser.account, mockFileHash);
+                expect(verifyValidFile).toHaveBeenCalledWith(selectedUserAccount, mockFileHash);
             });
         });
     });
