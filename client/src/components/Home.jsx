@@ -114,7 +114,7 @@ const Home = () => {
             await UserApp.getUserWithAccount(fileManagerFacadeInstance.current).then( async (resultUser) => {
                 if (resultUser.success == false) {
                     console.log("User first time in the app");
-                    navigate('/register');
+                    navigate('/');
                     return;
                 }
                 console.log("User already in the app.");
