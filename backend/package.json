@@ -2,7 +2,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "eth-gas-reporter": "^0.2.27",
-    "hardhat": "^2.22.2",
+    "hardhat": "^2.22.3",
     "hardhat-deploy": "^0.11.45",
     "solidity-coverage": "^0.8.11"
   },

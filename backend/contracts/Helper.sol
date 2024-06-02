@@ -73,10 +73,10 @@ contract Helper {
     function stringArrayToString(string[] memory permissions) external pure returns (ResultString memory) {
         string memory permissionsString;
         for (uint i = 0; i<permissions.length; i++) {
-            permissionsString = string(abi.encodePacked(permissionsString, permissions[i]));
-            if (i < permissions.length -1) {
-                permissionsString = string(abi.encodePacked(permissionsString, ", "));
+            if (i > 0) {
+                permissionsString = concat(permissionsString, ", ");
             }
+            permissionsString = concat(permissionsString, permissions[i]);
         }
         return ResultString(true, permissionsString, "");
     }
@@ -113,4 +113,19 @@ contract Helper {
         return string(strBytes);
     }
 
+    function concat(string memory _a, string memory _b) internal pure returns (string memory) {
+        bytes memory bytesA = bytes(_a);
+        bytes memory bytesB = bytes(_b);
+        string memory concatenated = new string(bytesA.length + bytesB.length);
+        bytes memory bytesConcatenated = bytes(concatenated);
+        
+        uint k = 0;
+        for (uint i = 0; i < bytesA.length; i++) {
+            bytesConcatenated[k++] = bytesA[i];
+        }
+        for (uint i = 0; i < bytesB.length; i++) {
+            bytesConcatenated[k++] = bytesB[i];
+        }
+        return concatenated;
+    }
 }

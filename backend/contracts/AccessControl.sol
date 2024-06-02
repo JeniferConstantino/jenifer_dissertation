@@ -52,9 +52,7 @@ contract AccessControl {
             permissionsOwner[3] = "edit";
             bool validFields = helper.verifyValidFields(userAccount, file.ipfsCID, permissionsOwner, file.state); // Validates if the file and the user exist
             if (validFields){
-                // Adds the file
-                fileRegister.addFile(file);
-
+                // NOTE: Avoiding reentrancy attack. First the changes to the current smart contract are performed and then external calls to smart contracts are made
                 // Performs the association between the user and the file
                 User_Has_File memory userFileData = User_Has_File({
                     userAccount: userAccount,
@@ -63,6 +61,9 @@ contract AccessControl {
                     permissions: permissionsOwner
                 });
                 user_Has_File.push(userFileData);
+
+                // Adds the file
+                fileRegister.addFile(file);
 
                 // Writes the audit log
                 auditLogControl.recordLogFromAccessControl(msg.sender, file.ipfsCID, userAccount, helper.stringArrayToString(permissionsOwner).resultString, "upload");
@@ -81,8 +82,7 @@ contract AccessControl {
             loginRegister.userLoggedIn(msg.sender) && 
             loginRegister.noTimeOut(msg.sender)
         ) {
-            // Adds the file
-            fileRegister.editFile(selectedFile, newFile);
+            // NOTE: Avoiding reentrancy attack. First the changes to the current smart contract are performed and then external calls to smart contracts are made
             // Performs the association between the users and this edited file
             for (uint256 i=0; i<user_Has_File.length; i++) {
                 if (keccak256(abi.encodePacked(user_Has_File[i].ipfsCID)) == keccak256(abi.encodePacked(selectedFile.ipfsCID))) {
@@ -106,6 +106,8 @@ contract AccessControl {
                     user_Has_File.push(userFileData);
                 }
             }
+            // Adds the file
+            fileRegister.editFile(selectedFile, newFile);
             // Writes the audit log
             auditLogControl.recordLogFromAccessControl(msg.sender, selectedFile.ipfsCID, msg.sender, "-", "edit");
         }
